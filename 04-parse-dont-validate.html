@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions – S7 Design Notes</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./05-composition-and-dispatch.html" rel="next">
+<link href="./03-types-and-meaning.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b85bc7c33db8c58e0ec93c3465666fed.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5630e6732664d48c7cde3b526013eeb9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-85797823d13c074f06d599944906f588.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5630e6732664d48c7cde3b526013eeb9.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">S7 Design Notes</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/jimbrig/s7-design-notes" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00-overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Laws and Composition</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Evidence</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Practice</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./sources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#the-thesis-precisely" id="toc-the-thesis-precisely" class="nav-link active" data-scroll-target="#the-thesis-precisely"><span class="header-section-number">5.1</span> The thesis, precisely</a></li>
+  <li><a href="#the-translation-to-a-dynamic-language" id="toc-the-translation-to-a-dynamic-language" class="nav-link" data-scroll-target="#the-translation-to-a-dynamic-language"><span class="header-section-number">5.2</span> The translation to a dynamic language</a></li>
+  <li><a href="#constructors-parse-validators-verify" id="toc-constructors-parse-validators-verify" class="nav-link" data-scroll-target="#constructors-parse-validators-verify"><span class="header-section-number">5.3</span> Constructors parse; validators verify</a></li>
+  <li><a href="#the-checking-ladder" id="toc-the-checking-ladder" class="nav-link" data-scroll-target="#the-checking-ladder"><span class="header-section-number">5.4</span> The checking ladder</a></li>
+  <li><a href="#the-cost-model" id="toc-the-cost-model" class="nav-link" data-scroll-target="#the-cost-model"><span class="header-section-number">5.5</span> The cost model</a></li>
+  <li><a href="#the-time-axis-as-early-as-possible-as-late-as-necessary" id="toc-the-time-axis-as-early-as-possible-as-late-as-necessary" class="nav-link" data-scroll-target="#the-time-axis-as-early-as-possible-as-late-as-necessary"><span class="header-section-number">5.6</span> The time axis: as early as possible, as late as necessary</a></li>
+  <li><a href="#errors-as-values-the-second-channel" id="toc-errors-as-values-the-second-channel" class="nav-link" data-scroll-target="#errors-as-values-the-second-channel"><span class="header-section-number">5.7</span> Errors as values: the second channel</a></li>
+  <li><a href="#conditions-errors-as-a-designed-surface" id="toc-conditions-errors-as-a-designed-surface" class="nav-link" data-scroll-target="#conditions-errors-as-a-designed-surface"><span class="header-section-number">5.8</span> Conditions: errors as a designed surface</a></li>
+  <li><a href="#design-by-contract-and-making-it-testable" id="toc-design-by-contract-and-making-it-testable" class="nav-link" data-scroll-target="#design-by-contract-and-making-it-testable"><span class="header-section-number">5.9</span> Design by contract, and making it testable</a></li>
+  <li><a href="#the-payoff-restated" id="toc-the-payoff-restated" class="nav-link" data-scroll-target="#the-payoff-restated"><span class="header-section-number">5.10</span> The payoff, restated</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/04-parse-dont-validate.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="the-thesis-precisely" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="the-thesis-precisely"><span class="header-section-number">5.1</span> The thesis, precisely</h2>
+<p>Alexis King’s 2019 essay <a href="https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/">“Parse, don’t validate”</a> is often reduced to “check inputs early,” which misses its actual content. The distinction is about <strong>what happens to the knowledge a check produces</strong>.</p>
+<p>A <em>validator</em> in her sense is a function like <code>validateNonEmpty :: [a] -&gt; ()</code>: it inspects, throws on failure, and returns nothing. The knowledge that the list was non-empty exists for one instant and is discarded; every later consumer either trusts blindly or checks again. A <em>parser</em> is <code>parseNonEmpty :: [a] -&gt; NonEmpty a</code>: the same inspection, but the result is recorded <strong>in the type of the output</strong>. Downstream code that receives a <code>NonEmpty a</code> cannot even ask whether it is empty — the question has been settled, permanently, by construction.</p>
+<p>Two named pathologies follow from doing it the other way. <strong>Shotgun parsing</strong> (a term from the language-theoretic security literature) is the anti-pattern of scattering input checks throughout processing code, interleaved with the processing itself — the program acts on input before fully deciding the input is well-formed, and rejection paths can fire after side effects have already happened. <strong>Boolean blindness</strong> (Robert Harper’s coinage) is the information loss of reducing a rich check to a <code>TRUE</code>/<code>FALSE</code>: the boolean remembers <em>that</em> something was true but not <em>what</em> or <em>why</em>, so the evidence must be reconstructed downstream — usually by checking again.</p>
+</section>
+<section id="the-translation-to-a-dynamic-language" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="the-translation-to-a-dynamic-language"><span class="header-section-number">5.2</span> The translation to a dynamic language</h2>
+<p>R has no compile-time types, so the slogan cannot mean “let the type checker carry proofs.” The translation is nonetheless faithful:</p>
+<p><strong>A parser is a boundary function that returns a domain object or fails loudly. Possession of the object is the proof.</strong></p>
+<p>Concretely, with S7: construction runs property class checks, property validators, and the class validator; every property replacement re-runs them. Therefore <em>an S7 object of class <code>Color</code> that exists</em> is evidence that its laws held at construction and after every legitimate modification since. A function receiving a <code>Color</code> needs no defensive re-checking of channel ranges — demanding the class (via dispatch or a property’s declared class) <em>is</em> the check. This is what “make illegal states unconstructable” buys: the object functions as a certificate.</p>
+<p>Honesty requires noting the seams in a dynamic language. R will not stop someone from calling <code>attr()</code> surgery on the object’s internals, and S7 itself ships named escape hatches: <code>S7::valid_eventually()</code> suspends validation while a function runs and validates once at the end, while <code>S7::valid_implicitly()</code> suspends it and performs <em>no</em> final check — verified directly against S7 0.2.2: it will hand back an object that violates its own class validator. A getter can likewise return output that violates its declared class (getter output is not auto-validated). The guarantee is therefore conventional, and the precise phrasing matters: <strong>construction through the supported API is the runtime certificate</strong>, and it certifies only the laws actually encoded. Mutate through the front door — constructors, <code>@&lt;-</code>, <code>S7::set_props()</code>, exported mutator functions — and the certificate holds. Package design reinforces the convention by exporting only the front door, and treats <code>valid_implicitly()</code> as what it is: an internal performance tool whose caller assumes the burden of proof.</p>
+</section>
+<section id="constructors-parse-validators-verify" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="constructors-parse-validators-verify"><span class="header-section-number">5.3</span> Constructors parse; validators verify</h2>
+<p>The clean division of labor inside an S7 class:</p>
+<p><strong>Constructors (and boundary functions) normalize.</strong> They accept the messy input the outside world actually produces — a hex string or a channel array; a double <code>8</code> where an integer is meant; a bare scalar where a list is expected — and either produce canonical property values or abort with a user-facing error that names the argument (this is where <code>cli::cli_abort()</code> with <code>rlang::caller_arg()</code> context belongs). Coercion, canonicalization, and version gating are all <em>parsing</em> and all happen here, once.</p>
+<p><strong>Validators verify canonical values.</strong> By the time a validator runs, its input should already be in the one true representation; the validator’s job is to <em>reject unlawful values</em>, not to accommodate alternative shapes. A property validator that tolerates five input forms “for convenience” is a parser wearing a validator’s clothes — and since validators run on every construction <em>and every property replacement</em>, it re-runs its accommodation logic forever, on values that were already clean.</p>
+<p>This is also Postel’s law put in its correct place: be liberal in what you accept <strong>at the boundary parser</strong>, and conservative everywhere else. The core of a well-built system is strict precisely because the boundary was generous.</p>
+</section>
+<section id="the-checking-ladder" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="the-checking-ladder"><span class="header-section-number">5.4</span> The checking ladder</h2>
+<p>Every check in a system has exactly one correct home. The rungs, from the outside world inward:</p>
+<p><strong>Rung 0 — external conformance validators.</strong> Full wire-format conformance — JSON Schema via AJV, an official specification validator, a database’s own constraint engine — belongs to the authority that owns the specification. Re-implementing an external spec’s full semantics inside property validators is expensive, drift-prone duplication. Published S7 packages are consistent on this: S7schema delegates YAML/JSON conformance to AJV; stacbuildr validates catalogs against the published STAC schemas; a style-document package should shell out to the official style validator for whole-document conformance. These run <strong>once, at the wire</strong>, not on every property write.</p>
+<p><strong>Rung 1 — boundary parsers.</strong> <code>from_json()</code>, <code>read_as_markdown()</code>, <code>color_hex()</code>: loose input in, domain objects out, <code>cli</code>-formatted errors with caller context on failure. All coercion lives here.</p>
+<p><strong>Rung 2 — property class.</strong> The declared class (possibly a union with <code>NULL</code>) is the base type check. S7 runs it before the property validator, so validators may assume the type.</p>
+<p><strong>Rung 3 — property validator.</strong> Local laws of one value: scalar-ness, length, range, set membership, pattern. Pure, cheap, no knowledge of any other property. Returns <code>NULL</code> or one message (without the property name — S7 prepends it, which is what makes property definitions reusable).</p>
+<p><strong>Rung 4 — setters.</strong> Normalization-on-write for meaning-preserving cleanup only. Used sparingly; a setter making semantic decisions is doing rung 1’s or rung 5’s job invisibly.</p>
+<p><strong>Rung 5 — class validator.</strong> Laws relating several properties of one object: ordering (<code>start &lt;= end</code>), mutual exclusion, conditional requiredness. Receives <code>self</code>, returns <code>NULL</code> or a character vector of problems, refers to properties as <code>@name</code>. Must not repeat rungs 2–3.</p>
+<p><strong>Rung 6 — aggregate validator.</strong> Laws relating <em>several objects</em> in a containing structure: unique ids across a collection, references that must resolve, pairings between siblings. These belong to the <strong>lowest class that can see everything the law mentions</strong> — usually a root document object. This is Eric Evans’s <em>aggregate</em> from domain-driven design: the consistency boundary, whose root is the only thing outsiders hold and through which all modification flows. An invariant placed <em>below</em> its visibility horizon cannot be checked; placed <em>above</em> it, it runs too often and knows too much.</p>
+<p><strong>Rung 7 — operation preconditions.</strong> Some states are lawful to <em>be in</em> but unlawful to <em>reach by a particular operation</em>: adding a source whose id already exists, removing a source that layers still reference. These are workflow rules, not document laws — the document containing the source was always valid — so they live in the mutator functions (<code>add_source()</code>, <code>remove_source()</code>), erroring with <code>cli::cli_abort()</code> before any modification.</p>
+<p><strong>Rung 8 — internal assertions.</strong> Developer-facing checks for states the maintainer believes impossible, kept while refactoring, never part of the user contract.</p>
+<p>Each rung <strong>assumes all rungs below it and duplicates none of them.</strong> The most common failure of validation architecture is not a missing check but the same law encoded on three rungs, which triples the maintenance surface and guarantees the encodings eventually disagree. When you find a law with two homes, delete one — or, more precisely, designate one home as <em>authoritative</em>. A deliberately retained cheap duplicate (a boundary check restating an inner law to produce a faster, better-localized error message) is a legitimate trade, provided it is documented as a duplicate and the authoritative rung is named. What the rule forbids is accidental multiplicity, where nobody knows which encoding governs.</p>
+</section>
+<section id="the-cost-model" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="the-cost-model"><span class="header-section-number">5.5</span> The cost model</h2>
+<p>Validators are not free, and their cost profile is part of the design. Property and class validators run at every construction and every property replacement — they are the <em>hot path</em> of the object system. Hence:</p>
+<ul>
+<li>Validators must be <strong>pure</strong> (no I/O, no network, no reads of global state) and <strong>fast</strong> (no quadratic scans where avoidable).</li>
+<li>Expensive conformance — full-document schema validation, cross-document consistency, anything touching disk — belongs on rungs 0–1, which run once per boundary crossing.</li>
+<li>If an aggregate’s rung-6 validator becomes genuinely expensive (huge collections revalidated on every append), that is a signal to provide bulk constructors and batch mutators (build the whole collection, validate once) rather than to weaken the validator. S7 supplies the sanctioned mechanism: <code>S7::valid_eventually(x, fun)</code> suspends validation for the duration of <code>fun</code> and validates once at the end — a transaction in the literal sense, verified to pass through transient-invalid intermediate states and still reject an unlawful final state.</li>
+</ul>
+<p>There is also a subtle <em>transactionality</em> consequence: because validation fires per replacement, invariants spanning multiple properties require atomic multi-property updates (<code>S7::set_props()</code>), or legitimate transitions will be rejected mid-flight. This was developed in <a href="./02-values-and-state.html">02-values-and-state.qmd</a>.</p>
+</section>
+<section id="the-time-axis-as-early-as-possible-as-late-as-necessary" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="the-time-axis-as-early-as-possible-as-late-as-necessary"><span class="header-section-number">5.6</span> The time axis: as early as possible, as late as necessary</h2>
+<p>The ladder places checks in <em>space</em> — which layer owns which law. Checks also have a placement in <em>time</em>, and the rule has two halves.</p>
+<p><strong>Shift left when the check needs nothing you don’t already have.</strong> The rtemis framework demonstrates both extremes of this. At the earliest possible moment: its property factories validate the <em>declaration itself</em> — a declared default outside its own declared bounds, or a double default on an integer property, “fails at factory time — i.e.&nbsp;at package load — rather than at first instantiation.” The author’s mistake surfaces before any user exists. At the last moment before expense: its <code>setup_*()</code> functions construct fully validated configuration objects <em>before</em> a training run that may fit thousands of models, so a typo in a hyperparameter costs milliseconds instead of hours. Both are the same principle: the value of a check is proportional to the cost of the work it gates, and it should run as far before that work as its inputs allow. A validated configuration object is itself a parse-don’t-validate move — the certificate is minted at setup time and trusted at run time.</p>
+<p><strong>Defer when the law mentions context that does not exist yet.</strong> Some constraints cannot be checked at construction because they relate the value to something external: rtemis’s <code>data_bound</code> properties declare that a hyperparameter is constrained by a <em>training-data dimension</em> (<code>mtry</code> bounded by the number of features; per-case weights matching the number of rows; feature selections that must be a subset of the column names). These are declared as data on the property and resolved in one pass, against the data, immediately before training begins — not smuggled into a validator that would have to guess, and not silently skipped. The general form: when a law spans the object and its eventual context, <em>declare</em> it at construction time and <em>check</em> it at the first moment the context is in hand, in one named place.</p>
+</section>
+<section id="errors-as-values-the-second-channel" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="errors-as-values-the-second-channel"><span class="header-section-number">5.7</span> Errors as values: the second channel</h2>
+<p>R’s condition system is a control-flow channel: an error unwinds the stack until something catches it. There is a second, complementary discipline in which failure travels through the <em>data</em> flow instead — the <code>Result</code>/<code>Option</code> family from Rust and the ML lineage — and the <a href="https://github.com/TransGirlCodes/resultr">resultr</a> package shows it is a natural fit for S7. <code>Result</code> is an abstract class existing purely for dispatch; <code>Success</code> and <code>Failure</code> are one-property variants; the combinator vocabulary (<code>unwrap()</code>, <code>unwrap_or_else()</code>, <code>and_then()</code>, <code>expect()</code>) is a set of generics with per-variant methods. The <code>Failure</code> method for <code>and_then()</code> just returns itself — which is the entire “railway-oriented programming” pattern in one line: once a pipeline is on the failure track, every subsequent step passes the failure through untouched, and the caller inspects the outcome once, at the end.</p>
+<p>The architectural point is not “use Result everywhere”; conditions remain the right channel for <em>bugs and contract violations</em> (a validator rejecting an unlawful value should absolutely throw). Values are the right channel when <strong>failure is an expected outcome the caller will branch on as data</strong> — a batch of items where some fail and the survivors matter; a fallible lookup feeding a pipeline that should complete. What resultr gets exactly right is the conversion discipline: its <code>wrap_in_result()</code> generic converts conditions into values at <em>one designed point</em> (methods on <code>class_error</code> and <code>class_warning</code> wrap into <code>Failure</code>; everything else into <code>Success</code>; a <code>Result</code> passes through), inside a single <code>rlang::try_fetch()</code>. Two channels, one explicit adapter between them — never ad hoc <code>tryCatch</code> scattered through the middle of the system. It also enforces its certificates: the <code>@value</code> and <code>@error</code> properties use write-once setters that error on reassignment, making the outcome tamper-evident.</p>
+</section>
+<section id="conditions-errors-as-a-designed-surface" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="conditions-errors-as-a-designed-surface"><span class="header-section-number">5.8</span> Conditions: errors as a designed surface</h2>
+<p>R’s condition system is unusually rich — conditions are classed, structured, signalable, catchable by class, and chainable — and a domain package should treat its error behavior as designed API, not incidental output. A workable stratification, aligned with the ladder:</p>
+<p><strong>User errors</strong> (rungs 1 and 7): the caller did something fixable. These deserve the full treatment — <code>cli::cli_abort()</code> with a message naming the argument (<code>rlang::caller_arg()</code>), attributed to the calling frame (<code>rlang::caller_env()</code>) so the error points at the user’s code rather than package internals, with a <code>parent =</code> chain when wrapping a lower-level failure. Message content should say what was expected, what arrived, and when possible what to do.</p>
+<p><strong>Invariant violations</strong> (rungs 3, 5, 6): terse declarative strings returned from validators — “must be between 0 and 255” — which S7 assembles into its own error, prefixing property names. These are not the place for <code>cli</code> markup or call-site attribution; they are law statements.</p>
+<p><strong>Warnings</strong>: recoverable degradation the caller should know about but need not stop for — a deprecated field mapped forward, a lossy normalization applied. Never use a warning where the result is unusable.</p>
+<p><strong>Progress and information</strong>: <code>cli</code> messaging in the shell, never in the core. A constructor that chatters is a constructor that cannot be used in a pipeline.</p>
+<p>Classed conditions earn their keep the moment any caller needs to <em>handle</em> one failure differently from another: give programmatically distinguishable failures their own condition classes rather than making callers grep message text.</p>
+</section>
+<section id="design-by-contract-and-making-it-testable" class="level2" data-number="5.9">
+<h2 data-number="5.9" class="anchored" data-anchor-id="design-by-contract-and-making-it-testable"><span class="header-section-number">5.9</span> Design by contract, and making it testable</h2>
+<p>Bertrand Meyer’s design-by-contract vocabulary maps cleanly onto this architecture and is worth using in design discussions. <strong>Preconditions</strong> are rungs 1 and 7 — what must be true for the operation to proceed, the caller’s responsibility. <strong>Invariants</strong> are rungs 3, 5, 6 — what is always true of a lawful object, the class’s responsibility. <strong>Postconditions</strong> are the guarantees of the return value — largely carried by the returned <em>type</em> (parse-don’t-validate again: the strongest postcondition is “returns a <code>Color</code>”), plus documented promises like “the result’s getter outputs conform to their declared classes,” which S7 leaves on the author’s honor.</p>
+<p>The contracts become <em>testable</em> in two complementary ways. Ordinary example tests exercise each rung: construction succeeds on lawful input, each unlawful input is rejected <em>by the right rung</em> with the right message, mutation through the front door revalidates, round-trips are identities. And <strong>law-based (property-based) testing</strong> generalizes them: state algebraic laws the domain must satisfy — serialization round-trips, order-insensitivity of collection construction, idempotence of normalization — and test them against generated inputs. The s7contract package packages exactly this for S7: explicit interface declarations (required generics), traits with registered implementations, optional runtime argument/return checking, and generative laws with shrinking. Whether or not one adopts the package, the mindset — an interface is a set of generics <em>plus laws</em>, and laws are executable — is the mature endpoint of validation thinking.</p>
+</section>
+<section id="the-payoff-restated" class="level2" data-number="5.10">
+<h2 data-number="5.10" class="anchored" data-anchor-id="the-payoff-restated"><span class="header-section-number">5.10</span> The payoff, restated</h2>
+<p>When the ladder is respected, a characteristic calm settles over the middle of the codebase. Core functions take domain objects and return domain objects; they contain no <code>if (!is.character(x))</code> boilerplate, because rungs below them already settled it; their tests test logic, not plumbing. All the suspicion concentrates at the edges, where it belongs, in a small number of parsers with excellent error messages. The system’s trust structure becomes legible: you can point at any function and say exactly what it is entitled to assume and which rung guarantees it.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/docs\.jimbrig\.com\/s7-design-notes\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./03-types-and-meaning.html" class="pagination-link" aria-label="Types and Meaning: Semantic Types, Structure, and Type-Driven Design">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./05-composition-and-dispatch.html" class="pagination-link" aria-label="Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/04-parse-dont-validate.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
