@@ -1,1 +1,0 @@
-Sitemap: https://jimbrig.github.io/s7-design-notes/sitemap.xml
