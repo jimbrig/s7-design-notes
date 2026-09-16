@@ -1,5 +1,8 @@
 # S7 Design Notes
 
+[![Publish](https://github.com/jimbrig/s7-design-notes/actions/workflows/publish.yml/badge.svg)](https://github.com/jimbrig/s7-design-notes/actions/workflows/publish.yml)
+[![pages-build-deployment](https://github.com/jimbrig/s7-design-notes/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/jimbrig/s7-design-notes/actions/workflows/pages/pages-build-deployment)
+
 Doctrine, field guide, and playbooks for functional OOP in R with
 [S7](https://rconsortium.github.io/S7/).
 
