@@ -1,0 +1,197 @@
+# Object Systems: What Kind of OOP S7 Is
+
+## Two traditions of object orientation
+
+Object-oriented programming is not one idea but at least two, and R is one of
+the few mainstream languages where both traditions coexist and interoperate.
+
+The **message-passing tradition** descends from Smalltalk through C++, Java,
+Python, and JavaScript. Objects encapsulate state and behavior together; you
+send a message to an object (`obj.method(arg)`) and the object decides how to
+respond. The class is the unit of organization: it owns its methods, controls
+access to its fields, and behavior extension means subclassing or mixins. In R
+this tradition is represented by R6 (and the older Reference Classes), where
+objects are environments with attached functions and genuine mutable state.
+
+The **generic-function tradition** descends from CLOS (the Common Lisp Object
+System) through Dylan and Julia. Here classes define *data and identity* while
+behavior lives in **generic functions** — ordinary-looking functions that
+select an implementation (a *method*) based on the classes of their arguments.
+A method call looks like any function call: `speak(dog)`, not `dog.speak()`.
+S3, S4, and S7 are all in this family; the S7 documentation calls it
+"functional OOP" for good reason, since from the outside everything remains
+function application and the system composes naturally with R's functional
+style — pipes, higher-order functions, and referential transparency where you
+choose to preserve it.
+
+The philosophical difference matters for design. In message-passing OOP, the
+central design question is "what objects exist and what do they encapsulate?"
+In generic-function OOP it splits in two: "what *is* each thing?" (classes,
+properties, invariants) and "what can be *done*, and to which things?"
+(generics and their methods). A well-designed S7 system has a deliberately
+curated **verb vocabulary** — its generics — that is as much a product of
+design as the class graph. Behavior is owned by verbs; classes opt into verbs
+by registering methods. This is much closer to Haskell type classes, Go
+interfaces, Rust traits, and Clojure protocols than to Java classes, and
+intuitions imported from Java-style OOP (deep hierarchies, God objects,
+behavior bundled with data) tend to produce poor S7 designs.
+
+## The landscape of R object systems
+
+A short tour, because the decision "which system?" precedes every other design
+decision and is frequently gotten wrong.
+
+**S3** is the lingua franca: an object is any value with a `class` attribute,
+and `UseMethod()` dispatches on it. There are no formal fields, no validation,
+no guarantees — only conventions. Its virtues are near-zero ceremony and
+universal ecosystem reach (every `print`, `format`, `summary` in existence).
+Its vice is that nothing stops anyone from constructing garbage. S3 remains the
+right choice for lightweight interoperability wrappers, and it is the substrate
+that vctrs disciplines.
+
+**S4** is the formal system from the Bioconductor world: explicit class
+definitions with typed slots, validity methods, and multiple dispatch. It
+anticipated most of S7's ideas but with a heavier, more idiosyncratic API and
+some deep complexity (virtual classes, complex method resolution). S7 is
+explicitly designed as the successor to both S3 and S4, built by the R
+Consortium's OOP Working Group with representatives from R-Core, Bioconductor,
+Posit/tidyverse, and the wider community — a genuinely cross-camp effort, which
+matters because it means S7 is intended to be *the* convergence point rather
+than another parallel system.
+
+**R6** provides message-passing OOP with reference semantics: objects are
+mutable, methods are attached, `$clone()` exists because copies are no longer
+automatic. R6 is not a competitor to S7; it answers a different question
+(identity and mutation) and appears *alongside* S7 in well-designed packages.
+
+**Environments** are the raw material of reference semantics — mutable bags
+with identity — useful for caches and registries when R6's structure would be
+overhead.
+
+**vctrs** is not an object system so much as a rigorous S3 framework for
+*vector* types: it supplies the algebra of sizes, prototypes, casting, and
+coercion that makes a custom vector behave correctly in `c()`, `[`,
+`data.frame` columns, and joins. If the thing you are modeling is
+fundamentally a column of homogeneous values, vctrs is the answer and S7 is
+not; re-implementing coercion rules in S7 validators is wasted, buggy effort.
+
+**S7**, finally: formal classes with typed, validated, defaulted properties;
+class validators for whole-object invariants; single and multiple dispatch via
+generics; explicit `super()`; declared compatibility with S3 and S4 in both
+directions.
+
+## What is distinctive about S7 itself
+
+Several S7 design decisions reward close attention because they enable
+patterns that S3/S4 made awkward.
+
+**Classes are first-class values.** `new_class()` returns an object that *is
+simultaneously the class definition and its constructor*. You call it to make
+instances; you pass it around like any value; you store it in lists; you write
+functions that *return classes*. This makes class factories a natural pattern —
+a function that stamps out enum classes from a vector of variants, for example
+— and it makes registries of classes (for round-trip deserialization: wire tag
+to class object) trivial. Languages where classes are compile-time entities
+need reflection to do what S7 does with a named list.
+
+The same fact makes genuine *reflection* buildable in ordinary R code, with no
+support from the system: because a class object carries `@properties`,
+`@parent`, `@validator`, and its own `@constructor`, a tool can walk them and
+report, for every property, its declared type, whether it has a default or a
+validator, whether it is required (a constructor formal equal to the empty
+symbol), and which ancestor declared it. The
+[datarr/reflect](https://github.com/SanD94/datarr) package does exactly this —
+immutable descriptor objects for properties, methods, and callables, with
+method tables enumerated per generic and S7's own `method_explain()` attached
+as a dispatch trace — and the descriptors are themselves S7 objects, the
+metaobject-protocol idea realized as an ordinary package. Whether or not one
+needs a reflection library, the design consequence stands: anything you can
+state about a class (documentation, schemas, UI forms, audits) can be
+*derived* from the class, because the class is data.
+
+**Properties have a full lifecycle.** A property is not just a typed slot. It
+carries a class (which may be a union), a default (which may be a *quoted
+expression* evaluated at construction — the standard trick for required
+properties is `default = quote(stop("Required"))`), an optional validator, and
+optional getter/setter for computed or guarded access. This is the layer where
+most fine-grained design happens, and it is examined throughout
+[03-types-and-meaning.qmd](03-types-and-meaning.qmd) and
+[04-parse-dont-validate.qmd](04-parse-dont-validate.qmd).
+
+**Validation is built into the object lifecycle.** The class validator runs at
+construction and after every property replacement. Validity is not something
+you remember to call; it is a property of being an object at all. The
+consequences — both the guarantees and the cost model — are the subject of
+[04-parse-dont-validate.qmd](04-parse-dont-validate.qmd).
+
+**Dispatch is explicit and disciplined.** Generics declare their dispatch
+arguments; method signatures are checked for compatibility against the generic
+(a method missing an argument the generic promises produces a warning; a
+method without `...` refuses misspelled arguments instead of silently
+swallowing them, a real S3 footgun). `super(x, to = Parent)` replaces the
+implicit `NextMethod()` with an explicit statement of *which* parent behavior
+you want. Multiple dispatch exists (`new_generic(dispatch_args = c("x",
+"y"))`) and, while rare, is decisive where behavior genuinely depends on two
+types at once — serializing a value *for a dialect*, converting *from* one
+type *to* another, combining two objects. The special classes `class_any` and
+`class_missing` round out multiple dispatch by matching anything and
+matching an absent argument respectively.
+
+**Compatibility is bidirectional.** S7 methods can be registered on S3
+generics; S3 and S4 classes can serve as property types (an S4 class via
+`methods::getClass()`, an S3 class via `new_S3_class()`); S7 classes can have
+methods on S4 generics. This matters strategically: adopting S7 does not fence
+you off from the ecosystem, and hybrid designs (an S7 property holding a DBI
+S4 connection, an S7 class fronted by an S3 facade) are supported rather than
+hacked.
+
+## Choosing the substrate: a semantic decision procedure
+
+The question "S7 or something else?" is answered by the semantics of the thing
+being modeled, in roughly this order:
+
+1. **Is it fundamentally a vector** — a column of homogeneous values that
+   must slice, concatenate, recycle, and live in data frames? Then vctrs,
+   possibly *held by* an S7 object but not replaced by one.
+
+2. **Does it have identity and a lifetime** — a conversation, a connection, a
+   cache, an accumulating log — where two references to it must observe each
+   other's changes? Then reference semantics: R6 or an environment. An S7
+   value may *snapshot* it, but the live thing is a reference.
+
+3. **Is it a domain value** — a fact, a configuration, a document, a message,
+   a measurement — with internal laws worth enforcing and behavior worth
+   dispatching on? Then S7.
+
+4. **Is it a veneer** over something that already works, needed only so a
+   `print` method looks right? Then S3, and stop there.
+
+The most instructive designs use several systems at once, on purpose. In
+ellmer, the `Chat` object is R6 because a conversation is an ongoing process
+with identity — you append turns to *it* — while every `Turn` inside it is an
+immutable S7 value, because a turn is a record of fact. In ragnar,
+`MarkdownDocumentChunks` is an S7 class that *inherits from tibble*: the data
+is fundamentally tabular (so it should behave as a data frame) but carries a
+`@document` property and domain identity on top. These are not compromises;
+they are the point. The systems are tools with distinct semantics, and fluency
+means combining them without ideology.
+
+## The expression problem, briefly
+
+Generic-function OOP has a distinctive relationship to what Philip Wadler
+named the expression problem: the difficulty of adding both new data variants
+and new operations to a system without modifying existing code. Class-owned
+methods make new variants easy (subclass) and new operations hard (edit every
+class). Pattern-matching functional code makes new operations easy (new
+function) and new variants hard (edit every match). Generic functions make
+*both* directions open: anyone can add a class and register methods for
+existing generics; anyone can add a generic and register methods for existing
+classes. ellmer exploits exactly this: adding a new LLM provider means adding
+a `Provider` subclass and registering methods on the existing generic
+vocabulary — no core changes.
+
+The price of this openness is the absence of exhaustiveness checking: nothing
+verifies at definition time that every variant handles every generic. The
+mitigations — sealed-hierarchy conventions, defaults that fail loudly, tests
+that enumerate the registry — are discussed in
+[05-composition-and-dispatch.qmd](05-composition-and-dispatch.qmd).

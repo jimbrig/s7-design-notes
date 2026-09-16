@@ -1,0 +1,312 @@
+# Parse, Don't Validate: Boundaries, the Checking Ladder, and Conditions
+
+## The thesis, precisely
+
+Alexis King's 2019 essay ["Parse, don't
+validate"](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
+is often reduced to "check inputs early," which misses its actual content. The
+distinction is about **what happens to the knowledge a check produces**.
+
+A *validator* in her sense is a function like `validateNonEmpty :: [a] -> ()`:
+it inspects, throws on failure, and returns nothing. The knowledge that the
+list was non-empty exists for one instant and is discarded; every later
+consumer either trusts blindly or checks again. A *parser* is
+`parseNonEmpty :: [a] -> NonEmpty a`: the same inspection, but the result is
+recorded **in the type of the output**. Downstream code that receives a
+`NonEmpty a` cannot even ask whether it is empty — the question has been
+settled, permanently, by construction.
+
+Two named pathologies follow from doing it the other way. **Shotgun parsing**
+(a term from the language-theoretic security literature) is the anti-pattern
+of scattering input checks throughout processing code, interleaved with the
+processing itself — the program acts on input before fully deciding the input
+is well-formed, and rejection paths can fire after side effects have already
+happened. **Boolean blindness** (Robert Harper's coinage) is the information
+loss of reducing a rich check to a `TRUE`/`FALSE`: the boolean remembers
+*that* something was true but not *what* or *why*, so the evidence must be
+reconstructed downstream — usually by checking again.
+
+## The translation to a dynamic language
+
+R has no compile-time types, so the slogan cannot mean "let the type checker
+carry proofs." The translation is nonetheless faithful:
+
+**A parser is a boundary function that returns a domain object or fails
+loudly. Possession of the object is the proof.**
+
+Concretely, with S7: construction runs property class checks, property
+validators, and the class validator; every property replacement re-runs them.
+Therefore *an S7 object of class `Color` that exists* is evidence that its
+laws held at construction and after every legitimate modification since. A
+function receiving a `Color` needs no defensive re-checking of channel ranges
+— demanding the class (via dispatch or a property's declared class) *is* the
+check. This is what "make illegal states unconstructable" buys: the object
+functions as a certificate.
+
+Honesty requires noting the seams in a dynamic language. R will not stop
+someone from calling `attr()` surgery on the object's internals, and S7
+itself ships named escape hatches: `S7::valid_eventually()` suspends
+validation while a function runs and validates once at the end, while
+`S7::valid_implicitly()` suspends it and performs *no* final check —
+verified directly against S7 0.2.2: it will hand back an object that
+violates its own class validator. A getter can likewise return output that
+violates its declared class (getter output is not auto-validated). The
+guarantee is therefore conventional, and the precise phrasing matters:
+**construction through the supported API is the runtime certificate**, and
+it certifies only the laws actually encoded. Mutate through the front door —
+constructors, `@<-`, `S7::set_props()`, exported mutator functions — and the
+certificate holds. Package design reinforces the convention by exporting
+only the front door, and treats `valid_implicitly()` as what it is: an
+internal performance tool whose caller assumes the burden of proof.
+
+## Constructors parse; validators verify
+
+The clean division of labor inside an S7 class:
+
+**Constructors (and boundary functions) normalize.** They accept the messy
+input the outside world actually produces — a hex string or a channel array;
+a double `8` where an integer is meant; a bare scalar where a list is
+expected — and either produce canonical property values or abort with a
+user-facing error that names the argument (this is where
+`cli::cli_abort()` with `rlang::caller_arg()` context belongs). Coercion,
+canonicalization, and version gating are all *parsing* and all happen here,
+once.
+
+**Validators verify canonical values.** By the time a validator runs, its
+input should already be in the one true representation; the validator's job
+is to *reject unlawful values*, not to accommodate alternative shapes. A
+property validator that tolerates five input forms "for convenience" is a
+parser wearing a validator's clothes — and since validators run on every
+construction *and every property replacement*, it re-runs its accommodation
+logic forever, on values that were already clean.
+
+This is also Postel's law put in its correct place: be liberal in what you
+accept **at the boundary parser**, and conservative everywhere else. The core
+of a well-built system is strict precisely because the boundary was generous.
+
+## The checking ladder
+
+Every check in a system has exactly one correct home. The rungs, from the
+outside world inward:
+
+**Rung 0 — external conformance validators.** Full wire-format conformance —
+JSON Schema via AJV, an official specification validator, a database's own
+constraint engine — belongs to the authority that owns the specification.
+Re-implementing an external spec's full semantics inside property validators
+is expensive, drift-prone duplication. Published S7 packages are consistent on
+this: S7schema delegates YAML/JSON conformance to AJV; stacbuildr validates
+catalogs against the published STAC schemas; a style-document package should
+shell out to the official style validator for whole-document conformance.
+These run **once, at the wire**, not on every property write.
+
+**Rung 1 — boundary parsers.** `from_json()`, `read_as_markdown()`,
+`color_hex()`: loose input in, domain objects out, `cli`-formatted errors
+with caller context on failure. All coercion lives here.
+
+**Rung 2 — property class.** The declared class (possibly a union with
+`NULL`) is the base type check. S7 runs it before the property validator, so
+validators may assume the type.
+
+**Rung 3 — property validator.** Local laws of one value: scalar-ness,
+length, range, set membership, pattern. Pure, cheap, no knowledge of any
+other property. Returns `NULL` or one message (without the property name —
+S7 prepends it, which is what makes property definitions reusable).
+
+**Rung 4 — setters.** Normalization-on-write for meaning-preserving cleanup
+only. Used sparingly; a setter making semantic decisions is doing rung 1's or
+rung 5's job invisibly.
+
+**Rung 5 — class validator.** Laws relating several properties of one
+object: ordering (`start <= end`), mutual exclusion, conditional
+requiredness. Receives `self`, returns `NULL` or a character vector of
+problems, refers to properties as `@name`. Must not repeat rungs 2–3.
+
+**Rung 6 — aggregate validator.** Laws relating *several objects* in a
+containing structure: unique ids across a collection, references that must
+resolve, pairings between siblings. These belong to the **lowest class that
+can see everything the law mentions** — usually a root document object. This
+is Eric Evans's *aggregate* from domain-driven design: the consistency
+boundary, whose root is the only thing outsiders hold and through which all
+modification flows. An invariant placed *below* its visibility horizon cannot
+be checked; placed *above* it, it runs too often and knows too much.
+
+**Rung 7 — operation preconditions.** Some states are lawful to *be in* but
+unlawful to *reach by a particular operation*: adding a source whose id
+already exists, removing a source that layers still reference. These are
+workflow rules, not document laws — the document containing the source was
+always valid — so they live in the mutator functions (`add_source()`,
+`remove_source()`), erroring with `cli::cli_abort()` before any modification.
+
+**Rung 8 — internal assertions.** Developer-facing checks for states the
+maintainer believes impossible, kept while refactoring, never part of the
+user contract.
+
+Each rung **assumes all rungs below it and duplicates none of them.** The
+most common failure of validation architecture is not a missing check but the
+same law encoded on three rungs, which triples the maintenance surface and
+guarantees the encodings eventually disagree. When you find a law with two
+homes, delete one — or, more precisely, designate one home as
+*authoritative*. A deliberately retained cheap duplicate (a boundary check
+restating an inner law to produce a faster, better-localized error message)
+is a legitimate trade, provided it is documented as a duplicate and the
+authoritative rung is named. What the rule forbids is accidental
+multiplicity, where nobody knows which encoding governs.
+
+## The cost model
+
+Validators are not free, and their cost profile is part of the design.
+Property and class validators run at every construction and every property
+replacement — they are the *hot path* of the object system. Hence:
+
+- Validators must be **pure** (no I/O, no network, no reads of global state)
+  and **fast** (no quadratic scans where avoidable).
+- Expensive conformance — full-document schema validation, cross-document
+  consistency, anything touching disk — belongs on rungs 0–1, which run once
+  per boundary crossing.
+- If an aggregate's rung-6 validator becomes genuinely expensive (huge
+  collections revalidated on every append), that is a signal to provide bulk
+  constructors and batch mutators (build the whole collection, validate once)
+  rather than to weaken the validator. S7 supplies the sanctioned mechanism:
+  `S7::valid_eventually(x, fun)` suspends validation for the duration of
+  `fun` and validates once at the end — a transaction in the literal sense,
+  verified to pass through transient-invalid intermediate states and still
+  reject an unlawful final state.
+
+There is also a subtle *transactionality* consequence: because validation
+fires per replacement, invariants spanning multiple properties require atomic
+multi-property updates (`S7::set_props()`), or legitimate transitions will be
+rejected mid-flight. This was developed in
+[02-values-and-state.qmd](02-values-and-state.qmd).
+
+## The time axis: as early as possible, as late as necessary
+
+The ladder places checks in *space* — which layer owns which law. Checks also
+have a placement in *time*, and the rule has two halves.
+
+**Shift left when the check needs nothing you don't already have.** The rtemis
+framework demonstrates both extremes of this. At the earliest possible moment:
+its property factories validate the *declaration itself* — a declared default
+outside its own declared bounds, or a double default on an integer property,
+"fails at factory time — i.e. at package load — rather than at first
+instantiation." The author's mistake surfaces before any user exists. At the
+last moment before expense: its `setup_*()` functions construct fully
+validated configuration objects *before* a training run that may fit
+thousands of models, so a typo in a hyperparameter costs milliseconds instead
+of hours. Both are the same principle: the value of a check is proportional to
+the cost of the work it gates, and it should run as far before that work as
+its inputs allow. A validated configuration object is itself a
+parse-don't-validate move — the certificate is minted at setup time and
+trusted at run time.
+
+**Defer when the law mentions context that does not exist yet.** Some
+constraints cannot be checked at construction because they relate the value to
+something external: rtemis's `data_bound` properties declare that a
+hyperparameter is constrained by a *training-data dimension* (`mtry` bounded
+by the number of features; per-case weights matching the number of rows;
+feature selections that must be a subset of the column names). These are
+declared as data on the property and resolved in one pass, against the data,
+immediately before training begins — not smuggled into a validator that would
+have to guess, and not silently skipped. The general form: when a law spans
+the object and its eventual context, *declare* it at construction time and
+*check* it at the first moment the context is in hand, in one named place.
+
+## Errors as values: the second channel
+
+R's condition system is a control-flow channel: an error unwinds the stack
+until something catches it. There is a second, complementary discipline in
+which failure travels through the *data* flow instead — the `Result`/`Option`
+family from Rust and the ML lineage — and the
+[resultr](https://github.com/TransGirlCodes/resultr) package shows it is a
+natural fit for S7. `Result` is an abstract class existing purely for
+dispatch; `Success` and `Failure` are one-property variants; the combinator
+vocabulary (`unwrap()`, `unwrap_or_else()`, `and_then()`, `expect()`) is a
+set of generics with per-variant methods. The `Failure` method for
+`and_then()` just returns itself — which is the entire "railway-oriented
+programming" pattern in one line: once a pipeline is on the failure track,
+every subsequent step passes the failure through untouched, and the caller
+inspects the outcome once, at the end.
+
+The architectural point is not "use Result everywhere"; conditions remain the
+right channel for *bugs and contract violations* (a validator rejecting an
+unlawful value should absolutely throw). Values are the right channel when
+**failure is an expected outcome the caller will branch on as data** — a
+batch of items where some fail and the survivors matter; a fallible lookup
+feeding a pipeline that should complete. What resultr gets exactly right is
+the conversion discipline: its `wrap_in_result()` generic converts conditions
+into values at *one designed point* (methods on `class_error` and
+`class_warning` wrap into `Failure`; everything else into `Success`; a
+`Result` passes through), inside a single `rlang::try_fetch()`. Two channels,
+one explicit adapter between them — never ad hoc `tryCatch` scattered through
+the middle of the system. It also enforces its certificates: the `@value` and
+`@error` properties use write-once setters that error on reassignment, making
+the outcome tamper-evident.
+
+## Conditions: errors as a designed surface
+
+R's condition system is unusually rich — conditions are classed, structured,
+signalable, catchable by class, and chainable — and a domain package should
+treat its error behavior as designed API, not incidental output. A workable
+stratification, aligned with the ladder:
+
+**User errors** (rungs 1 and 7): the caller did something fixable. These
+deserve the full treatment — `cli::cli_abort()` with a message naming the
+argument (`rlang::caller_arg()`), attributed to the calling frame
+(`rlang::caller_env()`) so the error points at the user's code rather than
+package internals, with a `parent =` chain when wrapping a lower-level
+failure. Message content should say what was expected, what arrived, and when
+possible what to do.
+
+**Invariant violations** (rungs 3, 5, 6): terse declarative strings returned
+from validators — "must be between 0 and 255" — which S7 assembles into its
+own error, prefixing property names. These are not the place for `cli`
+markup or call-site attribution; they are law statements.
+
+**Warnings**: recoverable degradation the caller should know about but need
+not stop for — a deprecated field mapped forward, a lossy normalization
+applied. Never use a warning where the result is unusable.
+
+**Progress and information**: `cli` messaging in the shell, never in the
+core. A constructor that chatters is a constructor that cannot be used in a
+pipeline.
+
+Classed conditions earn their keep the moment any caller needs to *handle*
+one failure differently from another: give programmatically distinguishable
+failures their own condition classes rather than making callers grep message
+text.
+
+## Design by contract, and making it testable
+
+Bertrand Meyer's design-by-contract vocabulary maps cleanly onto this
+architecture and is worth using in design discussions. **Preconditions** are
+rungs 1 and 7 — what must be true for the operation to proceed, the caller's
+responsibility. **Invariants** are rungs 3, 5, 6 — what is always true of a
+lawful object, the class's responsibility. **Postconditions** are the
+guarantees of the return value — largely carried by the returned *type*
+(parse-don't-validate again: the strongest postcondition is "returns a
+`Color`"), plus documented promises like "the result's getter outputs conform
+to their declared classes," which S7 leaves on the author's honor.
+
+The contracts become *testable* in two complementary ways. Ordinary example
+tests exercise each rung: construction succeeds on lawful input, each unlawful
+input is rejected *by the right rung* with the right message, mutation through
+the front door revalidates, round-trips are identities. And **law-based
+(property-based) testing** generalizes them: state algebraic laws the domain
+must satisfy — serialization round-trips, order-insensitivity of collection
+construction, idempotence of normalization — and test them against generated
+inputs. The s7contract package packages exactly this for S7: explicit
+interface declarations (required generics), traits with registered
+implementations, optional runtime argument/return checking, and generative
+laws with shrinking. Whether or not one adopts the package, the mindset — an
+interface is a set of generics *plus laws*, and laws are executable — is the
+mature endpoint of validation thinking.
+
+## The payoff, restated
+
+When the ladder is respected, a characteristic calm settles over the middle
+of the codebase. Core functions take domain objects and return domain
+objects; they contain no `if (!is.character(x))` boilerplate, because rungs
+below them already settled it; their tests test logic, not plumbing. All the
+suspicion concentrates at the edges, where it belongs, in a small number of
+parsers with excellent error messages. The system's trust structure becomes
+legible: you can point at any function and say exactly what it is entitled to
+assume and which rung guarantees it.

@@ -1,0 +1,215 @@
+# Values and State: Reference Semantics, Immutability, and Where Change Lives
+
+## R's physics: copy-on-modify
+
+R is, at bottom, a language of values. Bindings point at immutable-in-spirit
+objects, and what looks like mutation — `x[1] <- 5`, `df$col <- z`,
+`style@zoom <- 10` — is actually *replace and rebind*: a modified copy is
+produced and the name is pointed at it. The `@<-` form is syntactic sugar for
+a replacement function call followed by reassignment. Two consequences follow
+immediately for S7 design.
+
+First, **S7 objects are values**. If a function receives an S7 object and
+"modifies" it, the caller's copy is untouched. There is no spooky action at a
+distance, no need for defensive copies, no aliasing bugs. An object you hold
+is yours.
+
+Second, **validation hooks into replacement**. Because property "mutation" is
+really the construction of a new object, S7 can (and does) run validators on
+every property replacement. Validity becomes an invariant of *existing at
+all*, not a state you hope the object is in. This is the mechanical foundation
+for the parse-don't-validate discipline in
+[04-parse-dont-validate.qmd](04-parse-dont-validate.qmd).
+
+## Why value semantics are a superpower for domain modeling
+
+Rich Hickey's "value of values" argument is worth internalizing beyond its
+Clojure origins. A value — an immutable piece of data — can be shared without
+coordination, cached without invalidation protocols, compared by content,
+snapshotted for free, and reasoned about locally: what you see at the call
+site is what the function gets, forever. For *domain modeling* specifically,
+values buy you:
+
+- **Honest testing.** A value-in, value-out function is a fact you can check
+  with `identical()` and snapshot tests. No setup/teardown of hidden state.
+- **Free history.** Keeping the old version of a document is just... keeping
+  it. Undo, diffing, and audit trails fall out of the semantics.
+- **Branching.** Two candidate variants of a configuration are two values.
+  Nothing needs cloning ceremonies; ellmer's R6 `Chat` needs an explicit
+  `$clone()` to fork a conversation precisely because it *opted out* of value
+  semantics.
+- **Equational reasoning.** Transformations compose as functions. A pipeline
+  `style |> add_layer(l) |> set_zoom(10)` reads as algebra because it is.
+
+The temptation to resist is making domain objects mutable "because updating is
+annoying." The annoyance is real (deep updates in value-land involve rebuilding
+paths through the structure) but it is the *cost side* of every guarantee
+listed above, and R's replacement-function machinery plus well-designed
+mutator generics (`add_layer(style, layer)` returning a new style) absorbs
+most of it.
+
+## Where reference semantics genuinely belong
+
+Value semantics are the wrong answer for a specific, identifiable class of
+things: those with **identity and a lifetime** — where the whole point is
+that observers share *the same* evolving thing.
+
+- A **conversation** being appended to, turn by turn.
+- A **connection** or session with a server, a file handle, a browser tab.
+- A **cache** or memoization table, whose entire purpose is coordinated
+  mutation.
+- A **registry** that accumulates plugins or handlers at load time.
+- **UI state** observed by a reactive framework.
+
+R expresses these with environments, R6, or external pointers. The design
+failure mode is not using reference semantics — it is using them for things
+that are actually facts. A turn that has been said, a measurement that was
+taken, a style that was published: these are records, and records are values.
+The heuristic: **nouns that are ongoing processes get references; nouns that
+are records of fact get values.**
+
+One qualification deserves stating as a law of its own, because it bounds
+every claim above: **value semantics is only as deep as the payload.** An S7
+object behaves dependably as a value only when everything reachable through
+its properties is itself value-like. A property holding an environment, an
+R6 object, an external pointer, or a connection is a reference *inside* a
+value: copying the object copies the pointer, not the contents, and every
+"copy" observes mutations of the shared payload. This is directly
+demonstrable — assign into an environment held as a property through one
+binding, and the change is visible through the other binding, even after the
+two objects have otherwise diverged. The wrapper does not immunize its
+contents. The design consequences: if a class must hold a reference, say so
+in its documentation, exclude the reference from equality and serialization
+expectations (two equal-by-content objects sharing a cache environment are
+not `identical()` and should not claim to be), or snapshot the referenced
+state into plain data at the boundary so the object really is a value.
+
+## Functional core, imperative shell
+
+Gary Bernhardt's "Boundaries" talk gave the canonical name to the architecture
+these observations imply: a **functional core** of pure functions over
+immutable values, wrapped in a thin **imperative shell** that talks to the
+world. The shell fetches, reads, writes, streams, and mutates session state;
+the core decides, transforms, constructs, and validates. Values cross the
+boundary; decisions concentrate in the core where they are trivially testable;
+side effects concentrate in the shell where they are at least localized.
+
+In R terms:
+
+- **Core:** S7 constructors and validators; pure transformations from object
+  to object; serialization to and from plain lists; generation of documents,
+  queries, expressions.
+- **Shell:** httr2 requests, file I/O, database and GDAL calls, Shiny
+  reactivity, LLM streaming, R6 orchestrators.
+
+ellmer is the cleanest published illustration. The R6 `Chat` object is the
+shell: it owns the HTTP lifecycle, the streaming, the tool-invocation loop,
+and the accumulating list of turns — a state machine with identity. Everything
+that flows *through* it is S7 values: `Turn` objects containing `Content`
+objects, a `Model` configuration, a `Provider` description. The values are
+what you inspect, test, serialize, and reprocess; the R6 object is how the
+process is driven. Neither system is asked to do the other's job.
+
+The architecture has a fully formalized variant worth knowing by name: the
+**Model–View–Update** (Elm) architecture, which the
+[tooey](https://github.com/devOpifex/tooey) terminal-UI framework brings to R.
+An application is three pure functions — `update(model, msg)` maps the current
+state and an incoming message to a new state plus *commands*, and `view(model,
+buf)` renders state into a screen buffer — while the framework's runtime owns
+the terminal, the clock, and keyboard input, delivering them as plain data
+messages and executing the returned command values. Everything the programmer
+writes is functional core; the imperative shell is supplied by the framework
+and cannot be reached from application code. Beyond UI, MVU is the answer to a
+question value-oriented designs eventually face — *where do events go?* — and
+the answer is: events are values too, dispatched over like any other variant
+family, folded into state by one pure function.
+
+The test for whether you have the boundary right: could you reconstruct the
+entire domain state from the values alone, replaying or discarding the shell?
+If domain knowledge exists *only* as mutable state inside a reference object,
+the boundary has leaked.
+
+## A taxonomy of state
+
+"State" is not one thing. Separating its kinds prevents both over-engineering
+(R6 everywhere) and under-engineering (globals in disguise).
+
+**Document state** — the current value of the domain object itself. Lives in
+S7 values; changes by replacement through constructors and mutator generics.
+
+**Derived state** — anything computable from document state: an index from
+layer id to layer, a count, a rendered preview. The default is to *not store
+it*: compute on read, possibly via a getter-backed dynamic property. If
+computation is expensive, memoize *outside* the object (an environment keyed
+by content hash), because caching inside a value corrupts its value-ness —
+two objects with equal domain content should be equal.
+
+**Collection state** — registries of named things inside a document (sources
+by id, items by key). These are just properties (named lists) of an aggregate
+object; their invariants (unique ids, valid references) belong to that
+aggregate's validator, as developed in
+[04-parse-dont-validate.qmd](04-parse-dont-validate.qmd).
+
+**Session state** — the live process: connections, conversations, event
+loops. R6 or environments, in the shell.
+
+**Configuration state** — options, environment variables, credentials. Read
+at the boundary and passed *in* as values; a core function that consults
+`options()` mid-computation has smuggled in a hidden input.
+
+## Atomic updates and the transaction analogy
+
+S7 validates after *each* property replacement. When an invariant spans
+several properties, sequential single-property updates can pass through
+transiently invalid intermediate states — and the validator will correctly
+reject the intermediate, even though the final state would have been fine.
+Suppose a class requires `start <= end` and both must move forward:
+
+```r
+# fails if new start exceeds old end, despite a valid final state
+x@start <- 15
+x@end <- 20
+
+# atomic: validate once, after both replacements
+S7::set_props(x, start = 15, end = 20)
+```
+
+This is exactly a database transaction in miniature: constraints are checked
+at commit, not per statement. The design rule that follows: **any invariant
+spanning multiple properties implies that every code path updating those
+properties must go through an atomic multi-property update** — usually
+wrapped in a mutator function so callers cannot get it wrong.
+
+## Getters, setters, and the discipline of cheap access
+
+S7 properties may carry a `getter` (making the property computed and, without
+a setter, read-only — and excluded from the default constructor, since it is
+not stored state) and a `setter` (which receives `self` and `value` and
+returns the modified `self`, enabling normalization on write).
+
+Two contracts deserve emphasis because S7 does not enforce them for you.
+First, **a getter's return value is not validated** against the declared
+class; you are on your honor. Second, and more important as a design matter:
+**property access must be cheap and pure.** The entire mental model of an S7
+object is "structured data." A getter that performs I/O, network calls, or
+expensive computation silently converts data access into action-at-a-distance
+and destroys the reader's ability to reason about cost or effects. Computed
+properties are for derivations (a duration from start and end, a full name
+from parts, a constant discriminator), not for laziness tricks.
+
+Setters, symmetrically, are for *normalization that preserves meaning* —
+trimming whitespace, sorting a tag set, upgrading a bare scalar to a
+length-one vector. The moment a setter starts making semantic decisions or
+enforcing cross-property rules, it is doing a constructor's or validator's
+job in a place readers will not look.
+
+## Identity, equality, and testing
+
+Value objects compare by content: `identical(a, b)` answers "are these the
+same fact?" Reference objects compare by identity: two R6 handles are "equal"
+only if they are the same object. This distinction propagates into testing
+strategy. Value-centric designs test with input/output assertions and
+snapshots of serialized form; reference-centric designs need lifecycle tests
+(construct, mutate, observe) and are correspondingly more expensive to cover.
+A design that keeps the domain in values and confines references to the shell
+inherits the cheap testing profile for everything that matters most.

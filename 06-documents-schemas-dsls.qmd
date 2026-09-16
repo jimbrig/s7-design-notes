@@ -1,0 +1,282 @@
+# Documents, Schemas, and Languages: Object Models at the Wire
+
+## The document-object-model pattern
+
+A striking share of serious S7 usage models **documents**: a map style, a
+STAC catalog, a YAML configuration, a conversation transcript, a SQL
+statement, a typed program awaiting compilation. A document is a nested,
+typed, serializable *value* — declarative data with internal laws — and the
+recurring architecture for it deserves a name and an explicit anatomy:
+
+- **A class graph mirroring the document's semantic structure.** Composition
+  edges (a style *contains* sources and layers; a catalog *contains*
+  collections which contain items) become nested S7 properties. The graph is
+  a tree of ownership.
+- **Symbolic cross-references layered on the tree.** Documents routinely
+  encode relationships the tree cannot: a layer references a source *by id*;
+  an item links to a collection *by key*. These are relational edges embedded
+  in a hierarchical format — effectively foreign keys — and they generate the
+  referential-integrity invariants (every reference resolves; ids are unique)
+  that belong to an aggregate-root validator, per the ladder in
+  [04-parse-dont-validate.qmd](04-parse-dont-validate.qmd).
+- **An aggregate root as the unit of consistency.** Following Eric Evans:
+  outsiders hold the root; all modification flows through it; its validator
+  is the lowest point that sees every cross-object law. The root is also,
+  naturally, the unit of serialization and of external validation.
+- **Boundary constructors that lift native objects into the model.**
+  stacbuildr's `item_from_terra()`, `items_from_sf()`, and lidR bridges are
+  the pattern in its clearest form: users hold rasters and geometries, and
+  the package parses those *native* objects into document nodes at the
+  boundary, rather than asking users to hand-assemble metadata.
+
+## Documents are programs; your package is a front-end
+
+The deepest reframe available for this pattern: a declarative document is a
+**program** in a language you do not interpret. A map style is executed by a
+rendering engine; a STAC item is executed by search tooling; a SQL string by
+a database; a prompt-with-tools payload by an LLM provider. The R package
+producing such documents is therefore a **compiler front-end**: its job is to
+construct programs that are *well-formed by construction*, enforce the static
+semantics that are cheap and local (the ladder, rungs 1–6), and delegate full
+conformance to the engine's own authority (rung 0).
+
+This framing settles several recurring debates at once. Should the model
+validate everything the spec says? No — front-ends do not re-implement the
+runtime; the official validator owns full conformance. Should documents be
+built by string templating? No — compilers build structured representations
+and serialize once, because templates cannot enforce structure. Is
+hand-editing generated output acceptable? No — you do not patch a compiler's
+output; you change the source and regenerate. And the imperative/declarative
+boundary becomes crisp: the *document* is declarative (what should exist);
+the *pipeline* that fetches inputs, builds it, writes it, uploads it is
+imperative shell around a functional core, per
+[02-values-and-state.qmd](02-values-and-state.qmd).
+
+## Schema-driven development: postures toward an external schema
+
+Most documents come with a schema — JSON Schema, a TypeScript definition
+file, an OpenAPI component set, protobuf. Three postures toward *consuming*
+one recur, and mature designs usually combine the first two; a fourth
+relationship, pointing the opposite direction, appears when the model itself
+is the source of truth.
+
+**Schema as boundary contract.** Validate wire input and output against the
+schema, mechanically, using the schema ecosystem's own tooling. S7schema is
+this posture productized: YAML configuration in, AJV validation against JSON
+Schema via V8, and only then S7/list objects out for downstream typed
+extension. stacbuildr validates against the published STAC schemas. The
+posture is cheap, authoritative, and evolution-friendly (schema versions are
+explicit). Keep it wherever tooling exists.
+
+**Schema as design input.** Read the schema as *evidence about the domain*:
+census which property shapes recur (how many enum fields, how many bounded
+numbers, how many string-or-expression slots), which fields are required,
+where the sum types hide (`oneOf` with a discriminator), what is genuinely
+extensible (`additionalProperties`). Then design the semantic layer —
+atoms, composites, variant families — *informed* by the census but organized
+around meaning. This is data-driven design in the first sense of
+[03-types-and-meaning.qmd](03-types-and-meaning.qmd), and it is where design
+quality is actually determined.
+
+**Schema as codegen source.** Mechanically emit one class per schema object.
+This is the tempting posture and almost always the wrong one, for a reason
+worth stating carefully: **schemas encode structure, not semantics.** A
+TypeScript interface file will happily contain fifteen interfaces that are
+structurally distinct but semantically one concept (a color, expressed
+fifteen ways), and zero indication of which nesting is a real domain object
+versus a serialization artifact. A 1:1 mirror faithfully imports the
+structure while discarding the one thing a domain model adds — meaning — and
+saddles you with a class count that tracks the schema's quirks forever. What
+*does* mechanize well is the regular substrate: enum value tables, wire-name
+maps, requiredness matrices, version constants. Generate tables, not class
+graphs; hand-design the classes from the census.
+
+One legitimate exception deserves its own name so it stops being argued case
+by case: the **generated transport model**. When faithful transport is
+itself the requirement — an API surface too large and too churn-prone to
+hand-model, consumed mostly by code generators downstream — mechanically
+generated wire types are appropriate, *provided they are labeled as
+transport* and kept behind boundary parsers that lift them into the
+hand-designed domain layer (domain-driven design calls this arrangement an
+anti-corruption layer). The two models coexist: generated types absorb the
+schema's churn; semantic types carry the meaning. The anti-pattern was never
+generation itself — it is mistaking the generated transport model for the
+domain model, which is what "schema cosplay" names.
+
+**The reverse arrow: schema as projection.** The three postures above concern
+*consuming* an external schema. There is a fourth relationship, pointing the
+other way: when the domain model is the source of truth, the schema is one of
+its *outputs*. This only becomes possible under a specific precondition —
+**constraints must be stored as data, not encoded as closures.** A validator
+function can enforce a range but cannot be asked what the range is; a spec
+object carrying `minimum` and `maximum` fields can do both. rtemis is the
+fully developed exhibit: its property factories attach a `PropertySpec` object
+recording type, bounds, enum, nullability, container shape, and a dozen
+further axes as plain data, and from that one declaration the package
+mechanically derives the R validator, the default, a JSON Schema (via
+`S7_to_JSONSchema()`), and a TUI configuration form. sqlr is the same arrow in
+SQL: the schema value renders to per-dialect DDL, compares structurally, and
+diffs — projections a bag of `CREATE TABLE` strings could never support. The
+payoff in both cases is the single-source-of-truth guarantee: the validator
+and the published schema *cannot* disagree, because both are projections of
+one datum. When you find yourself writing a validator and separately
+documenting its rule, that is the signal this arrow wants to exist.
+
+A compact translation guide from external constructs to S7 mechanisms:
+
+| External construct | S7 mechanism |
+| --- | --- |
+| `const` / literal type | class identity: computed property or serializer-injected constant |
+| `enum`, closed | validated character property (or a formalized enum class) |
+| `enum`, extensible | validated character property plus a parse-boundary version gate |
+| `oneOf` with discriminator | abstract parent + subclass family; the tag is class identity |
+| `oneOf` of primitives | `S7::new_union()` on the property |
+| `allOf` / interface extension | composition first; a parent class only if is-a is honest |
+| `additionalProperties` | a pass-through bag property with key discipline only |
+| nullable / optional | `NULL` union member + explicit presence policy (four axes) |
+| nested object | composed S7 class |
+| array of typed objects | list property with a membership validator |
+
+## Serialization: one pair of functions knows the wire
+
+Serialization discipline compresses to a single rule: **exactly one place in
+the package knows what the wire looks like** — a `to_wire()` projection and a
+`from_wire()` parser, usually generic-dispatched over the class graph.
+
+The projection owns: wire-name mapping (`source_layer` → `"source-layer"`),
+the omit-empty policy per field (absent key versus `null` versus `[]`, per the
+presence axes of [03-types-and-meaning.qmd](03-types-and-meaning.qmd)),
+injection of identity constants (version numbers, type tags), and recursive
+descent through composed objects. The parser owns: version gating, coercion
+into canonical representations, the unknown-key policy, and construction
+through the front door so every law is checked on entry.
+
+Round-tripping is a **law**, not an aspiration: `from_wire(to_wire(x))`
+should equal `x`, and `to_wire(from_wire(doc))` should preserve every field
+you claim to preserve. State the law, test it against gold files, and where
+the round trip is deliberately lossy (normalization collapses equivalent
+forms), document the quotient explicitly. This is the most valuable single
+test family a document package can have, because it exercises the entire
+class graph, both boundary functions, and the presence policy at once.
+
+Stating the law *precisely* requires naming the equivalence relation,
+because "equals" hides four different contracts: **representational
+identity** (`identical()`, byte-for-byte); **canonical equality** (equal
+after normalization to the one stored form); **semantic equivalence** (equal
+ignoring non-meaningful variation — ordering, auto-generated names,
+whitespace); and **wire equivalence** (equal once omitted fields and
+defaults are resolved). Each round-trip promise should say which relation it
+uses, and for most document systems the honest law is canonical equality,
+not identity. sqlr models the discipline: its `sqlr_equal()` implements
+semantic equivalence — constraints matched on what they constrain rather
+than their order or auto-generated names — and its README says so
+explicitly, which is what makes a hand-written schema comparable to a
+reflected one.
+
+Two packages show how far the round-trip law scales as an organizing idea.
+sqlr's counterpart to `from_wire()` is `sqlr_reflect()`, which reads a *live
+database's* catalog back into the same schema representation the renderer
+consumes; the README calls the resulting equality "the package's own test
+oracle," and makes it meaningful by defining equality structurally —
+constraints matched on what they constrain rather than on order or
+auto-generated names, so a hand-written schema compares equal to a reflected
+one. typedjson goes further: the round trip is not a test of the product, it
+*is* the product — faithful, human-readable JSON for R values, achieved by
+annotating only what JSON cannot natively express (integer versus double,
+typed missing values, non-finite numbers, attributes, objects from the S3, S4,
+and S7 systems). Its design rule — keep ordinary JSON for ordinary values and
+add the minimum machinery that makes the identity hold — is presence policy
+elevated to a format's founding principle.
+
+One structural decision deserves early attention: **open versus closed
+nodes.** Foreign documents may carry extensions you do not model. A closed
+node rejects unknown keys (maximal law enforcement, brittle against spec
+evolution); an open node carries them through in a pass-through bag
+(round-trip fidelity for foreign content, weaker guarantees). Real formats
+need both, chosen per node — strict where you claim semantics, permissive
+where the format is deliberately extensible (metadata blocks, vendor
+extensions). What does not work is deciding by accident.
+
+## Expression languages and the AST escalation ladder
+
+Documents frequently embed a second, smaller language: filter and styling
+expressions inside map styles, query fragments, template strings, tool-call
+schemas. The design question — how much structure to give the embedded
+language — has a clean escalation ladder, and the discipline is to **climb
+only when the next rung's analysis is actually needed.**
+
+**Rung 1: opaque passthrough.** The expression is a list (or string) the
+model stores and emits verbatim; the engine's validator is its only judge.
+Zero modeling cost, zero analysis capability. This is the correct *default*,
+and treating it as the default is what prevents the most seductive
+over-engineering in document modeling: rebuilding the engine's expression
+type system in validators, forever, badly.
+
+**Rung 2: constructor combinators.** Functions that *build* correct
+expressions — `expr_match(field, cases)`, `expr_interpolate(...)` — giving
+ergonomics, spelling safety, and partial static checking at construction
+time, while the representation stays the wire's own (lists). This is a
+*shallow embedding* of the foreign language: the combinators are the DSL, and
+they compile immediately to the target form. Most packages should stop here;
+it captures the bulk of the value (humans stop hand-writing nested lists) at
+a fraction of the cost.
+
+**Rung 3: a typed AST.** Node classes for the expression language, generic
+passes over them — type checking, optimization, translation to *multiple*
+targets. This is a *deep embedding*: the program is data (S7 objects), and
+interpretation is a separate, swappable step. It is exactly what quickr is —
+R functions with `declare(type())` annotations parsed into a typed S7
+intermediate representation (typed nodes for subroutines, operations,
+analyses), passes over that IR, and Fortran emission at the back —, and what
+dbplyr does for SQL in S3 terms. The rung is justified when analysis or
+multi-target translation *is the product*; it is pure cost when the only
+consumer re-serializes to the single original wire format.
+
+The general lesson generalizes past expressions: **representation should be
+as deep as your analysis, and no deeper.**
+
+## DSLs and metaprogramming: R's home turf, with guardrails
+
+R is unusually good at embedded DSLs — quotation (`quote()`, `bquote()`),
+first-class environments, lazy evaluation, and rlang's quasiquotation make
+building little languages almost frictionless, which is precisely why
+restraint is a design skill. Two patterns earn their keep in object-system
+work:
+
+**Checks as data.** Validator logic represented as composable *quoted
+expressions*, assembled by a single function-builder into ordinary,
+inspectable validator functions (`rlang::new_function()` over a spliced
+body). This is a micro deep-embedding of a checking language, and it solves a
+real problem — validator factories that call validator factories accumulate
+argument-forwarding bugs; flat quoted checks compose without nesting. The
+guardrails: generated functions must be *inspectable* (printing the body
+shows exactly the checks, in order), *directly testable* (call the generated
+validator in tests, not just the factory), and built by splicing quoted
+expressions — never by `eval(parse(paste0(...)))`, which abandons hygiene,
+tooling, and safety at once.
+
+**Classes as data.** Because S7 classes are first-class values
+([01-object-systems.qmd](01-object-systems.qmd)), factories that *return
+classes* are ordinary code: an enum-class factory stamping variants from a
+character vector (the s7x pattern), a family generator producing parallel
+node classes from a table. The same guardrails apply, plus one more: generate
+*structural regularity* only. The moment generated classes need per-class
+special cases, the generator has become an obfuscation layer over what should
+be ordinary, readable class definitions.
+
+Both patterns assume the quoted material originates *inside the package*.
+The moment expressions, extension bags, or class metadata arrive from
+outside — a file, a wire, a user — the concern changes from hygiene to
+security, and the rules harden: never evaluate untrusted text or quoted
+structures; treat deserialization as parsing (rung 1 of the checking
+ladder), never as object restoration by fiat; keep pass-through extension
+bags inert data until something explicitly chooses to interpret them; and
+bound recursion depth and payload size before walking untrusted nested
+structures, because a parser that recurses on hostile input is a denial of
+service waiting for its input.
+
+The boundary that keeps metaprogramming honest is the one this whole
+document has been drawing: **mechanize the regular, hand-write the
+meaningful.** Wire-name tables, enum catalogs, repetitive property shapes —
+generate. Domain concepts, invariants, the verb vocabulary — write, by hand,
+where readers will look for them.

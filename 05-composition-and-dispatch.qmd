@@ -1,0 +1,285 @@
+# Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection
+
+## Algebraic data types: the half you already use and the half you underuse
+
+The algebraic in "algebraic data types" refers to two constructions.
+**Product types** combine fields: a record with a name *and* an age *and* an
+email is the product of three sets. Every struct, every S7 class with
+properties, every data frame row is a product. Nobody needs convincing to use
+products.
+
+**Sum types** (variants, tagged unions, discriminated unions) offer
+alternatives: a value is *one of* several possibilities, each possibly
+carrying different data. A network response is success-with-payload *or*
+failure-with-diagnostics. A message part is text *or* an image *or* a tool
+call. A map source is vector tiles *or* raster tiles *or* inline GeoJSON.
+
+Sum types are the chronically underused half in mainstream OOP, and their
+absence has recognizable symptoms: boolean flag fields that change the meaning
+of other fields; clusters of mutually exclusive nullable fields ("exactly one
+of `url` and `data` must be set"); mode strings consulted by `if`/`switch`
+chains scattered across the codebase; validators full of conditional
+requiredness rules. Each of these is a sum type flattened into a product, with
+the discriminating structure pushed out of the representation and into
+runtime discipline. The type-driven move is to put the alternatives back into
+the representation — *represent alternatives as alternatives.*
+
+## Four encodings of sum types in S7
+
+S7 has no native `data Shape = Circle r | Square s`, but it offers four
+encodings, each with a distinct profile.
+
+**1. Subclass family under an abstract parent.** An abstract class anchors the
+concept; concrete subclasses are the variants:
+
+```r
+Source <- S7::new_class("Source", abstract = TRUE)
+VectorSource <- S7::new_class("VectorSource", parent = Source, properties = ...)
+RasterSource <- S7::new_class("RasterSource", parent = Source, properties = ...)
+```
+
+This is the encoding of choice when variants differ in **fields** or in
+**behavior**: each subclass carries its own property schema, and generics
+dispatch per variant. It is nominal (each variant is a real class), open (new
+variants can be added, even by other packages), and integrates with property
+typing (`prop = Source` accepts any variant). Its cost is class-count and the
+absence of exhaustiveness checking, discussed below. The abstract parent
+exists for dispatch and shared schema; `abstract = TRUE` correctly prevents
+instantiating the concept-without-variant.
+
+**2. Anonymous union.** `S7::new_union(class_character, class_list)` describes
+"either of these" *for a property's type*, without creating any new class:
+
+```r
+value = S7::new_property(S7::new_union(NULL, S7::class_character, S7::class_list))
+```
+
+Unions shine for **alternatives of primitives in one slot** — a value that is
+a literal *or* an expression; a field that is present *or* `NULL`. You cannot
+dispatch on "the union" (it is not a class), and there is a subtlety worth
+knowing: an unset property's prototype derives from the union's **first**
+member, so member order is load-bearing when defaults matter. Unions are
+structural glue, not domain concepts; when the alternative *is* a domain
+concept, prefer encoding 1.
+
+**3. Enum-valued property.** When variants share all structure and differ
+only in a **tag** — a status that is pending, active, or closed, with no
+variant-specific fields — a constrained string property is the honest,
+cheapest encoding: a character scalar with a membership validator. The
+ecosystem has formalized this shape repeatedly: s7x ships an `Enum` class
+(value plus variants, validated), built exactly as an abstract parent with a
+class factory stamping out concrete enums. The moment one variant sprouts its
+own field, the enum has outgrown itself and wants encoding 1.
+
+**4. Discriminator plus conditional validator.** One class holding a `type`
+tag and the union of all variants' fields, with a class validator enforcing
+"if type is X, field Y must be set." This is the flattened form the sum type
+was rescuing you from, and it is occasionally right anyway — when the wire
+format is genuinely one bag, variants are numerous and trivially different,
+and dispatch is never needed. Treat it as a deliberate denormalization, chosen
+consciously, not a default.
+
+The selection logic compresses to three questions: **Do variants differ in
+fields?** Subclasses. **Does behavior dispatch on the variant?** Subclasses.
+**Do variants differ only in the tag value?** Enum property. **Is it several
+primitive shapes in one slot?** Union.
+
+### The canonical sum type, worked
+
+The most famous sum type of all — `Result = Success value | Failure error` —
+exists as an S7 package,
+[resultr](https://github.com/TransGirlCodes/resultr), and it is worth reading
+as a reference implementation of encoding 1 at its purest. The abstract
+parent is documented as existing "for the purposes of dispatch"; each variant
+carries exactly one property; and the entire API is a generic vocabulary with
+per-variant methods, several of which are one-liners because the variant
+structure did all the work (`and_then()` on `Failure` returns `x` — that
+single method *is* short-circuiting error propagation). It also demonstrates
+two idioms worth having in the toolbox: **write-once properties** (a setter
+that errors if the slot is already non-NULL, approximating immutability
+enforcement for certificate-like fields) and **multiple dispatch as argument
+typing** (`expect()` registered on `list(Success, class_character)`, so the
+message argument's type participates in dispatch rather than being checked by
+hand). The deeper use of the pattern — errors traveling as values through
+data flow rather than as conditions through control flow — is developed in
+[04-parse-dont-validate.qmd](04-parse-dont-validate.qmd).
+
+## Living without exhaustiveness
+
+ML-family languages check that every `match` handles every variant; S7 checks
+nothing of the sort, and this is the genuine loss in the translation. A new
+subclass silently satisfies no generics until methods are registered, and
+nothing at definition time lists what is missing. The working mitigations:
+
+- **A loud default.** Register a method on the abstract parent that fails with
+  "no method for class X" — converting silent fallthrough into an immediate,
+  named error at the first call.
+- **Registry-driven tests.** Keep the set of concrete variants enumerable (a
+  list in the package, or discovered from the namespace) and write one test
+  that iterates variants × required generics, asserting a method exists. This
+  is exhaustiveness checking recovered as a unit test.
+- **Sealed-hierarchy convention.** Document which families are closed (only
+  this package may add variants) versus open (extension expected). Closed
+  families may rely on enumerating variants; open families must define the
+  contract extenders implement — which is the interface question, below.
+
+## Composition over inheritance — what the maxim actually claims
+
+The Gang of Four's "favor object composition over class inheritance" is a
+claim about **implementation reuse**: inheriting to acquire another class's
+behavior couples you to its internals (the fragile base class problem — a
+parent's private change breaks children that depended on incidental
+behavior), forces your concept into a single hierarchy axis, and multiplies
+subclasses combinatorially when independent dimensions vary (the
+`ColoredBorderedScrollableWindow` explosion).
+
+Functional OOP softens the classic mechanism of the disease — an S7 parent
+contributes a *property schema* and a *dispatch position*, not a method table
+riddled with self-calls that subclasses override piecemeal — but the design
+rule survives fully intact:
+
+**Inherit for is-a and dispatch. Compose for has-a. Never inherit to reuse
+field names.**
+
+- A `VectorSource` *is a* `Source`, participates in `Source` dispatch, and is
+  substitutable wherever a `Source` is demanded: inheritance is honest.
+- A style *has* sources, layers, a light configuration: composition, always.
+  Nesting objects as properties is the bread and butter of document modeling.
+- Two classes that coincidentally share three field names do not thereby have
+  a parent. Extracting a parent from incidental structural overlap — schema
+  cosplay — creates a nominal relationship that dispatch will eventually
+  take seriously, wrongly.
+- Independent dimensions (a shape's geometry versus its styling) belong in
+  composed properties, not multiplied subclasses.
+
+Healthy S7 hierarchies are consequently **shallow**: an abstract root naming
+the concept, one level of concrete variants, rarely a second level (and then
+only when an intermediate genuinely adds shared schema *and* a dispatch
+target, as with ellmer's `Turn` → `AssistantTurn` → partial-turn refinements).
+Depth is a smell; width is normal.
+
+Inheritance from a **base type** (`parent = S7::class_character`) is its own
+special case with its own honesty test: the object must genuinely *be* that
+primitive — a markdown document is text, an enum value is a string — such
+that treating it as the primitive is semantically sound, not merely
+convenient. When a concept has parts, wrapping structure into a subclassed
+primitive with a heroic validator fights the system; give it properties.
+
+## Encapsulation without access control
+
+R has no `private`. Every property of every S7 object is reachable with `@`,
+every internal function with `:::`. Encapsulation therefore cannot mean
+enforcement; it means **a designed and documented public surface**:
+
+- Exported constructors (possibly user-friendly wrappers over stricter
+  internal ones), exported generics, exported mutators — the front door.
+- Unexported internals, free to change without deprecation.
+- Documentation that treats the exported surface as the contract.
+
+This is Parnas's information hiding in its original sense: modules hide
+*design decisions likely to change*, not secrets. The property layout of a
+class is such a decision; if churn is expected, exposing access through
+generics rather than documented `@` paths preserves freedom to reorganize.
+The practical discipline from
+[04-parse-dont-validate.qmd](04-parse-dont-validate.qmd) applies: guarantees
+hold for clients who use the front door, and the package's job is to make the
+front door the easiest path, not to bar the windows.
+
+When compatibility demands a different surface — `$` access, list-like
+behavior, an S3 class the ecosystem already handles — the answer is a
+**facade**: a thin S3 (or R6) exterior delegating to one internal S7 source
+of truth. One truth, two doors. Mirroring state across layers is how facades
+go wrong.
+
+## Dispatch as a design instrument
+
+Single dispatch is an open, extensible `switch` on class — the mechanism
+behind every polymorphic verb. Its design leverage comes from **who owns
+which side**: when you own the generic and others own classes, you have
+defined a plugin interface (ellmer owns `chat`-related generics; a
+third-party provider package adds a `Provider` subclass plus methods — the
+expression problem's data axis, open). When you own classes and others own
+generics (`print`, `format`, S3 ecosystem verbs), method registration is your
+integration mechanism.
+
+`super(x, to = Parent)` makes delegation up the hierarchy explicit — you
+name the parent whose behavior you want, rather than trusting an implicit
+resolution order (`NextMethod()`), which reads better and survives hierarchy
+refactors more loudly.
+
+**Multiple dispatch** — generics dispatching on two or more arguments — is
+S7's quiet superpower, inherited from the CLOS lineage and absent from
+mainstream message-passing OOP (which simulates it awkwardly via double
+dispatch/visitor patterns). It is rare, and where it applies nothing else is
+as clean: behavior that genuinely varies with **two** types at once.
+Published examples are instructive: sqlr defines
+`render_sql <- new_generic("render_sql", c("x", "con"))` — SQL generation
+varies by *the object being rendered* and *the dialect of the connection*,
+and each (type, dialect) pair is one small method rather than a matrix of
+conditionals. S7's own `convert(from, to)` is dispatch on source and target.
+Interaction problems (combine, compare, coerce) are the recurring shape. The
+special classes `class_any` (match anything) and `class_missing` (match an
+absent argument) fill out the method tables without dummy classes.
+
+## Interfaces: sets of generics, plus laws
+
+Functional OOP has no `interface` keyword because the concept is emergent: an
+interface is **a set of generics a class supports, together with the laws
+those methods must satisfy.** "Serializable" is: `to_wire()` and
+`from_wire()` exist, and `from_wire(to_wire(x))` is `x`. The generics are
+checkable by dispatch; the law is checkable only by tests.
+
+This implicitness is workable at small scale and frays at large scale, which
+is exactly the gap s7contract fills: explicit structural interfaces (named
+sets of required generics), traits (registered implementations with optional
+defaults and metadata), optional runtime checking of argument and return
+specifications, and — most valuably — **generative laws**: property-based
+tests with shrinking that verify the behavioral half of the contract, the
+half no dispatch table can see. The Go/Rust cultural import is deliberate and
+apt. Whether adopting the package or just the mindset, the design step it
+represents is the same: when you define an abstract class or an extension
+point, *write down the laws* an implementation must satisfy, as executable
+tests if at all possible.
+
+Open families carry a lifecycle obligation that sealed ones escape: the
+extension contract itself evolves, and it can break extenders in a way class
+construction never reveals. Adding a *required* generic to an interface
+silently invalidates every third-party implementor — their classes still
+construct, their existing methods still dispatch, and the gap only surfaces
+when the new verb is called on their variant. The mitigations mirror wire
+formats, because an extension contract *is* a wire format between packages:
+introduce new verbs as optional with loud defaults on the abstract parent;
+publish a conformance test suite that extension packages run in their own
+checks (an executable statement of the current contract — s7contract's
+interface checks are exactly this, packaged); and when a break is
+unavoidable, version the contract explicitly rather than letting extenders
+discover it at runtime.
+
+## Indirection: every layer must pay rent
+
+David Wheeler's aphorism — all problems in computer science can be solved by
+another level of indirection — comes with the standing corollary: except the
+problem of too many levels of indirection. Every abstraction in this document
+is indirection: the generic between caller and method, the semantic atom
+between meaning and primitive, the facade between surface and truth.
+
+The test for whether a layer deserves to exist: **does it absorb a real axis
+of variation?** Rent-paying layers, concretely:
+
+- **Generic → method** absorbs variation of behavior across types that is
+  actually observed (two-plus methods, or a genuine extension contract).
+- **Semantic atom → primitive** absorbs meaning: it prevents cross-wiring
+  and centralizes a law that recurs.
+- **Canonical spec → projections** absorbs representation churn: one
+  classification table generating a style expression *and* a legend *and*
+  documentation means changes happen once.
+- **Wire-name map → serializer** absorbs naming churn between the domain
+  model and evolving wire formats.
+
+Rent-free layers, equally concretely: the wrapper class that adds no law and
+no dispatch; the interface with exactly one implementation and no second in
+sight; the factory abstracting a construction that occurs once; the parameter
+threaded through five functions "for flexibility" that no caller varies. The
+rule of three is the operational test — abstract on demonstrated recurrence,
+not anticipated recurrence — and deleting a rent-free layer is a design
+improvement, not a loss.

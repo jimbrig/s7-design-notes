@@ -1,0 +1,263 @@
+# Types and Meaning: Semantic Types, Structure, and Type-Driven Design
+
+## Three lenses on what a type is
+
+Before designing with types it helps to hold three complementary definitions
+in mind.
+
+**A type is a set of values.** `integer between 0 and 255` names a set;
+`nonempty string` names a set. Under this lens, subtyping is subset-hood, a
+union type is a set union, and a validator is a membership predicate.
+
+**A type is a contract on operations.** Knowing `x` is a `Color` tells you
+what you may *do*: read channels, convert to hex, blend. Under this lens,
+interfaces and generics define types as much as data layouts do — a "thing
+that can be serialized" is a type in the behavioral sense even if no class
+hierarchy says so.
+
+**A type is a name for meaning.** `EmailAddress` and `CustomerId` may both be
+strings-as-sets, and support the same operations-as-contracts, yet naming them
+separately encodes knowledge: these are different *kinds* of thing, and
+substituting one for the other is a bug even when no operation would fail.
+
+Static languages let a compiler exploit all three lenses. In R, a dynamic
+language, the sets are enforced at runtime (validators), the contracts by
+dispatch and convention, and the meanings by the class graph you choose to
+build. The absence of a compiler does not make type thinking pointless — it
+makes it a *design discipline* rather than a checked artifact. Your
+constructor set is your type system; your validators are its proof
+obligations; your generics are its interfaces.
+
+## Structural versus nominal — and where semantics enters
+
+Type systems differ in what makes two types "the same." **Structural** typing
+(TypeScript, Go interfaces) says: same shape, same type — any object with the
+right fields satisfies the interface. **Nominal** typing (Java, Haskell's
+newtypes) says: same *name*, same type — identical shapes with different
+declarations are different types.
+
+R at runtime is loosely structural: code that reaches into `x$field` works on
+anything with that field. S7 layers nominal identity on top: dispatch and
+property-class checks consult the declared class, not the shape. And a
+property's declared class is itself a structural constraint on that slot. So
+an S7 design mixes the two deliberately: **nominal identity where meaning must
+not be confused, structural constraints where shape is what matters.**
+
+The third notion — **semantic** typing — is the design payoff of nominal
+identity. The classic statically typed device is the *newtype*: wrap a
+primitive in a distinct type (`CustomerId` wrapping `string`) so that the
+compiler stops you from passing a customer id where an order id is expected.
+The wrapper adds no structure; it adds *meaning* and prevents an entire class
+of "stringly typed" defects where everything is a character vector and nothing
+stops the wrong one from arriving.
+
+## Semantic contracts and loose coupling
+
+There is a systems-integration corollary that elevates semantic types from a
+convenience to an architectural principle. When two systems integrate by
+sharing **structure** — an agreed record layout — every structural change in
+one forces coordination with the other; the coupling is total. When they
+integrate by sharing **semantics** — agreed atomic meanings like
+`CustomerId`, `EmailAddress`, `FloodZoneClass` — each system arranges those
+atoms in whatever local structure suits it, and a mapping layer mediates.
+Structures then evolve independently while data remains meaningfully
+exchangeable, because the *meanings* are the stable contract.
+
+(This idea is developed explicitly in data-integration languages like Taxi,
+where `type CustomerId inherits String` declarations are shared across systems
+precisely so models do not have to be. The design notes in
+`s7-thoughts-and-notes.md` arrive at the same conclusion independently.)
+
+The general lesson for any multi-dialect domain — several external schemas
+describing overlapping concepts — is to build the **semantic layer first**
+(the atoms shared across dialects) and let each dialect's document structure
+be a separate, local composition of those atoms. The alternative, modeling
+one dialect's structure and treating others as deviations from it, couples
+you to the dialect you happened to start with.
+
+## Three carriers of semantics in S7
+
+S7 gives three mechanisms for making meaning first-class, in ascending order
+of weight.
+
+**1. A reused property definition.** A property object is a value; define it
+once, use it in many classes:
+
+```r
+prop_email <- S7::new_property(
+  class = S7::class_character,
+  validator = function(value) {
+    if (length(value) != 1L) return("must be a single string")
+    if (!grepl("^[^@\\s]+@[^@\\s]+$", value)) return("must be an email address")
+    NULL
+  }
+)
+```
+
+Two classes using `prop_email` share the *law* and, by convention, the
+*meaning*. There is no new nominal type — a plain string still flows in and
+out — so nothing prevents cross-wiring two different string-valued properties.
+This is the cheap tier: shared validation, meaning by convention. Note the S7
+convention that property validators do not mention the property's name; S7
+prepends it, which is exactly what makes one definition reusable across many
+properties.
+
+**2. A class inheriting from a base type.** `S7::new_class("MarkdownText",
+parent = S7::class_character)` creates a nominal type whose instances *are
+still character vectors* — the underlying data is reachable via
+`S7::S7_data()`, and with an S3 bridge the value can keep behaving like a
+string where that is wanted. Now dispatch can distinguish it, property classes
+can demand it, and accidental substitution fails loudly. ragnar's
+`MarkdownDocument` is a published example: a length-one string with an
+`@origin` property, inheriting from character because a markdown document
+genuinely *is* text — the inheritance is honest, not decorative. This is the
+newtype tier: nominal identity at modest cost. Its limit is structure: the
+moment the concept has *parts*, packing them into a subclassed primitive with
+a heroic validator is fighting the system.
+
+**3. A composite class.** When the concept has internal structure — a color
+with four channels, a range with two endpoints, an extent with bounds — it
+gets a class with properties, each carrying its own local law, plus a class
+validator for laws that relate them. This is the full tier: identity,
+structure, invariants, and a dispatch anchor.
+
+Choosing the tier is a judgment about the concept, not the code: does it have
+parts? Does behavior dispatch on it? Must it be impossible to confuse with its
+underlying primitive? Escalate only when a "yes" appears.
+
+## Type-driven design in a dynamic language
+
+The type-driven design slogan — **make illegal states unrepresentable**
+(Yaron Minsky) — translates to dynamic R as **make illegal states
+unconstructable**. You cannot stop the interpreter from holding a bad list,
+but you can arrange that no bad *object of your class* ever exists: the
+constructor parses, the validators enforce, and every mutation path
+revalidates. Possession of the object then certifies its laws, which is the
+bridge to [04-parse-dont-validate.qmd](04-parse-dont-validate.qmd).
+
+The practical workflow, adapted from the typed-functional world (Scott
+Wlaschin's *Domain Modeling Made Functional* is the best book-length
+treatment):
+
+1. **Enumerate the vocabulary.** List the domain's nouns and the sets of
+   values each can take, before writing any class. Distinguish atoms
+   (indivisible meanings) from composites (arrangements of atoms).
+2. **Write the laws next to the nouns.** "Alpha is a proportion." "A zoom
+   level lies in [0, 24]." "Every layer references an existing source." Each
+   law will land on a specific rung of the validation ladder.
+3. **Represent alternatives as alternatives.** Where the domain says "either
+   X or Y," reach for a sum-type encoding
+   ([05-composition-and-dispatch.qmd](05-composition-and-dispatch.qmd)) rather
+   than optional fields with implicit exclusivity.
+4. **Let the verbs emerge.** Once the nouns are stable, the generic vocabulary
+   — construct, combine, serialize, render, convert — tends to write itself,
+   and methods slot in per class.
+
+## Data-driven design, in two senses
+
+"Data-driven" names two distinct and equally useful ideas, and conflating
+them causes confusion.
+
+**Design driven by data about the domain.** Before abstracting, census the
+actual corpus: which shapes recur across a specification, which fields are
+required in practice, which enum values actually occur. Abstractions are then
+*earned* by observed repetition rather than speculated. A property-factory
+layer, for instance, should contain exactly the factories the census
+justifies — the shapes that occur dozens of times — and nothing "for
+completeness." This is the rule of three operating at design scale, and it is
+the discipline that keeps foundation layers small and honest.
+
+**Behavior represented as data.** Tables and specifications that *drive*
+computation: a classification table that generates both a style expression and
+a legend; a schedule that drives a state machine; quoted expressions composed
+into generated validator functions. This is the older Lisp/Unix sense —
+programs manipulating programs-as-data — and it reappears in
+[06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd) as the foundation
+of DSL and codegen work. Its cardinal rule: the data is the single source of
+truth, and *all* downstream artifacts are projections from it, never
+hand-maintained in parallel.
+
+## The wire universe versus the domain universe
+
+Documents live in an impoverished type universe. JSON has exactly six kinds:
+null, boolean, number, string, array, object. R's universe is richer and
+messier: `NULL` and `NA` (distinct!), integer versus double, length-one
+vectors standing in for scalars, named lists versus unnamed lists, attributes.
+Designing a document model means designing the mapping between universes, and
+most of the notorious bugs live in four mismatches:
+
+- **Number:** JSON does not distinguish `8` from `8L`. If a property demands
+  `class_integer`, wire input and casual users will supply doubles. Either
+  accept `class_numeric` plus an integerish validator, or coerce in the
+  constructor — but decide once, globally.
+- **Scalar:** JSON has scalars; R has length-one vectors. Every "string"
+  property needs a length-1 law somewhere, which is why scalar-ness is
+  usually the first check in any property-validator foundation.
+- **Nothing:** JSON can *omit* a key, or set it to `null`; R has `NULL` and
+  also `NA`. These are up to four distinct meanings ("never mentioned,"
+  "explicitly cleared," "unknown," "not applicable") flowing through two
+  representations. Tony Hoare called null references his billion-dollar
+  mistake; R doubled the budget. The only defense is an explicit,
+  per-property **presence policy**.
+- **Empty:** an empty array, an empty object, and an absent key serialize
+  differently and often mean different things (`"layers": []` versus no
+  `layers` key). Serializers need a stated omit-empty policy per field.
+
+## Presence is a four-way decision, not a boolean
+
+"Optional" conflates independent axes that a property model should separate:
+
+- **Required at construction?** May an object exist without a caller-supplied
+  value? (Enforced by a quoted stop-default or constructor check.)
+- **Nullable in the model?** Is `NULL` a *lawful stored value*, typically
+  meaning "omitted on the wire"? (Enforced by a `NULL` union member — and
+  note the S7 subtlety that a union's default prototype comes from its first
+  member, so union order is load-bearing.)
+- **Defaulted?** Is there a domain-meaningful value when the caller is
+  silent? (A real default is domain knowledge — `alpha = 1` — not a
+  placeholder.)
+- **Omitted on serialization?** Does an unset value vanish from the wire, or
+  serialize as null/empty?
+
+Every combination occurs in real specifications. Collapsing them into one
+`optional = TRUE` flag is how models end up unable to distinguish "user
+explicitly cleared this" from "user never touched this" — a distinction that
+matters enormously in patch/merge semantics and in round-tripping foreign
+documents.
+
+## Literals, enums, and identity
+
+A recurring puzzle when modeling specifications: a field whose value is fixed
+(`"version": 8`, `"type": "geojson"`). JSON Schema calls it `const`;
+TypeScript calls it a literal type. Three modeling options exist, and the
+choice is a genuine design decision, not a technicality:
+
+- **Class identity.** The field is not state at all; it is *what the class
+  is*. Model it as a computed (getter-only) property or inject it at
+  serialization. Two instances of the class can never differ on it, and it is
+  not a constructor argument.
+- **Stored with a default and a closed validator.** The field is state that
+  happens to have one lawful value *today* — the spec may add values, or
+  round-tripping must preserve exactly what the wire said.
+- **Constructor-normalized.** Accept lenient input (`8`, `8L`, even `"8"`) at
+  the boundary and store the canonical form.
+
+The two questions that decide it: **can two instances of this class ever
+differ on this value?** (If no, it is identity, not state.) And **must a
+round-trip preserve the user's supplied value verbatim?** (If yes, it must be
+stored.) Type discriminators in tagged unions ("this is a geojson source")
+are almost always class identity — the class *is* the tag — while version
+fields are judgment calls that depend on whether one class will represent
+multiple spec versions.
+
+## Refinements, for the statically minded
+
+If you come from typed languages, the property validator is best understood
+as a **runtime refinement type**: `{ x : numeric | 0 <= x && x <= 255 }`. The
+class system checks the base type; the refinement predicate narrows it. This
+framing explains the layering rule in
+[04-parse-dont-validate.qmd](04-parse-dont-validate.qmd) — base type and
+refinement are checked in that order, and S7 formalizes it by validating
+`class` before calling the property validator — and it explains why
+refinements should be *pure and cheap*: they run at every construction and
+replacement, like a type check would.

@@ -1,0 +1,424 @@
+# The Middlegame: From Doctrine to a Real Package
+
+## The gap this document exists to close
+
+Be honest about what the folder contained before this document. The
+conceptual chapters justify a worldview. The doctrine compresses it into
+defaults. The field guide shows *positions* — snapshots of finished
+packages with the pattern each one exhibits. The playbooks give *opening
+theory* — the first eight moves for six recognizable situations. In chess
+terms, the collection had openings, annotated positions, and endgame
+tables, and was missing the genre that actually teaches judgment:
+**annotated full games**, where you watch the decisions get made in
+sequence, interacting, under pressure, with the alternatives visible and
+the concessions priced.
+
+The gap is structural, not editorial. Doctrine is stated per decision —
+one principle, one rung, one encoding choice at a time — but a real
+package is a *system of coupled decisions*: the presence policy constrains
+the round-trip law, which constrains the open/closed choice, which feeds
+back into what the validators may assume. Toy examples cannot exhibit
+coupling, because coupling only appears when there are enough decisions to
+couple. This is why the mature packages — ellmer, ragnar, quickr, rtemis —
+feel categorically more complicated than anything in the playbooks: they
+are not applying more patterns; they are absorbing the *interactions*.
+
+So this document does two things. First it re-reads the mature four, not
+for their patterns (the field guide's job) but for their **pressure
+chains** — the sequence by which one hard requirement forced a cascade of
+design consequences, including the concessions. Then it plays one
+annotated game at realistic fidelity: a style-document core, derived
+decision by decision, with the doctrine cited where it was followed and
+overruled where reality outvoted it. The code for the load-bearing spine
+was verified against S7 0.2.2 on R 4.6.1.
+
+## Part I: How the mature four absorbed complexity
+
+### ellmer: one requirement forces the hybrid
+
+The instructive way to read ellmer is to ask what *forced* each piece of
+its architecture, and the answer starts with a product requirement, not a
+philosophy: **streaming**. A streamed response is a value that does not
+exist yet — tokens accumulate over seconds, consumers want them as they
+arrive, and the eventual `Turn` is only a fact once the stream closes.
+Partial state must live *somewhere*, and no amount of value-semantics
+conviction changes that. That single requirement makes the mutable `Chat`
+object load-bearing: R6 is not a stylistic lapse but the honest home for
+an accumulation-in-progress, and the doctrine's actual contribution is
+*containment* — completed turns crystallize into immutable S7 values, the
+conversation is reconstructible from the values alone, and the mutable rim
+stays one class wide.
+
+The second chain: **provider variation**. Every supported provider has
+quirks — capabilities, wire formats, authentication, streaming protocols —
+and the `Provider` dispatch surface absorbs them. The price, visible if
+you watch the package evolve, is that a plugin surface *grows*: each new
+provider capability becomes a new generic or a new argument somewhere, and
+the interface can never again be reorganized cheaply because third parties
+stand on it. The lesson for the middlegame: doctrine 10 tells you to
+design the verb vocabulary carefully; ellmer shows *why the stakes are
+asymmetric* — under-designing an internal function costs a refactor,
+under-designing an extension surface costs an ecosystem migration.
+
+### ragnar: the price tag on base-type inheritance
+
+The compendium praises `MarkdownDocumentChunks` inheriting from tibble as
+"honest base-type inheritance" — the value really is a table. The
+middlegame reading adds the invoice: **inheriting a base type means the
+parent's entire API becomes your unvalidated mutator set.** Every dplyr
+verb, every `[` method, every tool in the tibble ecosystem can transform
+the object along paths where the subclass's laws are never consulted —
+drop the columns the class depends on, break the alignment with
+`@document`, or silently strip the subclass entirely. ragnar's concession
+is that its invariants on that surface are documented rather than
+enforced, and re-established at the operations that matter. That is a
+rational trade — the whole point of inheriting tibble is to *get* that
+ecosystem — but it is a trade, and the doctrine's "construction is the
+proof" holds only on the package's own front doors, not on the thousand
+side doors the parent class ships with. When you inherit a base type, you
+are choosing which of those doors to guard, and accepting the rest.
+
+### quickr: power through refusal
+
+quickr compiles R to Fortran, and the design decision that makes it
+possible is what it *declines*: it accepts a subset of R, requires
+`declare(type())` annotations, and errors on constructs it cannot compile
+faithfully rather than approximating their semantics. This is doctrine 17
+— refuse to guess — applied not to an argument default but to the entire
+domain of the tool: **shrink the promise until you can keep it.** The
+middlegame lesson generalizes to every "model an existing thing" project:
+the fastest route to a robust core is usually not handling more of the
+input space, it is drawing a smaller boundary you can defend completely,
+with loud errors at the fence. Coverage grows later, fence post by fence
+post, each one tested. The packages that tried to accept everything on
+day one are the ones whose validators are full of guesses.
+
+### rtemis: the fixed cost of constraints-as-data
+
+rtemis's property-factory stratum — the `PropertySpec` machinery deriving
+validators, defaults, JSON Schema, and TUI forms from single declarations
+— is the compendium's favorite exhibit for constraints-as-data. The
+middlegame reading prices it: that stratum is itself a serious system,
+hundreds of lines of meta-machinery that every contributor must understand
+before they can add a property, and every error message now has an extra
+layer of indirection between the symptom and the declaration. It
+amortizes because rtemis has *hundreds* of hyperparameters across dozens
+of models and genuinely needs all four projections. Below some scale
+threshold — and most packages are below it — hand-written
+`new_property()` calls are not a failure to apply the pattern; they are
+the pattern correctly not applied (doctrine 15: the third occurrence, not
+the first). The factory stratum is the right move exactly when you can
+name the projections you need and count the declarations that will pay
+for it.
+
+### The shared shape
+
+Four packages, one shape: each met a pressure that made the naive,
+doctrine-by-the-letter design uneconomic — streaming broke pure values,
+ecosystem reuse broke enforced invariants, R's full semantics broke
+compilability, hyperparameter count broke hand-written validation. And
+each responded the same way: **not by abandoning a principle but by
+moving where it applies** — containing state instead of forbidding it,
+guarding chosen doors instead of all doors, shrinking the promise instead
+of diluting it, buying machinery only where the census showed volume.
+That move — relocating a principle's jurisdiction instead of revoking it
+— is the core middlegame skill, and it is exactly what per-decision
+doctrine cannot teach and an annotated game can.
+
+## Part II: An annotated game
+
+The domain: a core for map-style documents — the root, its sources, its
+layers, their paint. Chosen because it is real, the spec pressure is
+genuine (hundreds of paint properties, embedded expressions, ongoing spec
+evolution), and it exercises three playbooks at once (spec modeling,
+embedded language, and the temptation of a stateful manager). What
+follows is a derivation, not project work: ten decisions in dependency
+order, each with its pressure, its options, and its resolution — doctrine
+cited when followed, named when overruled.
+
+### Move 1: Scope — model what your operations touch
+
+The census (playbook 1, move 2) says the spec is far too large to model
+at once: root, sources, layers, sprite, glyphs, terrain, fog, transitions,
+and a paint vocabulary in the hundreds. The pressure is real and the
+answer is an ordering, not an ambition: model the nodes your *operations*
+touch — construction, mutation, serialization of root/sources/layers —
+and let everything else pass through as inert wire data until an
+operation needs it. Deferral is not debt if the pass-through is lossless;
+it is the vertical-slice discipline applied to scope.
+
+### Move 2: Rung 0 — the engine's validator, and gold files
+
+The engine ships an authoritative validator; re-implementing it in R
+would be expression-system envy at document scale. Rung 0 is: gold files
+produced by reference tooling, round-trip tests against them, and the
+engine validator run in CI where a JS runtime is available. Every
+subsequent decision about what *we* validate assumes this floor exists.
+
+### Move 3: The layer family — three principles collide
+
+The pivotal decision of the whole game. Layers come in a dozen types
+(fill, line, symbol, raster, ...) that differ in behavior and in their
+paint vocabularies — doctrine 8 says subclass family, and dispatch
+genuinely wants it (validation, legend generation, rendering hints all
+vary by type). But each type's paint vocabulary is dozens of properties,
+churned by spec releases — hand-modeling four hundred paint properties as
+S7 properties is schema cosplay by volume, and doctrine 16 says generate
+tables, not class graphs. Meanwhile the paint values themselves can be
+literals *or* expressions, which doctrine 8 would encode as a union.
+
+The resolution is a **two-level hybrid, with the split placed exactly at
+the dispatch boundary**: layer *types* become subclasses, because
+behavior dispatches on them; paint becomes a *validated bag* — one list
+property, checked against a generated spec table. The bag is a
+denormalization doctrine 8 would frown at, chosen consciously: variant
+honesty is paid for where dispatch collects the benefit (the type level)
+and declined where it would cost four hundred properties tracking a
+moving spec (the paint level). The spec table is constraints-as-data —
+rtemis's pattern at the scale where it actually amortizes:
+
+```r
+# generated from the engine's style-spec json, one row per paint property;
+# excerpt shown - the real table is machine-derived, never hand-edited
+paint_spec <- list(
+  fill = list(
+    `fill-color`   = list(type = "color"),
+    `fill-opacity` = list(type = "number", minimum = 0, maximum = 1)
+  ),
+  line = list(
+    `line-color` = list(type = "color"),
+    `line-width` = list(type = "number", minimum = 0)
+  )
+)
+
+check_paint <- function(paint, type) {
+  spec <- paint_spec[[type]]
+  bad <- character()
+  for (nm in names(paint)) {
+    rule <- spec[[nm]]
+    if (is.null(rule)) {
+      bad <- c(bad, paste0("unknown paint property '", nm, "'"))
+      next
+    }
+    val <- paint[[nm]]
+    if (is_expression(val)) next   # move 4: rung 1, the engine judges these
+    if (identical(rule$type, "number") && is.numeric(val)) {
+      if (!is.null(rule$minimum) && val < rule$minimum) {
+        bad <- c(bad, paste0("'", nm, "' below minimum ", rule$minimum))
+      }
+      if (!is.null(rule$maximum) && val > rule$maximum) {
+        bad <- c(bad, paste0("'", nm, "' above maximum ", rule$maximum))
+      }
+    }
+  }
+  if (length(bad)) bad
+}
+```
+
+Note what the interaction did: doctrine 16 (generate tables) is what made
+overruling doctrine 8 (honest variants) *safe* — the bag is lawless only
+as a class shape; the table restores the laws at validation time, and the
+same table can later project documentation or a paint-builder UI (the
+reverse arrow of [06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd)).
+Neither principle alone produces this design; their collision does.
+
+### Move 4: Expressions — rung 1, stated as a policy not an omission
+
+Paint values may be expressions (`["interpolate", ["zoom"], ...]`). The
+escalation ladder says opaque passthrough until analysis is the product,
+so `check_paint()` contains one line — `if (is_expression(val)) next` —
+and that line *is* the policy: expressions are the engine's jurisdiction.
+The trap this dodges is the validator slowly learning the expression
+grammar, one special case at a time, until it is a bad reimplementation
+of the engine (expression-system envy). The upgrade path is already
+written down: if legend generation ever becomes a requirement, that is
+the `fields_used()` justification test from
+[09-playbooks.qmd](09-playbooks.qmd), and the climb goes to combinators,
+not directly to an AST.
+
+### Move 5: The layer classes — thin, because the table is thick
+
+```r
+layer <- S7::new_class("layer", abstract = TRUE, properties = list(
+  id     = S7::class_character,
+  source = S7::class_character,
+  paint  = S7::new_property(S7::class_list, default = list())
+))
+
+fill_layer <- S7::new_class("fill_layer", parent = layer,
+  validator = function(self) check_paint(self@paint, "fill")
+)
+line_layer <- S7::new_class("line_layer", parent = layer,
+  validator = function(self) check_paint(self@paint, "line")
+)
+```
+
+Each subclass validator is one delegation line. This is the checking
+ladder holding under load: type lives on the property classes, paint law
+lives in the table, and the subclass's only job is to bind its type tag
+to the table lookup. A dozen layer types cost a dozen three-line classes
+— which is also the honest test that the move-3 hybrid was right: had we
+hand-modeled paint, each of these classes would be a hundred lines of
+property declarations chasing the spec.
+
+### Move 6: Presence and the round-trip law — decided together, or wrong
+
+Paint properties have engine-defined defaults (`fill-opacity` defaults to
+1 in the engine). The presence decision: **do not store engine defaults.**
+An omitted key means "engine default," and the model preserves the
+distinction between *omitted* and *explicitly set to the default value* —
+because a user who wrote `fill-opacity: 1` and a user who wrote nothing
+have expressed different things, and a future spec release could change
+the default out from under the silent one. This immediately constrains
+the round-trip law (the equality taxonomy of
+[06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd)): the
+promise is *canonical equality* on modeled fields and *representational
+preservation* on the paint bag — not wire equivalence, precisely because
+wire equivalence would license resolving defaults, which is the one
+normalization this design forbids. Two decisions, one lock: neither the
+presence policy nor the equality relation could have been chosen alone.
+
+### Move 7: The root, and the laws only it can see
+
+```r
+style <- S7::new_class("style", properties = list(
+  sources = S7::new_property(S7::class_list, default = list()),
+  layers  = S7::new_property(S7::class_list, default = list())
+), validator = function(self) {
+  ids  <- vapply(self@layers, function(l) l@id, character(1))
+  refs <- vapply(self@layers, function(l) l@source, character(1))
+  msgs <- character()
+  if (anyDuplicated(ids)) msgs <- c(msgs, "layer ids must be unique")
+  missing_refs <- setdiff(refs, names(self@sources))
+  if (length(missing_refs)) {
+    msgs <- c(msgs, paste("layer references unknown source:", missing_refs))
+  }
+  if (length(msgs)) msgs
+})
+```
+
+Id uniqueness and source resolution are laws no layer can check — they
+mention the collection. The aggregate-root rung earns its place here, and
+note the granularity call (an open question the ledger tracks): this
+design has *one* root despite the document's depth, because both
+cross-object laws happen to be visible from the top. A spec with
+cross-references three levels down would force the nested-root question
+this game gets to skip.
+
+### Move 8: Mutators — the front door, with preconditions
+
+```r
+add_layer <- function(style, layer, before = NULL) {
+  layers <- style@layers
+  if (!is.null(before)) {
+    ids <- vapply(layers, function(l) l@id, character(1))
+    pos <- match(before, ids)
+    if (is.na(pos)) {
+      cli::cli_abort("no layer with id {.val {before}} to insert before.")
+    }
+    layers <- append(layers, list(layer), after = pos - 1)
+  } else {
+    layers <- c(layers, list(layer))
+  }
+  S7::set_props(style, layers = layers)
+}
+```
+
+`before` not existing is an *operation* error (rung: method
+precondition), distinct from the structural laws below it — the message
+can therefore speak the operation's language ("insert before"), which no
+class validator could. And a verified interaction worth knowing:
+`set_props()` re-runs the root validator, so a duplicate id introduced
+*through the mutator* is rejected by the root's law without the mutator
+checking it — the rungs genuinely do not duplicate each other, and the
+insertion order, precondition failure, and duplicate rejection were all
+confirmed live.
+
+### Move 9: Ids — the tier-1 answer to the atoms-versus-earning tension
+
+Should `layer_id` be a semantic type? It is a meaning, not just a string
+— doctrine 1 wants it named early; doctrine 15 wants abstraction earned.
+The concrete resolution uses the tiers: a *reused property definition*
+(tier 1 — one `new_property()` value shared by every id-shaped slot)
+names the meaning and centralizes its law at near-zero cost, while a
+full class (tier 2/3) waits until something dispatches on ids or ids
+grow structure. The tension between two principles, unresolvable in the
+abstract, costs one line to resolve in the concrete — which is itself a
+middlegame lesson: many doctrinal collisions are cheap at the point of
+decision and only look profound in prose.
+
+### Move 10: The manager that must not exist
+
+Every document model eventually tempts its author with a `StyleManager`
+R6 class — "convenient" mutable state holding the current style, an undo
+stack, a dirty flag. The fact/process sort (playbook 5) says no: a style
+is a fact through and through; reading, patching, and writing it are
+shell *functions*; and an undo stack, if wanted, is a list of immutable
+snapshots — which value semantics makes nearly free (structural sharing:
+the copies share every untouched payload, per the verified probes in
+[02-values-and-state.qmd](02-values-and-state.qmd)). The mutable manager
+would buy nothing and sell local reasoning. Declined, by name, on the
+record.
+
+### The game's concessions, tallied
+
+An annotated game ends by admitting what it conceded, because the
+concessions are where the doctrine's edges live:
+
+- **The paint bag is a flattened product** (overrules the letter of
+  doctrine 8), made safe by the generated table (doctrine 16) — the
+  overrule and its mitigation are one decision, not two.
+- **Unknown paint keys are currently rejected** (closed node), which is
+  the strict choice; a package prioritizing round-trip fidelity for
+  foreign styles would flip this to a pass-through with the table
+  checking only known keys. The choice is defensible either way; making
+  it *by accident* is not. This one is flagged for revisit.
+- **The spec table is trusted, not verified** — its correctness is
+  inherited from the generation pipeline against the engine's spec JSON,
+  which quietly relocates rung 0 upstream. A stale table is now the
+  design's single most dangerous failure mode, which is exactly the
+  single-source-of-truth trade: one datum, one point of failure.
+- **What the toy still hides:** the real table generation pipeline, the
+  sprite and glyph subsystems, wire-version migration, and every print
+  method, error message, and documentation page — the unglamorous
+  majority of a real package that no design document shortens much.
+
+## Part III: The loop that actually transfers the wisdom
+
+The last honest thing this document can say is that no document — not
+this one — converts wisdom into skill. The mature four were not designed
+by consulting a compendium; they were designed by people making
+decisions, hitting walls, and revising. What a compendium can do is
+shorten that loop: make the decision points visible sooner, the options
+nameable, and the concessions explicit instead of accidental. The
+transfer mechanism is a practice, and it is cheap:
+
+**Keep a design journal in the project.** One entry per real decision,
+five lines: the decision, the pressure, the options considered, the
+choice, and the principle followed *or overruled, with the reason*. The
+annotated game above is exactly this journal, written after the fact;
+writing it during the fact is faster and truer. The journal does two
+jobs at once: it makes "selectively considering the proper aspects" an
+explicit act instead of an anxiety (you consulted the doctrine, you cited
+or overruled it, done — no lingering doubt about whether you *should*
+have used some sophisticated pattern you decided against), and it
+produces the evidence stream the compendium needs to stay alive — a
+recurring overrule in your journals is a counterexample entry for
+[open-questions.qmd](open-questions.qmd), and a pattern that keeps earning
+across your projects is a promotion candidate.
+
+**Review the journal at complexity checkpoints, not on a schedule.** The
+natural checkpoints: the first mutator (is the invariant placement
+holding?), the first serializer (did presence and equality get decided
+together?), the tenth class (is a factory stratum starting to amortize?),
+the first external implementor (is the interface really a contract?).
+These are the moments the middlegame pressure chains start, and a
+half-hour against the doctrine's decision guides at each one is worth
+more than any amount of up-front design piety.
+
+That is the whole method: openings from the playbooks, this document's
+annotated game as the model for the middlegame, the journal as your own
+annotation habit, and the ledger as the place your games feed back into
+the theory. Eating our own food is not a property the compendium can
+have by itself — it is a loop the compendium and the projects run
+together.

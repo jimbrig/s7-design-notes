@@ -1,0 +1,149 @@
+# Overview: The Whole Argument in Miniature
+
+Everything in this research folder elaborates a single compact position. This
+document states that position in ten theses. Each thesis gets a paragraph here
+and a fuller treatment in the numbered documents.
+
+## 1. S7 is functional OOP, and that changes what "class" means
+
+S7 belongs to the generic-function tradition of object orientation (CLOS,
+Dylan, Julia, S3, S4), not the message-passing tradition (Smalltalk, Java,
+Python, R6). In this tradition a class answers the question *what is this
+thing?* — its data, its invariants, its place in a dispatch hierarchy — while a
+generic function answers *what can be done?* Methods belong to generics, not to
+classes. This inversion is not cosmetic. It means behavior is organized around
+verbs that many types can implement, extension happens by registering methods
+from the outside, and "interface" is an implicit concept: a set of generics
+that a class happens to support. Designing well in S7 means designing the
+generic vocabulary with as much care as the class graph. See
+[01-object-systems.qmd](01-object-systems.qmd).
+
+## 2. Choosing the object system is a semantic decision, not a stylistic one
+
+R offers S3, S4, S7, R6, environments, and vctrs, and the choice among them is
+determined by the semantics of the thing being modeled. Domain values with
+invariants and dispatch needs want S7. Homogeneous vectors that must slice,
+recycle, and live in data frame columns want vctrs. Ongoing processes with
+identity — sessions, connections, caches, accumulating conversations — want
+reference semantics, which means R6 or an environment. Thin interoperability
+veneers want S3. Real systems mix these deliberately: the most instructive
+modern example is ellmer, where the mutable `Chat` is R6 and the immutable
+`Turn`, `Content`, `Model`, and `Provider` objects it manages are S7. See
+[01-object-systems.qmd](01-object-systems.qmd) and
+[02-values-and-state.qmd](02-values-and-state.qmd).
+
+## 3. Value semantics are the foundation; state is an opt-in at the edges
+
+R's copy-on-modify physics makes S7 objects behave as immutable values:
+"modifying" a property produces a new object. This is a strength to be
+embraced, not a limitation to be engineered around. Values permit local
+reasoning, cheap snapshots, honest testing, and freedom from defensive copying.
+The architecture that follows is the functional core / imperative shell: pure
+construction and transformation of domain values in the middle, and a thin
+stateful rim — I/O, sessions, orchestration — around it. When invariants span
+several properties, updates must be atomic (`S7::set_props()`), which is the
+value-world analogue of a database transaction. See
+[02-values-and-state.qmd](02-values-and-state.qmd).
+
+## 4. Types carry meaning, not just shape
+
+A string that holds an email address and a string that holds a layer id have
+the same structure and entirely different meanings. Semantic types — the
+newtype idea from statically typed languages — give meaning its own name and
+its own laws. In S7 there are three carriers for this: a reused property
+definition (cheapest), a class inheriting from a base type (nominal identity
+while the value remains the primitive — ragnar's `MarkdownDocument` is a
+character string with an origin), and a full composite class (when the concept
+has internal structure). Sharing semantics rather than structure is also the
+deep principle of loosely coupled integration: systems that agree on what data
+*means* can evolve how it is *arranged* independently. See
+[03-types-and-meaning.qmd](03-types-and-meaning.qmd).
+
+## 5. Parse, don't validate — construction is the proof
+
+Alexis King's slogan names the difference between a check that discards its
+own result (validation) and a check that records it in a richer type
+(parsing). In a dynamic language the translation is: boundary functions accept
+loose input and return domain objects or fail loudly; from then on, possession
+of the object *is* the evidence that its laws hold, and downstream code stops
+re-asking. Constructors normalize; validators verify; nothing inside the core
+ever touches raw wire input. The alternative — checks scattered through
+processing code, each function distrusting its inputs — is what the language
+security literature calls shotgun parsing, and it is both a correctness and a
+clarity disaster. See [04-parse-dont-validate.qmd](04-parse-dont-validate.qmd).
+
+## 6. Every invariant has exactly one home
+
+Checking logic belongs on a ladder: external schema validators at the wire,
+parsers at the boundary, property classes for type, property validators for
+local laws, class validators for cross-property laws, aggregate-root
+validators for cross-object laws, method preconditions for operation legality,
+and internal assertions for developer invariants. Each rung may assume all
+rungs below it and must not duplicate them. The most common validation design
+failure is not a missing check but the same check living in four places,
+drifting apart over time. See
+[04-parse-dont-validate.qmd](04-parse-dont-validate.qmd).
+
+## 7. Sum types deserve representation, and S7 gives you four encodings
+
+Much of real-world modeling is alternatives: a source is vector *or* raster
+*or* image; a message part is text *or* a tool call. Flag fields, clusters of
+mutually exclusive nullables, and stringly typed mode switches are all sum
+types begging for honest representation. S7 offers four encodings — subclass
+families under an abstract parent, anonymous unions, enum-valued properties,
+and discriminator-plus-validator hybrids — and choosing among them follows
+from whether the variants differ in fields, in behavior, or only in value. The
+notable loss relative to ML-family languages is exhaustiveness checking, which
+must be recovered by convention and tests. See
+[05-composition-and-dispatch.qmd](05-composition-and-dispatch.qmd).
+
+## 8. Inherit for dispatch and substitutability; compose for structure
+
+The classic warnings about inheritance — fragile base classes, implementation
+coupling, a single rigid hierarchy axis — lose some force in functional OOP,
+because an S7 parent contributes a property schema and a dispatch position
+rather than a method table full of self-calls. But the discipline stands:
+inheritance is for is-a relationships that dispatch exploits, shallow trees
+with abstract roots and concrete leaves; composition is for has-a structure,
+which is most structure. Inheriting merely to reuse field names is
+schema cosplay. Interfaces — sets of generics with behavioral laws — are the
+third mechanism, implicit in S7 and made explicit by s7contract. See
+[05-composition-and-dispatch.qmd](05-composition-and-dispatch.qmd).
+
+## 9. Documents are declarative programs; model them as object graphs, verify them at boundaries
+
+A style, a config, a catalog, a query, a conversation transcript — these are
+declarative programs interpreted by some engine elsewhere. The R package's job
+is to be a good compiler front-end: construct lawful documents, enforce the
+invariants that are cheap and local, and delegate full conformance to the
+authoritative external validator at the wire. Schemas (JSON Schema, TypeScript
+definitions, protobuf) are contracts and design inputs, not blueprints:
+mirroring a schema one-interface-per-class imports its structure while
+discarding the opportunity to encode meaning. Expression languages embedded in
+documents deserve an escalation ladder — opaque passthrough, then constructor
+combinators, then a typed AST — climbed only as far as analysis needs justify.
+See [06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd).
+
+## 10. Abstractions must earn their keep
+
+Every abstraction is indirection, and indirection has a comprehension price.
+The layers that pay rent absorb a real axis of change: generic-to-method
+absorbs behavioral variation across types; a semantic atom absorbs meaning
+drift; a canonical spec projected into many artifacts absorbs representation
+churn; a wire-name map absorbs serialization churn. Layers that do not pay —
+pass-through wrappers, speculative interfaces with one implementation,
+factories for shapes that occur once — should not exist yet. The practical
+test is the rule of three: abstract after the pattern has recurred, not
+before. The ecosystem itself demonstrates convergent evolution here: multiple
+independent projects (s7x, rtemis's `PropertySpec` factories, and
+property-factory layers in private codebases) grew nearly identical helper
+strata over S7's deliberately minimal core, which is strong evidence for which
+abstractions are genuinely load-bearing. See
+[08-doctrine.qmd](08-doctrine.qmd).
+
+---
+
+The remaining documents unpack these theses with mechanics, examples from the
+published ecosystem, and named anti-patterns. The doctrine document at the end
+compresses everything back into decision guides you can apply in a design
+review.

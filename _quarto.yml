@@ -1,0 +1,45 @@
+project:
+  type: book
+
+book:
+  title: "S7 Design Notes"
+  subtitle: "Doctrine, Field Guide, and Playbooks for Functional OOP in R"
+  author: "Jimmy Briggs"
+  date: last-modified
+  repo-url: https://github.com/jimbrig/s7-design-notes
+  repo-actions: [edit, issue]
+  site-url: https://jimbrig.github.io/s7-design-notes/
+  chapters:
+    - index.qmd
+    - 00-overview.qmd
+    - part: "Foundations"
+      chapters:
+        - 01-object-systems.qmd
+        - 02-values-and-state.qmd
+        - 03-types-and-meaning.qmd
+    - part: "Laws and Composition"
+      chapters:
+        - 04-parse-dont-validate.qmd
+        - 05-composition-and-dispatch.qmd
+        - 06-documents-schemas-dsls.qmd
+    - part: "Evidence"
+      chapters:
+        - 07-ecosystem-field-guide.qmd
+    - part: "Practice"
+      chapters:
+        - 08-doctrine.qmd
+        - 09-playbooks.qmd
+        - 10-middlegame.qmd
+  appendices:
+    - open-questions.qmd
+    - sources.qmd
+
+format:
+  html:
+    theme:
+      light: cosmo
+      dark: darkly
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    link-external-newwindow: true

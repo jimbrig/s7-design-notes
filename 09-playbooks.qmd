@@ -1,0 +1,604 @@
+# Playbooks: How to Approach S7, by Situation
+
+Every other document in this folder is organized by *concept* — values,
+types, validation, dispatch, documents. This one is organized by
+*situation*. You arrive with a project, not a concept: a published spec to
+conform to, a pile of TypeScript definitions to interoperate with, an idea
+for a little language, a training run to configure, a live connection to
+wrap, an interface others will implement. Each of those situations has a
+known sequence of opening moves, a known set of traps, and known exemplars
+in the ecosystem. This document writes those sequences down.
+
+Two references set the genre. Advanced R's
+[Translating R code](https://adv-r.hadley.nz/translation.html) chapter
+(formerly the [DSL chapter](http://adv-r.had.co.nz/dsl.html)) teaches
+domain-specific languages not by theory but by two worked campaigns — an
+HTML generator and a LaTeX translator — each proceeding from *know the
+target language* through *build the vocabulary* to *handle the unknown
+cases*, and each making different design choices for stated reasons. And
+[Tidy design principles](https://design.tidyverse.org/) covers the "art"
+register — the naming, argument-design, and ergonomics decisions that no
+type system settles — as patterns and principles that trade off against one
+another, to be balanced rather than obeyed. The playbooks below aim for the
+same registers: sequences of moves that are concrete enough to follow, with
+the judgment calls flagged as judgment calls.
+
+One orienting fact before the playbooks: **they compose.** A real package
+almost never lives inside a single playbook. ellmer runs three at once —
+wrapping a live resource (the `Chat` object), modeling wire documents (the
+`Turn`/`Content` graph), and exposing an extension surface (the `Provider`
+family). A map-style package runs the spec playbook for the document, the
+language playbook for embedded expressions, and often the configuration
+playbook for build options. Identify every playbook in play, because each
+one places its validation, its state, and its boundaries differently.
+
+## Finding your playbook
+
+Ask where the *truth about correctness* lives, and what the artifact's
+*life* is:
+
+- **A published spec, format, or schema exists, and my objects must produce
+  or consume it** — [Playbook 1](#playbook-1-modeling-an-existing-specification).
+  Truth lives outside, in the spec and its official validator.
+- **Type definitions exist in another language — TypeScript, Rust, Go, C,
+  protobuf — and I must mirror or interoperate with them** —
+  [Playbook 2](#playbook-2-translating-foreign-type-definitions). Truth
+  lives outside, but in a type system rather than a document format, so the
+  work is translation rather than parsing.
+- **I am inventing the representation: an AST, an IR, a little language** —
+  [Playbook 3](#playbook-3-building-a-language-from-scratch). Truth is
+  yours to define, which is more dangerous than it sounds.
+- **Objects exist to configure computation that happens later, elsewhere,
+  or expensively** — [Playbook 4](#playbook-4-configuring-expensive-computation).
+  Truth is partly deferred: some laws mention data that does not exist yet.
+- **There is a live thing with a lifetime — a connection, session, device,
+  conversation** — [Playbook 5](#playbook-5-wrapping-a-live-resource).
+  The design problem is drawing the membrane between process and fact.
+- **Other people will implement my classes and generics** —
+  [Playbook 6](#playbook-6-designing-a-surface-others-extend). The
+  artifact is the contract itself.
+
+---
+
+## Playbook 1: Modeling an existing specification
+
+**You are here if** the domain has a published spec — a map style
+specification, STAC, GeoJSON, an OpenAPI description, a config file format
+— and your package's job is to construct, manipulate, and emit documents
+that conform to it. This is the document-object-model situation of
+[06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd), approached
+now as a sequence of moves rather than an anatomy.
+
+### The moves
+
+**1. Collect the authorities before writing any code.** The spec text, the
+official machine-readable schema if one exists, the official validator, a
+reference implementation, and — most valuable of all — a corpus of *gold
+files*: real documents produced by the reference tooling, covering the
+cases you care about. Wire up rung 0 of the checking ladder (the external
+validator, called mechanically) on day one, because every later decision
+about what *you* validate is a decision about what to leave to it.
+
+**2. Census the schema; do not transcribe it.** This is the
+schema-as-design-input posture: read the schema as evidence. Count the
+recurring property shapes (enums, bounded numbers, string-or-expression
+slots), find the sum types (`oneOf` with a discriminator, clusters of
+mutually exclusive optionals), find the deliberately open nodes
+(`additionalProperties`, metadata blocks, vendor extensions), and build the
+requiredness matrix. The census's output is a page of notes, and that page
+— not the schema file — is what you design from.
+
+**3. Draw the ownership tree, then the reference edges, then pick the
+root.** Composition edges become nested properties; symbolic references
+(a layer names a source *by id*) become the referential-integrity laws
+that will live on the aggregate root's validator. The root is the unit of
+consistency, serialization, and external validation.
+
+**4. Name the semantic atoms and collapse the structural duplicates.** The
+spec's type definitions will contain many structurally distinct spellings
+of one meaning (the proverbial fifteen colors). One semantic type per
+*meaning*, per the tiers of
+[03-types-and-meaning.qmd](03-types-and-meaning.qmd), regardless of how many
+shapes the wire uses.
+
+**5. Build one vertical slice before broadening.** Pick a single leaf node
+and take it all the way: class, boundary parser, serializer, presence
+policy, round-trip test against a gold file. The slice forces every
+infrastructure decision — wire-name mapping, omit-empty policy, unknown-key
+policy, the equivalence relation your round-trip law uses — while the
+stakes are one class instead of forty. Only then fan out across the node
+catalog, which by that point is mostly mechanical.
+
+**6. Decide presence per property and openness per node, on the record.**
+The four presence axes (required, nullable, defaulted, omitted) and the
+open/closed decision are the two choices that cannot be retrofitted
+cheaply. Strict where you claim semantics; pass-through where the spec is
+deliberately extensible.
+
+**7. Meet users at the objects they already hold.** The best boundary
+constructors lift *native* objects into the model — stacbuildr's
+`item_from_terra()` builds STAC items from rasters, not from hand-assembled
+metadata lists. Ask what your users have in their hands before you ask
+them to learn your class graph.
+
+### A slice, worked
+
+The smallest complete slice — one node, one parser, one serializer, one
+law (verified against S7 0.2.2):
+
+```r
+to_wire <- S7::new_generic("to_wire", "x")
+
+vector_source <- S7::new_class("vector_source", properties = list(
+  url         = S7::class_character,
+  min_zoom    = S7::new_property(S7::class_numeric, default = 0),
+  attribution = S7::new_property(
+    S7::new_union(S7::class_character, NULL), default = NULL
+  )
+))
+
+source_from_wire <- function(json) {
+  # the boundary owns wire names, defaults, and coercion, once
+  vector_source(
+    url         = json[["url"]],
+    min_zoom    = json[["minzoom"]] %||% 0,
+    attribution = json[["attribution"]]
+  )
+}
+
+S7::method(to_wire, vector_source) <- function(x) {
+  out <- list(type = "vector", url = x@url)   # 'type' is identity, injected
+  if (x@min_zoom != 0) out[["minzoom"]] <- x@min_zoom
+  if (!is.null(x@attribution)) out[["attribution"]] <- x@attribution
+  out
+}
+```
+
+Small as it is, the slice already embodies five decisions: the wire
+spelling `minzoom` exists in exactly two functions; the `type` constant is
+identity, not a stored property; `attribution` is nullable *and* omitted
+when absent (two axes, decided separately); the default `min_zoom` is
+omitted on the wire (so the round-trip law must be canonical equality, not
+byte identity); and the parser is the only path in. Scaling to the full
+spec is repetition of this shape, which is exactly why the slice comes
+first.
+
+### Traps
+
+Schema cosplay (transcribing the schema instead of censusing it),
+expression-system envy (re-implementing the engine's validator for
+embedded expressions — see Playbook 3 for what to do instead), and
+validator soup (your rungs re-checking what the official validator already
+owns). All three are named in the
+[anti-pattern catalog](08-doctrine.qmd#anti-pattern-catalog).
+
+**Exemplars:** stacbuildr (the pattern complete), rapid (an OpenAPI spec
+as a strict domain object), S7schema (rung 0 productized), typedjson (the
+round trip as the entire product). See
+[07-ecosystem-field-guide.qmd](07-ecosystem-field-guide.qmd), Cluster B.
+
+---
+
+## Playbook 2: Translating foreign type definitions
+
+**You are here if** the source of truth is a *type system* rather than a
+document format: a TypeScript definition file, Rust or Go structs, C
+headers, protobuf messages. The deliverable is different from Playbook 1's
+— not a parser for documents but a *correspondence* between two type
+systems, and the central artifact is a translation table you write before
+any class.
+
+### The moves
+
+**1. Write the translation table first.** Every foreign construct gets a
+row: what it is there, what it becomes here, and what is *lost or gained*
+in the crossing. The table below covers the recurring rows; your table
+adds the domain-specific ones. The discipline matters because translation
+decisions made ad hoc, class by class, drift — the same TS `string | null`
+becomes three different presence policies in three files.
+
+| Foreign construct | S7 move | Watch for |
+| --- | --- | --- |
+| TS `interface` / struct | hand-designed class, *after* collapsing structural duplicates | serialization artifacts posing as domain objects |
+| tagged union (TS discriminated union, Rust `enum` with payloads, protobuf `oneof`) | abstract parent + subclass family; the tag is class identity | flattening it into one bag with a mode string |
+| TS string-literal union (`"a" \| "b"`) | validated enum property (or a formalized enum class) | modeling it as a free character |
+| TS `field?: T` vs `field: T \| null` vs `field: T \| undefined` | three *different* presence decisions on the four axes | collapsing all three to one `NULL` |
+| Rust `Option<T>` | `NULL` union member plus an explicit presence policy | — |
+| Rust `Result<T, E>` | conditions, or resultr values, per [doctrine 19](08-doctrine.qmd) | mirroring it structurally without choosing a channel |
+| Rust newtype (`struct Meters(f64)`) | semantic type: base-type-inheriting class or reused property, per tier | dropping it to a bare double |
+| Go zero values | explicit defaults + presence policy | conflating "absent" with "zero" |
+| Go embedded struct / TS `extends` | composition first; a parent class only if is-a is honest | decorative hierarchy |
+| generics (`Vec<T>`, `Array<T>`, `Map<K,V>`) | list property + membership validator; element type documented and enforced, not parametric | pretending S7 has parametric types (it does not) |
+| TS utility types (`Partial<T>`, `Pick<T, K>`) | do not mirror; they are structural *derivations* — re-derive at the boundary if needed | one class per derived shape |
+| protobuf unknown fields / extensions | inert pass-through bag with key discipline | interpreting bag contents in core logic |
+
+**2. Sort every foreign type into transport or domain.** The foreign
+definitions almost always mix both: types that exist because the wire
+needed a shape, and types that carry the domain's actual concepts. The
+transport stratum may be mirrored mechanically (the generated transport
+model of [06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd)) —
+*labeled as transport and kept behind boundary parsers*. The domain
+stratum is hand-designed from the census, exactly as in Playbook 1. The
+whole failure mode of this playbook is letting the first stratum stand in
+for the second.
+
+**3. Fix the interop direction, because it places the parsing.** If you
+*consume* their values (their runtime serializes, you deserialize), your
+boundary is a parser and the certificate is yours to mint. If you
+*produce* values for their runtime, their validator is rung 0 and your
+serializer must satisfy it — which usually means gold files generated by
+their tooling and a conformance test that runs their checker if it is
+invocable. Bidirectional interop means both, plus a round-trip law with a
+named equivalence relation.
+
+**4. Import the laws, not just the shapes.** Foreign type systems encode
+some invariants you cannot see in the type text: Rust's ownership rules
+mean an `&mut` parameter is a promise about aliasing that R cannot state;
+TS's `readonly` is a promise S7 can approximate with a write-once setter
+or simply by value semantics. Read the foreign *documentation* for the
+laws that live outside the types, and give them homes on the ladder — they
+are the part a mechanical translation silently drops.
+
+### Traps
+
+The deadliest is **assuming their equality and their nullability idioms
+transfer.** Two structurally equal Go structs are `==`-comparable; two S7
+objects are compared however *you* define comparison, and until you define
+it, `identical()` — representational identity — is all you have, which is
+almost never the contract the foreign code meant. Likewise `undefined`
+versus `null` versus absent-key is a real distinction in a TS codebase and
+a single `NULL` in naive R translation. Both are presence-policy and
+equality-relation decisions ([06](06-documents-schemas-dsls.qmd)) that the
+translation table must settle globally, not per class.
+
+**Exemplars:** rapid (OpenAPI's component types as a strict S7 substrate),
+the R-ArcGIS stack (Esri's JSON types over s7x foundations), structr (the
+contrast: when fidelity to a schema *is* the product and no domain layer
+is wanted, a compiled non-S7 schema engine is honest about that).
+
+---
+
+## Playbook 3: Building a language from scratch
+
+**You are here if** no external spec constrains you: you are designing an
+AST, a compiler IR, a query builder, an expression vocabulary — a little
+language whose truth you define. This is the most seductive playbook,
+because R's metaprogramming makes language-building nearly frictionless
+and S7's variant families make ASTs pleasant; the discipline is the
+escalation ladder of [06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd),
+climbed slowly.
+
+### The moves
+
+**1. Write the target artifact by hand until it hurts.** The Advanced R
+translation chapter's silent first lesson: both case studies begin with
+the author fluent in the target language (HTML, LaTeX), writing target
+output manually, before any R vocabulary exists. The pain points of manual
+writing are the *requirements list* for the DSL; a DSL designed before the
+pain is felt ossifies the wrong abstractions (the premature-DSL
+anti-pattern). If nobody has hand-written the nested lists your
+combinators will generate, you do not yet know which constructions need
+help.
+
+**2. Default to rung 1 and demand justification for each climb.** Opaque
+passthrough — store the expression as a list or string, let the engine
+judge it — is the correct *default*, not a temporary embarrassment. Climb
+to rung 2 (constructor combinators) when humans demonstrably suffer
+writing the raw form. Climb to rung 3 (a typed AST) only when analysis or
+multi-target translation is the product.
+
+**3. At rung 2, name the vocabulary after the domain's idioms, not the
+wire's grammar.** A combinator layer that mirrors the wire one-to-one adds
+spelling safety and nothing else. The valuable combinators are the ones
+that compress an idiom — `expr_interpolate(zoom, stops)` rather than a
+transliteration of the underlying operator tree. This is where
+[Tidy design principles](https://design.tidyverse.org/) does the most
+work: enumerate the possible options in arguments, required arguments
+without defaults, prefer an enum over two booleans, put the data argument
+first. Combinators are functions; function-design craft is DSL craft.
+
+**4. At rung 3, the shape is fixed: closed variant family, smart
+constructors, passes as generics.** An abstract node root, concrete leaf
+nodes, constructors that reject unlawful nodes at build time, and — the
+part functional OOP uniquely rewards — every operation over the tree is a
+*generic*, so each new analysis is a new generic with per-node methods,
+not an edit to the node classes. This is the expression problem resolved
+in the direction a language wants: the node set is closed and stable; the
+operation set is open and growing.
+
+**5. Write the printer immediately after the nodes.** A language whose
+values cannot render themselves readably is undebuggable, and the printer
+doubles as the first real pass — writing it forces you to walk every node
+kind once, which surfaces structural mistakes while the family is still
+small. (In S7 terms: a `format()` method per node, before any clever
+pass.)
+
+**6. Decide the surface syntax last: constructors or quoted R.** Two
+different products. Constructor syntax (`cmp("==", "class", "park")`)
+is ordinary code — honest, pipeable, no magic. Quoted-R syntax
+(`filter(class == "park")`) makes R itself the surface language via
+quotation, which is strictly more powerful and strictly more dangerous:
+you inherit R's grammar for free and its ambiguity forever. The Advanced R
+LaTeX case study shows the cost concretely — a translator over quoted R
+must decide what every *unknown* symbol means, and the honest options are
+translate-known / error-unknown (refuse to guess, doctrine 17) or an
+explicit escape hatch, never silent passthrough. quickr is the full-scale
+version: R source with `declare(type())` annotations, parsed into a typed
+S7 IR, passes over the IR, Fortran out. Choose quotation when your users
+should *think in R*; choose constructors when they should think in your
+domain's nouns.
+
+### A rung-3 core, worked
+
+The minimal honest AST — abstract root, two nodes, two passes — verified
+against S7 0.2.2:
+
+```r
+filter_expr <- S7::new_class("filter_expr", abstract = TRUE)
+
+cmp <- S7::new_class("cmp", parent = filter_expr, properties = list(
+  op = S7::new_property(S7::class_character, validator = function(value) {
+    if (length(value) != 1 || !value %in% c("==", "!=", "<", ">")) {
+      "must be one of ==, !=, <, >"
+    }
+  }),
+  field = S7::class_character,
+  value = S7::class_any
+))
+
+all_of <- S7::new_class("all_of", parent = filter_expr, properties = list(
+  exprs = S7::new_property(S7::class_list, validator = function(value) {
+    if (!all(vapply(value, S7::S7_inherits, logical(1), class = filter_expr))) {
+      "every element must be a filter_expr"
+    }
+  })
+))
+
+# each pass is a new generic; the node family never changes
+to_wire <- S7::new_generic("to_wire", "x")
+S7::method(to_wire, cmp)    <- function(x) list(x@op, x@field, x@value)
+S7::method(to_wire, all_of) <- function(x) c(list("all"), lapply(x@exprs, to_wire))
+
+fields_used <- S7::new_generic("fields_used", "x")
+S7::method(fields_used, cmp)    <- function(x) x@field
+S7::method(fields_used, all_of) <- function(x)
+  unique(unlist(lapply(x@exprs, fields_used)))
+```
+
+The second pass is the entire justification for rung 3: `fields_used()` is
+an *analysis* — something a stored list could never answer without being
+re-parsed. If no such pass exists in your plans, `to_wire()` alone does
+not justify the nodes; stay at rung 2 and emit lists directly.
+
+### Traps
+
+Premature DSL (move 1 skipped), representation deeper than analysis (rung
+3 with one serializing consumer), and — for quoted surfaces — evaluating
+user text (`eval(parse())` is never the mechanism; quotation and walking
+are). Exhaustiveness is the structural weak point of R's closed families:
+a new node kind will not force old passes to update, so keep a registry of
+node classes and a test asserting every pass has a method for every node.
+
+**Exemplars:** quickr (rung 3 as a product: the IR *is* the compiler),
+sqlr (a schema language whose passes are renderers per dialect), dbplyr
+in S3 terms, and the Advanced R chapter's two case studies as the genre's
+teaching texts.
+
+---
+
+## Playbook 4: Configuring expensive computation
+
+**You are here if** your objects exist to *parameterize work* — a model
+training run, a rendering job, a deployment — and the gap between "config
+written" and "consequence discovered" is minutes, hours, or money. The
+organizing principle is doctrine 18: check as early as the inputs allow,
+as late as the context requires. rtemis is the fully worked exhibit.
+
+### The moves
+
+**1. One class per decision cluster; compose the clusters.** A
+hyperparameter set, a resampling policy, a preprocessing pipeline — each
+is its own small class with its own laws, composed into the run
+configuration. The alternative (one flat bag of forty fields) has no place
+to put cross-field laws and no way to reuse a cluster across contexts.
+
+**2. The constructor is a parser with opinions.** Enumerate options
+(`match.arg`-style, or an enum property), refuse required arguments with
+defaults, refuse to guess on ambiguity. Tidy design's argument canon
+applies with extra force here because a configuration constructor is the
+single point where a human's intent becomes machine-checkable — every
+leniency in it is a deferred debugging session.
+
+**3. Validate everything validatable at setup time, before the expensive
+thing.** The `setup_*()` pattern: a fully validated configuration object
+is minted *before* the run, so a typo costs milliseconds. The object is a
+certificate; the run function demands the class and re-checks nothing.
+
+**4. Declare context-dependent laws as data; resolve them in one named
+pass.** Some laws mention what does not exist yet — `mtry` bounded by the
+number of features, weights matching the number of rows. Declare these on
+the property as data (rtemis's `data_bound`), and check them in one
+explicit resolution step at the moment the data arrives. Never smuggle
+them into a validator that would have to guess, and never skip them
+because construction-time checking was impossible.
+
+**5. Make the configuration readable back.** A print method that shows the
+*resolved* state — supplied values, applied defaults, deferred checks
+still pending — is not cosmetics; it is the only way a user can confirm
+the certificate says what they meant before spending the compute. A
+config that cannot be inspected will be re-specified from scratch every
+time doubt arises, which defeats its purpose as a value.
+
+### Traps
+
+The flat god-config (move 1 skipped); silent defaults for consequential
+choices (an untestable default "quietly accumulates behaviour no database
+had ever accepted" — sqlr's phrase generalizes to every default nobody
+chose); and validating at run time what was knowable at setup time, which
+converts cheap errors into expensive ones at exactly the moment the user
+is least able to iterate.
+
+**Exemplars:** rtemis (`setup_*()` + `data_bound`, Cluster D of the
+[field guide](07-ecosystem-field-guide.qmd)), optimizers7 (stopping rules
+as composable configuration objects).
+
+---
+
+## Playbook 5: Wrapping a live resource
+
+**You are here if** the domain contains something with a *lifetime* — a
+database connection, an HTTP session, a browser, a device handle, an
+accumulating conversation. Value semantics cannot model it, because its
+whole point is that observers share its changes. The design problem is
+not "how do I make S7 mutable" (you don't) but *where to draw the
+membrane* between the process and the facts it produces.
+
+### The moves
+
+**1. Sort every noun into fact or process.** Facts — a completed turn, a
+query result, a fitted model, a snapshot of settings — are S7 values.
+Processes — the connection, the session, the accumulating history — get
+reference semantics: R6 or an environment. The sort is the design; ellmer
+is its exhibit (mutable R6 `Chat`, immutable S7 `Turn`/`Content`
+crossing the membrane in both directions).
+
+**2. Keep the reference object thin: lifecycle and orchestration only.**
+Everything computable belongs in pure functions over the value types,
+called *by* the process object. The test is direct: if a method's logic
+can be tested without standing up the live resource, it should not live
+on the reference class. This is functional core / imperative shell with
+the shell given a name and a lifetime.
+
+**3. Values in, values out.** The reference object's methods accept S7
+values and return S7 values. State never leaks out as a shared mutable
+structure; callers get facts, not handles into the internals. Where a
+property of an S7 *value* must hold a reference (a cache, a connection),
+remember the law from [02-values-and-state.qmd](02-values-and-state.qmd):
+value semantics is only as deep as the payload — document it, exclude it
+from equality and serialization, or snapshot it.
+
+**4. Make provider variation a dispatch surface, not a conditional.** When
+the live resource comes in flavors (LLM providers, database backends,
+tile services), the flavor is an S7 value the process object *holds*, and
+behavior varies by methods on generics over it. This is ellmer's
+`Provider` design and sqlr's dialect dispatch: the reference object stays
+one class; the variation lives in the value world where dispatch works.
+
+**5. Every important state must project to values.** A `snapshot()` /
+`as_data()` path from the process to plain values is what makes the
+system testable, persistable, and debuggable. If some state cannot be
+projected, that state cannot be asserted on in a test — which usually
+means it is about to become folklore.
+
+### Traps
+
+The mutable domain object (facts stored in R6 "for convenience" —
+[anti-pattern catalog](08-doctrine.qmd#anti-pattern-catalog)); the fat
+session class that accretes every function that ever needed the
+connection; and the leaked handle — returning internal mutable state to
+callers who then observe changes they never subscribed to.
+
+**Exemplars:** ellmer (the hybrid architecture, Cluster A of the
+[field guide](07-ecosystem-field-guide.qmd)); tooey for the fully inverted
+variant, where the framework owns the entire shell and user code is pure.
+
+---
+
+## Playbook 6: Designing a surface others extend
+
+**You are here if** the point of the package is that *strangers implement
+it*: storage backends, model engines, providers, format plugins. In
+functional OOP the extension surface is a set of generics plus the laws
+their methods must satisfy — the interface is implicit in S7, so the work
+of this playbook is making it explicit enough to implement against.
+
+### The moves
+
+**1. Verbs before nouns.** Draft the generic vocabulary first — the
+operations every implementation must support — and write the *law* each
+generic carries (`store_read()` after `store_write()` returns what was
+written; `render()` is pure; `close()` is idempotent). The abstract root
+class exists to give dispatch a place to stand; the vocabulary and laws
+are the actual interface.
+
+**2. Build two implementations before freezing anything.** One real, one
+toy (an in-memory fake living in the test suite). The second implementor
+is where every accidental assumption of the first gets discovered — a
+generic whose signature only makes sense for the filesystem backend, a
+law that was really an implementation detail. An interface with one
+implementation is a speculation, not an abstraction (doctrine 15).
+
+**3. Export the conformance suite as a function.** A
+`test_backend_conformance(backend)` that any implementor can run against
+their class converts the written laws into executable ones. s7contract
+shows the machinery (contracts, traits, generative laws with shrinking);
+even without machinery, a plain testthat function over the generic
+vocabulary is the single highest-leverage artifact this playbook
+produces.
+
+**4. Make capabilities optional by declaration, not by error.** When some
+implementations support an operation and others cannot, add a capability
+predicate generic (`supports_streaming(x)`) with a default of `FALSE`,
+and let the framework branch on it — rather than requiring every
+implementor to stub methods that throw. This is interface evolution's
+front door: new capabilities arrive as new optional generics with safe
+defaults, and old implementations keep working unchanged
+([05-composition-and-dispatch.qmd](05-composition-and-dispatch.qmd)).
+
+**5. Version the contract in words.** State which generics are required,
+which are optional, and what a conforming implementation may assume about
+call order and argument validity (typically: the framework validates
+inputs, so methods may trust them — say so). Silence here means every
+implementor re-validates defensively, which is shotgun parsing
+distributed across an ecosystem.
+
+### Traps
+
+The speculative interface (one implementation, frozen API); the leaky
+root (an abstract parent whose properties encode one backend's needs);
+and law-free generics — a vocabulary with no stated laws is an interface
+in syntax only, and implementations will satisfy the signatures while
+diverging on every behavior that matters.
+
+**Exemplars:** objectstore (interface-first, embryonic and explicit about
+it), ellmer's `Provider` family (the mature version, with the framework
+owning orchestration), s7contract (laws made executable).
+
+---
+
+## Combining playbooks: two worked identifications
+
+**A map-style package.** The style document is Playbook 1 (spec, gold
+files, aggregate root, one serializer pair). Embedded filter and paint
+expressions are Playbook 3, entered at rung 1 and climbed only if legend
+generation or expression analysis becomes a product requirement (that
+analysis pass — `fields_used()` above — is precisely the justification
+test). Build options, if any, are a small Playbook 4. Nothing here is
+Playbook 5: a style is a value through and through, and the moment a
+"style manager" R6 class appears, a wrong turn has been taken.
+
+**An API client with typed payloads.** The session — auth, retries, rate
+limits — is Playbook 5 (a thin reference shell over httr2). The
+request/response payloads are Playbook 2 if the provider publishes types
+(translation table, transport/domain sort) or Playbook 1 if it publishes
+an OpenAPI document. If the client is meant to support multiple provider
+backends, the provider abstraction is Playbook 6, and the conformance
+suite is what keeps the third-party backend honest.
+
+The identification step is worth doing explicitly at project start,
+because the playbooks disagree about where checking lives (the spec's
+validator versus your constructors versus a deferred resolution pass),
+where state is allowed (nowhere versus the named shell), and what the
+first artifact should be (a gold-file corpus, a translation table, a
+hand-written target document, a conformance suite). Knowing which game
+each part of the system is playing is most of what "architecture" means
+at this scale.
+
+One caveat about what playbooks are: they are *opening theory*. They get
+a project through its first decisions in the right order; they cannot
+show how those decisions interact ten moves later, when the presence
+policy constrains the round-trip law and the spec's churn rate argues
+against the sum-type encoding the doctrine recommends. That layer — the
+middlegame — is [10-middlegame.qmd](10-middlegame.qmd), which traces the
+pressure chains of the mature packages and plays one design derivation
+out in full, concessions included.
