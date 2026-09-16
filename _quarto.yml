@@ -8,7 +8,7 @@ book:
   date: last-modified
   repo-url: https://github.com/jimbrig/s7-design-notes
   repo-actions: [edit, issue]
-  site-url: https://jimbrig.github.io/s7-design-notes/
+  site-url: https://docs.jimbrig.com/s7-design-notes/
   chapters:
     - index.qmd
     - 00-overview.qmd

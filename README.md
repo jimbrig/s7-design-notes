@@ -3,7 +3,7 @@
 Doctrine, field guide, and playbooks for functional OOP in R with
 [S7](https://rconsortium.github.io/S7/).
 
-**Read online:** <https://jimbrig.github.io/s7-design-notes/>
+**Read online:** <https://docs.jimbrig.com/s7-design-notes/>
 
 Working notes on designing object systems with S7 — types, values,
 validation, dispatch, composition, documents, schemas, and the craft of
