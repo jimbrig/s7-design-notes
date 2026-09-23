@@ -8,7 +8,7 @@
 
 <meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
-<title>6&nbsp; Composition and Dispatch: Variants, Operations, and Outcomes – S7 Design Notes</title>
+<title>Appendix B — Glossary – S7 Design Notes</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -27,41 +27,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -72,8 +37,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./06-documents-schemas-dsls.html" rel="next">
-<link href="./04-parse-dont-validate.html" rel="prev">
+<link href="./sources.html" rel="next">
+<link href="./open-questions.html" rel="prev">
 <link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -118,13 +83,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
-<meta property="og:title" content="6&nbsp; Composition and Dispatch: Variants, Operations, and Outcomes – S7 Design Notes">
+<meta property="og:title" content="Appendix B — Glossary – S7 Design Notes">
 <meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 <meta property="og:site_name" content="S7 Design Notes">
-<meta name="twitter:title" content="6&nbsp; Composition and Dispatch: Variants, Operations, and Outcomes – S7 Design Notes">
+<meta name="twitter:title" content="Appendix B — Glossary – S7 Design Notes">
 <meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 <meta name="twitter:card" content="summary">
-<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/05-composition-and-dispatch.html">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/glossary.html">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -298,7 +263,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./05-composition-and-dispatch.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./open-questions.html">Appendices</a></li><li class="breadcrumb-item"><a href="./glossary.html"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -385,7 +350,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link active">
+  <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
@@ -460,7 +425,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
@@ -477,37 +442,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
-   
-  <ul>
-  <li><a href="#alternatives-belong-in-the-representation" id="toc-alternatives-belong-in-the-representation" class="nav-link active" data-scroll-target="#alternatives-belong-in-the-representation"><span class="header-section-number">6.1</span> Alternatives belong in the representation</a></li>
-  <li><a href="#five-mechanisms-five-responsibilities" id="toc-five-mechanisms-five-responsibilities" class="nav-link" data-scroll-target="#five-mechanisms-five-responsibilities"><span class="header-section-number">6.2</span> Five mechanisms, five responsibilities</a>
-  <ul class="collapse">
-  <li><a href="#unions-state-accepted-alternatives" id="toc-unions-state-accepted-alternatives" class="nav-link" data-scroll-target="#unions-state-accepted-alternatives"><span class="header-section-number">6.2.1</span> Unions state accepted alternatives</a></li>
-  <li><a href="#concrete-classes-preserve-variant-identity" id="toc-concrete-classes-preserve-variant-identity" class="nav-link" data-scroll-target="#concrete-classes-preserve-variant-identity"><span class="header-section-number">6.2.2</span> Concrete classes preserve variant identity</a></li>
-  <li><a href="#abstract-parents-provide-shared-schema-or-protocol" id="toc-abstract-parents-provide-shared-schema-or-protocol" class="nav-link" data-scroll-target="#abstract-parents-provide-shared-schema-or-protocol"><span class="header-section-number">6.2.3</span> Abstract parents provide shared schema or protocol</a></li>
-  <li><a href="#coverage-tests-check-the-family-you-claim-to-support" id="toc-coverage-tests-check-the-family-you-claim-to-support" class="nav-link" data-scroll-target="#coverage-tests-check-the-family-you-claim-to-support"><span class="header-section-number">6.2.4</span> Coverage tests check the family you claim to support</a></li>
-  <li><a href="#fallbacks-reject-unsupported-runtime-cases" id="toc-fallbacks-reject-unsupported-runtime-cases" class="nav-link" data-scroll-target="#fallbacks-reject-unsupported-runtime-cases"><span class="header-section-number">6.2.5</span> Fallbacks reject unsupported runtime cases</a></li>
-  </ul></li>
-  <li><a href="#define-the-operation-before-its-methods" id="toc-define-the-operation-before-its-methods" class="nav-link" data-scroll-target="#define-the-operation-before-its-methods"><span class="header-section-number">6.3</span> Define the operation before its methods</a></li>
-  <li><a href="#nouns-and-verbs-expose-each-others-gaps" id="toc-nouns-and-verbs-expose-each-others-gaps" class="nav-link" data-scroll-target="#nouns-and-verbs-expose-each-others-gaps"><span class="header-section-number">6.4</span> Nouns and verbs expose each other’s gaps</a></li>
-  <li><a href="#composition-over-inheritance" id="toc-composition-over-inheritance" class="nav-link" data-scroll-target="#composition-over-inheritance"><span class="header-section-number">6.5</span> Composition over inheritance</a></li>
-  <li><a href="#outcome-families-describe-what-happened" id="toc-outcome-families-describe-what-happened" class="nav-link" data-scroll-target="#outcome-families-describe-what-happened"><span class="header-section-number">6.6</span> Outcome families describe what happened</a></li>
-  <li><a href="#composition-is-a-separate-protocol" id="toc-composition-is-a-separate-protocol" class="nav-link" data-scroll-target="#composition-is-a-separate-protocol"><span class="header-section-number">6.7</span> Composition is a separate protocol</a></li>
-  <li><a href="#interfaces-are-operations-plus-laws" id="toc-interfaces-are-operations-plus-laws" class="nav-link" data-scroll-target="#interfaces-are-operations-plus-laws"><span class="header-section-number">6.8</span> Interfaces are operations plus laws</a></li>
-  <li><a href="#encapsulation-and-indirection" id="toc-encapsulation-and-indirection" class="nav-link" data-scroll-target="#encapsulation-and-indirection"><span class="header-section-number">6.9</span> Encapsulation and indirection</a></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/05-composition-and-dispatch.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./05-composition-and-dispatch.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./open-questions.html">Appendices</a></li><li class="breadcrumb-item"><a href="./glossary.html"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Variants, Operations, and Outcomes</span></h1>
+<h1 class="title">Appendix B — Glossary</h1>
 </div>
 
 
@@ -524,153 +468,63 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="alternatives-belong-in-the-representation" class="level2" data-number="6.1">
-<h2 data-number="6.1" class="anchored" data-anchor-id="alternatives-belong-in-the-representation"><span class="header-section-number">6.1</span> Alternatives belong in the representation</h2>
-<p>A product combines fields: a task has an identifier, a request, and resource limits. A sum describes alternatives: execution finishes, is rejected, is cancelled, or fails with diagnostics.</p>
-<p>Products are familiar because almost every record-shaped class is one: a <code>Task</code> contains an identifier <strong>and</strong> a request <strong>and</strong> resource limits. Sums are less visible in conventional object-oriented notation even though domains are full of them: a source is vector tiles <strong>or</strong> raster tiles <strong>or</strong> inline features; a response is success-with-a-value <strong>or</strong> failure-with-diagnostics. The two constructions answer different questions. Adding optional fields to a product does not turn it into an honest sum; it merely asks validators and consumers to recover the missing alternative structure.</p>
-<p>Flattening alternatives into one record produces familiar warning signs: mode flags that reinterpret other fields, mutually exclusive nullable properties, and repeated <code>switch()</code> statements. When alternatives have different meaning, fields, or behavior, represent that distinction directly.</p>
-<p>For example, a record with <code>is_remote</code>, nullable <code>url</code>, nullable <code>data</code>, and a <code>type</code> string invites rules such as “exactly one of <code>url</code> and <code>data</code> is set” and “ignore <code>url</code> unless <code>is_remote</code>.” A <code>RemoteSource(url)</code> / <code>InlineSource(data)</code> family makes the same facts structural. Similarly, a single <code>status</code> record with nullable <code>value</code>, <code>reason</code>, and <code>error</code> asks every consumer to repeat a <code>switch(status)</code> and remember which fields are legal. Concrete outcome variants move that switch into dispatch and give each alternative only the state it can actually carry.</p>
-<p>S7 provides several related mechanisms, but they do different jobs.</p>
-</section>
-<section id="five-mechanisms-five-responsibilities" class="level2" data-number="6.2">
-<h2 data-number="6.2" class="anchored" data-anchor-id="five-mechanisms-five-responsibilities"><span class="header-section-number">6.2</span> Five mechanisms, five responsibilities</h2>
-<section id="unions-state-accepted-alternatives" class="level3" data-number="6.2.1">
-<h3 data-number="6.2.1" class="anchored" data-anchor-id="unions-state-accepted-alternatives"><span class="header-section-number">6.2.1</span> Unions state accepted alternatives</h3>
-<p><code>S7::new_union()</code> describes which classes a position accepts. Its members may be primitive classes, <code>NULL</code>, or domain classes:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>CandidateSelection <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_union</span>(</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  FixedCandidate,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  CandidateSet</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The union says that a property accepts either intent. It does not create a runtime variant, define shared fields, provide a dispatch target, or prove that all possible alternatives have been listed forever. Dispatch sees the class of the value, not “the union.”</p>
-<p>Member order can also affect the prototype used for an unset property, so a union is not a neutral defaulting mechanism. Chapter 3 discusses that <a href="./03-types-and-meaning.html">union-default caveat</a> together with the separate questions of nullability, optionality, and default policy.</p>
-<p>This candidate example preserves a distinction that a numeric vector loses: one fixed tuning value and several values to search are different requests even when both happen to contain one number.</p>
-</section>
-<section id="concrete-classes-preserve-variant-identity" class="level3" data-number="6.2.2">
-<h3 data-number="6.2.2" class="anchored" data-anchor-id="concrete-classes-preserve-variant-identity"><span class="header-section-number">6.2.2</span> Concrete classes preserve variant identity</h3>
-<p><code>FixedCandidate</code> and <code>CandidateSet</code> are nominal values that can carry different invariants and methods. Use concrete variants when callers or operations must retain which alternative was chosen. A constrained string is enough when alternatives differ only by a tag and never by data or behavior.</p>
-</section>
-<section id="abstract-parents-provide-shared-schema-or-protocol" class="level3" data-number="6.2.3">
-<h3 data-number="6.2.3" class="anchored" data-anchor-id="abstract-parents-provide-shared-schema-or-protocol"><span class="header-section-number">6.2.3</span> Abstract parents provide shared schema or protocol</h3>
-<p>An abstract <code>CandidateIntent</code> parent can supply shared properties or serve as a dispatch position:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>CandidateIntent <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"CandidateIntent"</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">abstract =</span> <span class="cn">TRUE</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>An abstract parent prevents construction of the parent itself. It does not seal the family, enumerate every child, or guarantee that methods exist for each child. Use inheritance for an honest is-a relationship and a useful dispatch axis; use composition for has-a relationships and independent axes.</p>
-</section>
-<section id="coverage-tests-check-the-family-you-claim-to-support" class="level3" data-number="6.2.4">
-<h3 data-number="6.2.4" class="anchored" data-anchor-id="coverage-tests-check-the-family-you-claim-to-support"><span class="header-section-number">6.2.4</span> Coverage tests check the family you claim to support</h3>
-<p>If a package publishes a known set of variants, keep that set explicit and test each required operation against it. The test is evidence about the registered family at that revision, not language-level exhaustiveness.</p>
-<p>Open families need a conformance suite for extension classes. Closed-by-policy families need tests that fail when a new internal variant lacks an operation. Neither convention turns the hierarchy into a sealed type.</p>
-<p>An open family also needs an evolution policy. Introduce a new verb with a loud parent fallback before making it required, publish the conformance suite for extension packages to run, and version the extension contract when a required operation or law must change. A third-party class can continue to construct after the protocol has evolved while lacking the new behavior; construction success is therefore not compatibility evidence.</p>
-</section>
-<section id="fallbacks-reject-unsupported-runtime-cases" class="level3" data-number="6.2.5">
-<h3 data-number="6.2.5" class="anchored" data-anchor-id="fallbacks-reject-unsupported-runtime-cases"><span class="header-section-number">6.2.5</span> Fallbacks reject unsupported runtime cases</h3>
-<p>A method on an abstract parent or broad class can issue a clear error when no specific implementation exists. This improves failure behavior. It is not coverage: a fallback can make every call dispatch while every new variant is still unsupported.</p>
-<p>Keeping these roles separate prevents a fallback from being described as exhaustiveness, a parent from being described as a union, or a union from being treated as a domain value.</p>
-</section>
-</section>
-<section id="define-the-operation-before-its-methods" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="define-the-operation-before-its-methods"><span class="header-section-number">6.3</span> Define the operation before its methods</h2>
-<p>A generic is not a contract merely because it has a name. Define each operation in five parts:</p>
-<ol type="1">
-<li><strong>Meaning:</strong> what domain verb does it represent?</li>
-<li><strong>Accepted concepts:</strong> which argument roles participate in dispatch, and which values are admissible?</li>
-<li><strong>Result:</strong> what class or outcome family is returned?</li>
-<li><strong>Failure policy:</strong> which failures are conditions, diagnostics, or result variants?</li>
-<li><strong>Laws:</strong> what relationships must all methods preserve?</li>
-</ol>
-<p>For example, <code>render(model, dialect)</code> might have this contract:</p>
-<ul>
-<li>render a semantic model without changing it;</li>
-<li>accept a <code>Model</code> and a <code>Dialect</code>, dispatching on both;</li>
-<li>return a <code>RenderedDocument</code>;</li>
-<li>signal an unsupported model–dialect pair as a classed condition;</li>
-<li>preserve model meaning under the documented parse/render equivalence.</li>
-</ul>
-<p>Methods then implement that contract for <code>(SelectModel, PostgresDialect)</code>, <code>(SelectModel, SQLiteDialect)</code>, and other supported pairs. Multiple dispatch is appropriate because neither argument alone owns the interaction. It avoids placing a dialect <code>switch()</code> inside every model or a model <code>switch()</code> inside every dialect.</p>
-<p>Coverage is a separate artifact from dispatch. Keep the supported model–dialect matrix explicit, test that every published pair has a specific method, and test that unsupported pairs reach the documented fallback. Adding a model, adding a dialect, and adding support for one pair are three different changes. In an open contract, a broad fallback keeps failure clear while a conformance suite tells extenders which pairs and laws they have actually implemented.</p>
-<p>The operation should evolve before the method table does. A change from “render without semantic loss” to “render with target-specific approximation” changes the contract even if every method still returns a <code>RenderedDocument</code>. Name the approximation policy, diagnostics, and equivalence relation explicitly; otherwise method coverage can conceal semantic drift.</p>
-<p>Single dispatch remains the usual choice when one concept controls the variation. Ordinary functions remain preferable when there is only one behavior and no extension point.</p>
-</section>
-<section id="nouns-and-verbs-expose-each-others-gaps" class="level2" data-number="6.4">
-<h2 data-number="6.4" class="anchored" data-anchor-id="nouns-and-verbs-expose-each-others-gaps"><span class="header-section-number">6.4</span> Nouns and verbs expose each other’s gaps</h2>
-<p>Representation and operations should be designed together.</p>
-<ul>
-<li>If <code>prepare()</code> keeps asking whether a numeric vector means “fixed” or “search these,” the model is missing candidate intent.</li>
-<li>If <code>execute()</code> branches on several nullable fields to infer what happened, the model is missing task-outcome variants.</li>
-<li>If <code>render()</code> branches on both model and dialect tags, the design is missing a useful multiple-dispatch axis.</li>
-<li>If a proposed class has no invariant, independent lifetime, or operation, it may be a property contract rather than a domain concept.</li>
-</ul>
-<p>This is an iterative process: sketch representative classes and verbs, use the verbs to find missing distinctions, and extract repeated property machinery only after the distinctions are understood.</p>
-</section>
-<section id="composition-over-inheritance" class="level2" data-number="6.5">
-<h2 data-number="6.5" class="anchored" data-anchor-id="composition-over-inheritance"><span class="header-section-number">6.5</span> Composition over inheritance</h2>
-<p>“Favor composition over inheritance” is primarily a warning about using a hierarchy for implementation reuse. A parent chosen merely to donate fields or helper behavior creates a nominal claim that dispatch will later treat as meaningful. It also couples children to parent details and forces independent dimensions into one tree, leading to combinations such as <code>ColoredBorderedScrollableWindow</code>.</p>
-<p>S7 avoids some classic fragile-base-class mechanics because parents chiefly contribute property schema and dispatch positions, but the design rule remains. Inherit when a value honestly <strong>is a</strong> member of the parent concept and substitutability is useful: <code>VectorSource</code> is a <code>Source</code>. Compose when a value <strong>has a</strong> collaborator or an independent axis: a style has sources and layers; a shape has styling. Do not invent a parent because two classes happen to share property names.</p>
-<p>Healthy hierarchies are consequently shallow: often one abstract concept and one level of concrete variants. An intermediate parent must pay twice—by adding honest shared schema and by being a useful dispatch target. Primitive inheritance has the same honesty test: subclass character only when the domain value really is text, not when squeezing a structured object into a string happens to be convenient.</p>
-</section>
-<section id="outcome-families-describe-what-happened" class="level2" data-number="6.6">
-<h2 data-number="6.6" class="anchored" data-anchor-id="outcome-families-describe-what-happened"><span class="header-section-number">6.6</span> Outcome families describe what happened</h2>
-<p>Suppose task execution can produce:</p>
-<ul>
-<li><code>TaskCompleted</code>, carrying a value and measurements;</li>
-<li><code>TaskRejected</code>, carrying policy reasons;</li>
-<li><code>TaskCancelled</code>, carrying cancellation metadata;</li>
-<li><code>TaskFailed</code>, carrying expected operational diagnostics.</li>
-</ul>
-<p>These classes remove flag and <code>NULL</code> interpretation from consumers. They also separate domain outcomes from R conditions. Invalid arguments and programmer errors may still signal conditions; a designed adapter can turn selected operational conditions into <code>TaskFailed</code> at the execution boundary.</p>
-<p>An outcome family alone does not define composition. It says what happened to one task, not how a sequence of tasks behaves.</p>
-</section>
-<section id="composition-is-a-separate-protocol" class="level2" data-number="6.7">
-<h2 data-number="6.7" class="anchored" data-anchor-id="composition-is-a-separate-protocol"><span class="header-section-number">6.7</span> Composition is a separate protocol</h2>
-<p>For every outcome pipeline, decide:</p>
-<ul>
-<li>whether the first failure short-circuits;</li>
-<li>whether independent failures accumulate;</li>
-<li>which warnings and diagnostics survive success;</li>
-<li>what <code>map()</code> does to a successful payload;</li>
-<li>what <code>and_then()</code> does when the next step also returns an outcome;</li>
-<li>how a collection of outcomes is sequenced;</li>
-<li>where conditions become values and values become conditions.</li>
-</ul>
-<p>A deployment pipeline may short-circuit because later stages depend on earlier ones. A batch evaluator may accumulate every task outcome because partial completion is useful. Both can use the same variant vocabulary while implementing different composition protocols.</p>
-<p>Laws make the protocol reviewable. For a short-circuiting protocol, mapping identity should not alter an outcome, mapping over a failure should preserve that failure, and sequencing should not execute steps after the first terminal result. For an accumulating protocol, result order and diagnostic combination require their own laws.</p>
-<p>The <a href="https://github.com/TransGirlCodes/resultr">resultr</a> package is a useful public example of S7 variants paired with short-circuiting combinators. Its design is evidence for that particular protocol, not a requirement that every domain outcome use the same one.</p>
-<p>Its small worked trace shows why the representation matters. Begin with a <code>Success</code> carrying parsed input. <code>and_then()</code> extracts that payload for the next fallible step; another <code>Success</code> continues, while a <code>Failure</code> becomes the pipeline value. The <code>Failure</code> method for <code>and_then()</code> simply returns the failure unchanged, so later steps are not run and the original diagnostic is preserved. <code>wrap_in_result()</code> is the deliberate adapter that catches selected conditions and turns them into variants. The caller then unwraps or branches once at the edge rather than scattering <code>tryCatch()</code> and status checks through every stage.</p>
-<p>That protocol is excellent for dependent stages, but it would be wrong for a batch importer that must retain every row’s result. The batch can use the same <code>Success</code>/<code>Failure</code> vocabulary while defining <code>sequence()</code> to accumulate all outcomes and diagnostics. A validation protocol may instead accumulate independent failures before constructing anything. Variant classes describe the alternatives; <code>map</code>, <code>and_then</code>, and <code>sequence</code> laws describe how those alternatives compose.</p>
-</section>
-<section id="interfaces-are-operations-plus-laws" class="level2" data-number="6.8">
-<h2 data-number="6.8" class="anchored" data-anchor-id="interfaces-are-operations-plus-laws"><span class="header-section-number">6.8</span> Interfaces are operations plus laws</h2>
-<p>An interface is the set of generics a class supports together with behavioral laws those methods satisfy. Method registration can check the first part; only tests can establish the second.</p>
-<p>For a renderable model, a conformance suite might check that:</p>
-<ul>
-<li>every published model–dialect pair has a specific method;</li>
-<li>unsupported pairs fail through the documented fallback;</li>
-<li>rendering is deterministic under canonical equality;</li>
-<li>parse-after-render preserves the promised semantic equivalence;</li>
-<li>rendering does not mutate the model.</li>
-</ul>
-<p>For open extension families, publish that suite so extenders can run it. Adding a required generic changes the extension contract even when existing classes still construct successfully.</p>
-</section>
-<section id="encapsulation-and-indirection" class="level2" data-number="6.9">
-<h2 data-number="6.9" class="anchored" data-anchor-id="encapsulation-and-indirection"><span class="header-section-number">6.9</span> Encapsulation and indirection</h2>
-<p>R’s openness makes the exported surface a convention rather than an access barrier. Constructors, generics, and invariant-preserving transformations are the supported front door. The guarantees in Chapter 4 are promises about that door, not about arbitrary internal modification.</p>
-<p>This is Parnas-style information hiding: hide decisions likely to change, not data out of a desire for secrecy. If property layout is expected to evolve, expose stable generics rather than making documented <code>@</code> paths the primary interface. When another ecosystem requires <code>$</code> access, S3 behavior, or a legacy shape, put a thin facade in front of one S7 source of truth. Duplicating mutable state on both sides creates two authorities and defeats the facade.</p>
-<p>Dispatch ownership clarifies plugin design. When your package owns a generic and another package owns a class, registration is an extension point: a provider package can add its class and methods without editing the generic’s package. When your package owns the class and another ecosystem owns the generic, registration is integration. <code>S7::super()</code> makes intentional parent delegation explicit instead of relying on an implicit next-method search. The public sqlr design illustrates the two-dimensional case: <code>render_sql(x, con)</code> varies with both the semantic object and the connection dialect, so one method owns each meaningful pair.</p>
-<p>Indirection earns its place when it absorbs a real variation:</p>
-<ul>
-<li>a generic absorbs behavior across meaningful classes;</li>
-<li>multiple dispatch absorbs a genuine interaction between concepts;</li>
-<li>a semantic class preserves intent that a primitive would erase;</li>
-<li>a projection absorbs change between a model and an external form.</li>
-</ul>
-<p>Do not require three instances before naming an important domain concept. Apply repetition thresholds to generalized factories and framework machinery, not to distinctions such as candidate intent or task outcome that consumers already need.</p>
-<p>Every layer should nevertheless pay rent by absorbing a real axis of variation. A generic pays by supporting meaningful behavioral variation or a real extension contract. A semantic class pays by preserving intent and laws a primitive would erase. A projection pays by isolating transport churn. A wire-name map pays by keeping foreign naming out of the domain model.</p>
-<p>A wrapper with no law or operation, an interface with one implementation and no extension pressure, or a factory abstracting one construction does not pay that rent. Parnas’s hiding, facades, and “composition over inheritance” are not demands for more layers; they are tools for placing the few layers whose variation and authority can be named.</p>
+<p>Terms in this glossary name recurring design distinctions rather than new S7 APIs. Each definition links to its principal treatment in the book.</p>
+<dl>
+<dt>Aggregate root</dt>
+<dd>
+<p>The object boundary that sees a complete consistency unit and can enforce relationships among its contained values. See <a href="./04-parse-dont-validate.html#one-authoritative-definition-several-uses">the checking ladder</a>.</p>
+</dd>
+<dt>Canonical equality</dt>
+<dd>
+<p>Equality after applying documented normalization rules, without requiring exact R representation identity. See <a href="./02-values-and-state.html#identity-equality-and-testing">identity and equality</a>.</p>
+</dd>
+<dt>Contextual preparation</dt>
+<dd>
+<p>A named operation that combines an intrinsically valid value with external data, metadata, resources, or authority and returns a value recording what was resolved. See <a href="./04-parse-dont-validate.html#contextual-preparation">contextual preparation</a>.</p>
+</dd>
+<dt>Domain equality</dt>
+<dd>
+<p>Equality defined by meaning in the problem domain rather than exact storage representation. See <a href="./06-documents-schemas-dsls.html#round-trips-require-named-equivalence">round-trip equivalence</a>.</p>
+</dd>
+<dt>Invariant</dt>
+<dd>
+<p>A condition that must remain true for a value or consistency boundary throughout its supported lifecycle. See <a href="./04-parse-dont-validate.html#keep-the-result-of-checking">retained knowledge</a>.</p>
+</dd>
+<dt>Operation contract</dt>
+<dd>
+<p>The meaning, accepted concepts, result, failure policy, and laws shared by every implementation of an operation. See <a href="./05-composition-and-dispatch.html#define-the-operation-before-its-methods">defining operations</a>.</p>
+</dd>
+<dt>Property contract</dt>
+<dd>
+<p>The class, shape, cardinality, presence policy, default behavior, and intrinsic constraints attached to one property position. See <a href="./03-types-and-meaning.html#a-practical-property-and-contract-inventory">the property inventory</a>.</p>
+</dd>
+<dt>Projection</dt>
+<dd>
+<p>A deliberate representation derived from an authoritative model, such as a schema, serializer output, interface description, or documentation page. See <a href="./06-documents-schemas-dsls.html#four-schema-and-model-architectures">schema architectures</a>.</p>
+</dd>
+<dt>Reference owner</dt>
+<dd>
+<p>An object with shared identity or a live lifecycle whose aliases must observe the same evolving state. See <a href="./02-values-and-state.html#three-lifecycle-policies">the lifecycle policies</a>.</p>
+</dd>
+<dt>Semantic class</dt>
+<dd>
+<p>A nominal class that preserves a domain concept independently so it can travel through the program or participate in dispatch. See <a href="./03-types-and-meaning.html#three-carriers-of-semantics-in-s7">the semantic carriers</a>.</p>
+</dd>
+<dt>Snapshot</dt>
+<dd>
+<p>A value representing a fact at a point in time, often with a public policy that forbids revision. See <a href="./02-values-and-state.html#three-lifecycle-policies">the lifecycle policies</a>.</p>
+</dd>
+<dt>Sum type</dt>
+<dd>
+<p>A representation of alternatives in which a value is exactly one of several meaningful variants. See <a href="./05-composition-and-dispatch.html#alternatives-belong-in-the-representation">alternatives and variants</a>.</p>
+</dd>
+<dt>Wire representation</dt>
+<dd>
+<p>The serialized form exchanged with another system, distinct from the program’s semantic domain model. See <a href="./06-documents-schemas-dsls.html#a-document-model-is-a-contract-between-representations">documents and schemas</a>.</p>
+</dd>
+</dl>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1088,13 +942,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./04-parse-dont-validate.html" class="pagination-link" aria-label="Parse, Don't Validate">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span>
+      <a href="./open-questions.html" class="pagination-link" aria-label="Open Questions">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./06-documents-schemas-dsls.html" class="pagination-link" aria-label="Documents, Schemas, and Languages">
-        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./sources.html" class="pagination-link" aria-label="Sources">
+        <span class="nav-page-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
@@ -1103,4 +957,4 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/05-composition-and-dispatch.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/glossary.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

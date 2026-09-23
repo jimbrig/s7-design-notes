@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
 <title>2&nbsp; Object Systems: What Kind of OOP S7 Is – S7 Design Notes</title>
 <style>
@@ -26,7 +27,61 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -38,6 +93,7 @@ ul.task-list li input[type="checkbox"] {
 <meta name="quarto:offset" content="./">
 <link href="./02-values-and-state.html" rel="next">
 <link href="./00-overview.html" rel="prev">
+<link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -49,9 +105,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1f846c7865d629590e2cadd4f479fcb7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-c13f21f511963f2a6363cc37617da2fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -81,6 +137,13 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
+<meta property="og:title" content="2&nbsp; Object Systems: What Kind of OOP S7 Is – S7 Design Notes">
+<meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta property="og:site_name" content="S7 Design Notes">
+<meta name="twitter:title" content="2&nbsp; Object Systems: What Kind of OOP S7 Is – S7 Design Notes">
+<meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/01-object-systems.html">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -254,7 +317,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./01-object-systems.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./01-object-systems.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -292,7 +355,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -307,19 +370,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span></a>
   </div>
 </li>
       </ul>
@@ -336,19 +399,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span></a>
   </div>
 </li>
       </ul>
@@ -365,7 +428,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span></a>
   </div>
 </li>
       </ul>
@@ -382,19 +445,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></span></a>
   </div>
 </li>
       </ul>
@@ -411,13 +474,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./sources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
   </div>
 </li>
       </ul>
@@ -444,7 +513,7 @@ ul.task-list li input[type="checkbox"] {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./01-object-systems.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./01-object-systems.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></h1>
 </div>
@@ -465,48 +534,70 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="two-traditions-of-object-orientation" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="two-traditions-of-object-orientation"><span class="header-section-number">2.1</span> Two traditions of object orientation</h2>
-<p>Object-oriented programming is not one idea but at least two, and R is one of the few mainstream languages where both traditions coexist and interoperate.</p>
+<p>Object-oriented programming is not one idea but at least two, and R is unusual in making both traditions ordinary parts of package design. The distinction matters because it changes what the design must name, where extension lives, and which intuitions transfer safely from other languages.</p>
 <p>The <strong>message-passing tradition</strong> descends from Smalltalk through C++, Java, Python, and JavaScript. Objects encapsulate state and behavior together; you send a message to an object (<code>obj.method(arg)</code>) and the object decides how to respond. The class is the unit of organization: it owns its methods, controls access to its fields, and behavior extension means subclassing or mixins. In R this tradition is represented by R6 (and the older Reference Classes), where objects are environments with attached functions and genuine mutable state.</p>
-<p>The <strong>generic-function tradition</strong> descends from CLOS (the Common Lisp Object System) through Dylan and Julia. Here classes define <em>data and identity</em> while behavior lives in <strong>generic functions</strong> — ordinary-looking functions that select an implementation (a <em>method</em>) based on the classes of their arguments. A method call looks like any function call: <code>speak(dog)</code>, not <code>dog.speak()</code>. S3, S4, and S7 are all in this family; the S7 documentation calls it “functional OOP” for good reason, since from the outside everything remains function application and the system composes naturally with R’s functional style — pipes, higher-order functions, and referential transparency where you choose to preserve it.</p>
-<p>The philosophical difference matters for design. In message-passing OOP, the central design question is “what objects exist and what do they encapsulate?” In generic-function OOP it splits in two: “what <em>is</em> each thing?” (classes, properties, invariants) and “what can be <em>done</em>, and to which things?” (generics and their methods). A well-designed S7 system has a deliberately curated <strong>verb vocabulary</strong> — its generics — that is as much a product of design as the class graph. Behavior is owned by verbs; classes opt into verbs by registering methods. This is much closer to Haskell type classes, Go interfaces, Rust traits, and Clojure protocols than to Java classes, and intuitions imported from Java-style OOP (deep hierarchies, God objects, behavior bundled with data) tend to produce poor S7 designs.</p>
+<p>The <strong>generic-function tradition</strong> descends from CLOS (the Common Lisp Object System) through Dylan and Julia. Here classes define <em>data and identity</em> while behavior lives in <strong>generic functions</strong> — ordinary-looking functions that select an implementation (a <em>method</em>) based on the classes of their arguments. A method call looks like any function call: <code>speak(dog)</code>, not <code>dog.speak()</code>. S3, S4, and S7 are all in this family; the S7 documentation calls it “functional OOP.” From the outside, behavior remains function application and composes naturally with R’s functional style: values flow through ordinary calls and pipes, methods remain implementations of verbs rather than hidden entries in an object’s method table, and packages can add behavior without owning the class definition.</p>
+<p>The philosophical difference matters for design. In message-passing OOP, the central design question is “what objects exist and what do they encapsulate?” In generic-function OOP it splits in two: “what <em>is</em> each thing?” (classes, properties, invariants) and “what can be <em>done</em>, and to which things?” (generics and their methods). A well-designed S7 system co-designs its nouns and verbs. A deliberately curated <strong>verb vocabulary</strong> — its generics — matters as much as the class graph. This is the important correction to class-centered habits: drawing a complete inheritance tree and only then asking what users need to do designs half an interface.</p>
+<p>Consider a family of document nodes. A class-first design may distinguish nodes only by stored fields. Asking for <code>render()</code>, <code>references()</code>, and <code>rewrite()</code> methods can reveal that two structurally similar nodes obey different laws, while two structurally different nodes participate in the same protocol. Operations reveal distinctions the representation is missing; representations reveal useful dispatch axes and behavioral laws. The process therefore iterates: classes do not need to be finished before methods inform them, and a generic should name a stable domain action rather than expose the current storage layout.</p>
+<p>The two traditions also produce different extension stories. In message-passing OOP, adding behavior normally means changing a class or a subclass under its control. In generic-function OOP, another package can define a new generic for existing classes or a new method for an existing generic and a new class. That openness is powerful, but it makes generic names, dispatch arguments, fallback behavior, and method laws part of the public architecture.</p>
 </section>
 <section id="the-landscape-of-r-object-systems" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="the-landscape-of-r-object-systems"><span class="header-section-number">2.2</span> The landscape of R object systems</h2>
-<p>A short tour, because the decision “which system?” precedes every other design decision and is frequently gotten wrong.</p>
+<p>Choosing among R’s systems is therefore not a syntax preference. The useful distinctions are representation contract, operation model, and lifecycle. A vector that must recycle correctly, a value whose construction establishes invariants, and a session whose aliases must observe the same changes have different semantics even if each could be forced into a class-shaped API.</p>
 <p><strong>S3</strong> is the lingua franca: an object is any value with a <code>class</code> attribute, and <code>UseMethod()</code> dispatches on it. There are no formal fields, no validation, no guarantees — only conventions. Its virtues are near-zero ceremony and universal ecosystem reach (every <code>print</code>, <code>format</code>, <code>summary</code> in existence). Its vice is that nothing stops anyone from constructing garbage. S3 remains the right choice for lightweight interoperability wrappers, and it is the substrate that vctrs disciplines.</p>
-<p><strong>S4</strong> is the formal system from the Bioconductor world: explicit class definitions with typed slots, validity methods, and multiple dispatch. It anticipated most of S7’s ideas but with a heavier, more idiosyncratic API and some deep complexity (virtual classes, complex method resolution). S7 is explicitly designed as the successor to both S3 and S4, built by the R Consortium’s OOP Working Group with representatives from R-Core, Bioconductor, Posit/tidyverse, and the wider community — a genuinely cross-camp effort, which matters because it means S7 is intended to be <em>the</em> convergence point rather than another parallel system.</p>
+<p><strong>S4</strong> provides explicit class definitions, typed slots, validity methods, and multiple dispatch. It remains important in Bioconductor and other established ecosystems. S7 pursues many of the same goals with a more regular interface and explicit interoperability with existing systems.</p>
 <p><strong>R6</strong> provides message-passing OOP with reference semantics: objects are mutable, methods are attached, <code>$clone()</code> exists because copies are no longer automatic. R6 is not a competitor to S7; it answers a different question (identity and mutation) and appears <em>alongside</em> S7 in well-designed packages.</p>
 <p><strong>Environments</strong> are the raw material of reference semantics — mutable bags with identity — useful for caches and registries when R6’s structure would be overhead.</p>
 <p><strong>vctrs</strong> is not an object system so much as a rigorous S3 framework for <em>vector</em> types: it supplies the algebra of sizes, prototypes, casting, and coercion that makes a custom vector behave correctly in <code>c()</code>, <code>[</code>, <code>data.frame</code> columns, and joins. If the thing you are modeling is fundamentally a column of homogeneous values, vctrs is the answer and S7 is not; re-implementing coercion rules in S7 validators is wasted, buggy effort.</p>
-<p><strong>S7</strong>, finally: formal classes with typed, validated, defaulted properties; class validators for whole-object invariants; single and multiple dispatch via generics; explicit <code>super()</code>; declared compatibility with S3 and S4 in both directions.</p>
+<p><strong>S7</strong>, finally: formal classes with typed, validated, defaulted properties; class validators for whole-object invariants; single and multiple dispatch via generics; explicit <code>S7::super()</code>; declared compatibility with S3 and S4 in both directions.</p>
 </section>
 <section id="what-is-distinctive-about-s7-itself" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="what-is-distinctive-about-s7-itself"><span class="header-section-number">2.3</span> What is distinctive about S7 itself</h2>
 <p>Several S7 design decisions reward close attention because they enable patterns that S3/S4 made awkward.</p>
-<p><strong>Classes are first-class values.</strong> <code>new_class()</code> returns an object that <em>is simultaneously the class definition and its constructor</em>. You call it to make instances; you pass it around like any value; you store it in lists; you write functions that <em>return classes</em>. This makes class factories a natural pattern — a function that stamps out enum classes from a vector of variants, for example — and it makes registries of classes (for round-trip deserialization: wire tag to class object) trivial. Languages where classes are compile-time entities need reflection to do what S7 does with a named list.</p>
-<p>The same fact makes genuine <em>reflection</em> buildable in ordinary R code, with no support from the system: because a class object carries <code>@properties</code>, <code>@parent</code>, <code>@validator</code>, and its own <code>@constructor</code>, a tool can walk them and report, for every property, its declared type, whether it has a default or a validator, whether it is required (a constructor formal equal to the empty symbol), and which ancestor declared it. The <a href="https://github.com/SanD94/datarr">datarr/reflect</a> package does exactly this — immutable descriptor objects for properties, methods, and callables, with method tables enumerated per generic and S7’s own <code>method_explain()</code> attached as a dispatch trace — and the descriptors are themselves S7 objects, the metaobject-protocol idea realized as an ordinary package. Whether or not one needs a reflection library, the design consequence stands: anything you can state about a class (documentation, schemas, UI forms, audits) can be <em>derived</em> from the class, because the class is data.</p>
-<p><strong>Properties have a full lifecycle.</strong> A property is not just a typed slot. It carries a class (which may be a union), a default (which may be a <em>quoted expression</em> evaluated at construction — the standard trick for required properties is <code>default = quote(stop("Required"))</code>), an optional validator, and optional getter/setter for computed or guarded access. This is the layer where most fine-grained design happens, and it is examined throughout <a href="./03-types-and-meaning.html">03-types-and-meaning.qmd</a> and <a href="./04-parse-dont-validate.html">04-parse-dont-validate.qmd</a>.</p>
-<p><strong>Validation is built into the object lifecycle.</strong> The class validator runs at construction and after every property replacement. Validity is not something you remember to call; it is a property of being an object at all. The consequences — both the guarantees and the cost model — are the subject of <a href="./04-parse-dont-validate.html">04-parse-dont-validate.qmd</a>.</p>
-<p><strong>Dispatch is explicit and disciplined.</strong> Generics declare their dispatch arguments; method signatures are checked for compatibility against the generic (a method missing an argument the generic promises produces a warning; a method without <code>...</code> refuses misspelled arguments instead of silently swallowing them, a real S3 footgun). <code>super(x, to = Parent)</code> replaces the implicit <code>NextMethod()</code> with an explicit statement of <em>which</em> parent behavior you want. Multiple dispatch exists (<code>new_generic(dispatch_args = c("x", "y"))</code>) and, while rare, is decisive where behavior genuinely depends on two types at once — serializing a value <em>for a dialect</em>, converting <em>from</em> one type <em>to</em> another, combining two objects. The special classes <code>class_any</code> and <code>class_missing</code> round out multiple dispatch by matching anything and matching an absent argument respectively.</p>
-<p><strong>Compatibility is bidirectional.</strong> S7 methods can be registered on S3 generics; S3 and S4 classes can serve as property types (an S4 class via <code>methods::getClass()</code>, an S3 class via <code>new_S3_class()</code>); S7 classes can have methods on S4 generics. This matters strategically: adopting S7 does not fence you off from the ecosystem, and hybrid designs (an S7 property holding a DBI S4 connection, an S7 class fronted by an S3 facade) are supported rather than hacked.</p>
+<p><strong>Classes are first-class values.</strong> <code>S7::new_class()</code> returns an object that <em>is simultaneously the class definition and its constructor</em>. You call it to make instances; you pass it around like any value; you store it in lists; you write functions that <em>return classes</em>. This makes class factories and registries possible in ordinary R. They are useful when generated from an owned, coherent specification or demonstrated repetition; first-class classes do not by themselves justify generating a native class for every piece of foreign structure.</p>
+<p>A practical use is a parser registry whose wire tags select constructors:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>node_classes <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">query =</span> QueryNode,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">relation =</span> RelationNode</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>construct_node <span class="ot">&lt;-</span> <span class="cf">function</span>(input) {</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  constructor <span class="ot">&lt;-</span> node_classes[[input<span class="sc">$</span>type]]</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(constructor)) {</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    cli<span class="sc">::</span><span class="fu">cli_abort</span>(<span class="st">"Unknown node type {.val {input$type}}."</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do.call</span>(constructor, input<span class="sc">$</span>fields)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The registry is data, so packages can inspect, extend, or test it without encoding the same choice in a <code>switch()</code> at every boundary. This is most useful when the tags and constructors belong to one coherent model; it is not a reason to manufacture classes for distinctions the domain does not use.</p>
+<p>The same fact supports useful <em>reflection</em> in ordinary R code. A tool can walk class and generic metadata to report declared properties, parents, defaults, validators, methods, and dispatch information. The <a href="https://github.com/SanD94/datarr">datarr/reflect</a> package does exactly this — descriptor objects for properties, methods, and callables, with method tables enumerated per generic and S7’s own <code>S7::method_explain()</code> attached as a dispatch trace. The boundary is important: an arbitrary validator is executable code, not automatically inspectable constraint data. Documentation, schemas, and forms can be projected only from metadata and constraints the model represents explicitly. Those projections still require tests for agreement.</p>
+<p><strong>Properties have a full lifecycle.</strong> A property is not just a typed slot. It carries a class (which may be a union), a default (which may be a <em>quoted expression</em> evaluated at construction — the standard trick for required properties is <code>default = quote(stop("Required"))</code>), an optional validator, and optional getter/setter for computed or guarded access. This is the layer where most fine-grained design happens, and it is examined throughout <a href="./03-types-and-meaning.html">Types and Meaning</a> and <a href="./04-parse-dont-validate.html">Parse, Don’t Validate</a>.</p>
+<p><strong>Validation is built into the object lifecycle.</strong> Class validation runs at construction and after supported property replacement, and a validator may return a character vector describing several problems. The resulting certificate is bounded by what the validator can see and by mutation paths: reference-valued payloads can change behind the wrapper without triggering outer validation. The consequences are developed in <a href="./04-parse-dont-validate.html">Parse, Don’t Validate</a>.</p>
+<p><strong>Dispatch is explicit and disciplined.</strong> Generics declare their dispatch arguments; method signatures are checked for compatibility against the generic (a method missing an argument the generic promises produces a warning; a method without <code>...</code> refuses misspelled arguments instead of silently swallowing them, a real S3 footgun). <code>S7::super(x, to = Parent)</code> replaces the implicit <code>NextMethod()</code> with an explicit statement of <em>which</em> parent behavior you want. Multiple dispatch exists (<code>S7::new_generic(dispatch_args = c("x", "y"))</code>) and, while rare, is decisive where behavior genuinely depends on two types at once — serializing a value <em>for a dialect</em>, converting <em>from</em> one type <em>to</em> another, combining two objects. The special classes <code>class_any</code> and <code>class_missing</code> round out multiple dispatch by matching anything and matching an absent argument respectively.</p>
+<p><strong>Compatibility is bidirectional.</strong> S7 methods can be registered on S3 generics; S3 and S4 classes can serve as property types (an S4 class via <code>methods::getClass()</code>, an S3 class via <code>S7::new_S3_class()</code>); S7 classes can have methods on S4 generics. This matters strategically: adopting S7 does not fence you off from the ecosystem, and hybrid designs (an S7 property holding a DBI S4 connection, an S7 class fronted by an S3 facade) are supported rather than hacked.</p>
 </section>
 <section id="choosing-the-substrate-a-semantic-decision-procedure" class="level2" data-number="2.4">
 <h2 data-number="2.4" class="anchored" data-anchor-id="choosing-the-substrate-a-semantic-decision-procedure"><span class="header-section-number">2.4</span> Choosing the substrate: a semantic decision procedure</h2>
-<p>The question “S7 or something else?” is answered by the semantics of the thing being modeled, in roughly this order:</p>
+<p>The question “S7 or something else?” is answered by the semantics of the thing being modeled. The following inventory is deliberately ordered: lifecycle and vector behavior are harder to bolt on after the fact than a prettier print method.</p>
 <ol type="1">
 <li><p><strong>Is it fundamentally a vector</strong> — a column of homogeneous values that must slice, concatenate, recycle, and live in data frames? Then vctrs, possibly <em>held by</em> an S7 object but not replaced by one.</p></li>
 <li><p><strong>Does it have identity and a lifetime</strong> — a conversation, a connection, a cache, an accumulating log — where two references to it must observe each other’s changes? Then reference semantics: R6 or an environment. An S7 value may <em>snapshot</em> it, but the live thing is a reference.</p></li>
-<li><p><strong>Is it a domain value</strong> — a fact, a configuration, a document, a message, a measurement — with internal laws worth enforcing and behavior worth dispatching on? Then S7.</p></li>
+<li><p><strong>Is it a domain value</strong> — a fact, configuration, document, message, or measurement — with nominal meaning, internal laws, or behavior worth dispatching on? Then S7 is a strong candidate. If an external metadata registry already owns the contract and no additional semantic identity is needed, an S3 value plus metadata may remain the better design.</p></li>
 <li><p><strong>Is it a veneer</strong> over something that already works, needed only so a <code>print</code> method looks right? Then S3, and stop there.</p></li>
 </ol>
-<p>The most instructive designs use several systems at once, on purpose. In ellmer, the <code>Chat</code> object is R6 because a conversation is an ongoing process with identity — you append turns to <em>it</em> — while every <code>Turn</code> inside it is an immutable S7 value, because a turn is a record of fact. In ragnar, <code>MarkdownDocumentChunks</code> is an S7 class that <em>inherits from tibble</em>: the data is fundamentally tabular (so it should behave as a data frame) but carries a <code>@document</code> property and domain identity on top. These are not compromises; they are the point. The systems are tools with distinct semantics, and fluency means combining them without ideology.</p>
+<p>The procedure is not a tournament with one winner. The most instructive designs use several systems at once, on purpose. In ellmer, the <code>Chat</code> object is R6 because a conversation is an ongoing process with identity — you append turns to <em>it</em> — while each <code>Turn</code> inside it is an S7 value representing a record. Whether that value is editable or exposed as a read-only snapshot is a separate API policy. In ragnar, <code>MarkdownDocumentChunks</code> is an S7 class that <em>inherits from tibble</em>: the data is fundamentally tabular (so it should behave as a data frame) but carries a <code>@document</code> property and domain identity on top. These are not compromises; they are the point. The systems are tools with distinct semantics, and fluency means combining them without ideology.</p>
 </section>
 <section id="the-expression-problem-briefly" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="the-expression-problem-briefly"><span class="header-section-number">2.5</span> The expression problem, briefly</h2>
-<p>Generic-function OOP has a distinctive relationship to what Philip Wadler named the expression problem: the difficulty of adding both new data variants and new operations to a system without modifying existing code. Class-owned methods make new variants easy (subclass) and new operations hard (edit every class). Pattern-matching functional code makes new operations easy (new function) and new variants hard (edit every match). Generic functions make <em>both</em> directions open: anyone can add a class and register methods for existing generics; anyone can add a generic and register methods for existing classes. ellmer exploits exactly this: adding a new LLM provider means adding a <code>Provider</code> subclass and registering methods on the existing generic vocabulary — no core changes.</p>
-<p>The price of this openness is the absence of exhaustiveness checking: nothing verifies at definition time that every variant handles every generic. The mitigations — sealed-hierarchy conventions, defaults that fail loudly, tests that enumerate the registry — are discussed in <a href="./05-composition-and-dispatch.html">05-composition-and-dispatch.qmd</a>.</p>
+<p>Generic-function OOP has a distinctive relationship to what Philip Wadler named the expression problem <span class="citation" data-cites="wadler1998">(<a href="sources.html#ref-wadler1998" role="doc-biblioref">Wadler 1998</a>)</span>: the difficulty of adding both new data variants and new operations to a system without modifying existing code. The problem explains why verb-centered extension is more than a calling style. Class-owned methods make new variants easy (subclass) and new operations hard (edit every class). Pattern-matching functional code makes new operations easy (new function) and new variants hard (edit every match). Generic functions make <em>both</em> directions open: anyone can add a class and register methods for existing generics; anyone can add a generic and register methods for existing classes. ellmer exploits exactly this: adding a new LLM provider means adding a <code>Provider</code> subclass and registering methods on the existing generic vocabulary — no core changes.</p>
+<p>The design opportunity is two-dimensional. A provider package can add a new <code>Provider</code> variant to verbs ellmer already defines; an analysis package can add a new operation over provider classes it does not own. Neither extension requires turning the class into a God object or editing a central switch. This is why an S7 API should expose a small, meaningful generic vocabulary: those verbs are the joints at which independent packages can extend the system.</p>
+<p>The price of this openness is the absence of exhaustiveness checking: nothing verifies at definition time that every variant handles every generic. An abstract parent is not sealed, and a fallback method is not proof of coverage. Loud fallbacks plus tests that enumerate the known registry detect unsupported cases without claiming that the family is closed. These techniques are discussed in <a href="./05-composition-and-dispatch.html">Composition and Dispatch</a>.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-wadler1998" class="csl-entry" role="listitem">
+Wadler, Philip. 1998. <span>“The Expression Problem.”</span> <a href="https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt">https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->
@@ -610,11 +701,6 @@ ul.task-list li input[type="checkbox"] {
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -930,13 +1016,13 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./00-overview.html" class="pagination-link" aria-label="Overview: The Whole Argument in Miniature">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span>
+      <a href="./00-overview.html" class="pagination-link" aria-label="Overview">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./02-values-and-state.html" class="pagination-link" aria-label="Values and State: Reference Semantics, Immutability, and Where Change Lives">
-        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./02-values-and-state.html" class="pagination-link" aria-label="Values and State">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

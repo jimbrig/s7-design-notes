@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
-<title>7&nbsp; Documents, Schemas, and Languages: Object Models at the Wire – S7 Design Notes</title>
+<title>7&nbsp; Documents, Schemas, and Languages: Authority at the Wire – S7 Design Notes</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,7 +27,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -38,6 +58,7 @@ ul.task-list li input[type="checkbox"] {
 <meta name="quarto:offset" content="./">
 <link href="./07-ecosystem-field-guide.html" rel="next">
 <link href="./05-composition-and-dispatch.html" rel="prev">
+<link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -49,9 +70,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1f846c7865d629590e2cadd4f479fcb7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-c13f21f511963f2a6363cc37617da2fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -81,6 +102,13 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
+<meta property="og:title" content="7&nbsp; Documents, Schemas, and Languages: Authority at the Wire – S7 Design Notes">
+<meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta property="og:site_name" content="S7 Design Notes">
+<meta name="twitter:title" content="7&nbsp; Documents, Schemas, and Languages: Authority at the Wire – S7 Design Notes">
+<meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/06-documents-schemas-dsls.html">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -254,7 +282,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./06-documents-schemas-dsls.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./06-documents-schemas-dsls.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -292,7 +320,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -307,19 +335,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span></a>
   </div>
 </li>
       </ul>
@@ -336,19 +364,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span></a>
   </div>
 </li>
       </ul>
@@ -365,7 +393,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span></a>
   </div>
 </li>
       </ul>
@@ -382,19 +410,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></span></a>
   </div>
 </li>
       </ul>
@@ -411,13 +439,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./sources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
   </div>
 </li>
       </ul>
@@ -432,12 +466,18 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#the-document-object-model-pattern" id="toc-the-document-object-model-pattern" class="nav-link active" data-scroll-target="#the-document-object-model-pattern"><span class="header-section-number">7.1</span> The document-object-model pattern</a></li>
-  <li><a href="#documents-are-programs-your-package-is-a-front-end" id="toc-documents-are-programs-your-package-is-a-front-end" class="nav-link" data-scroll-target="#documents-are-programs-your-package-is-a-front-end"><span class="header-section-number">7.2</span> Documents are programs; your package is a front-end</a></li>
-  <li><a href="#schema-driven-development-postures-toward-an-external-schema" id="toc-schema-driven-development-postures-toward-an-external-schema" class="nav-link" data-scroll-target="#schema-driven-development-postures-toward-an-external-schema"><span class="header-section-number">7.3</span> Schema-driven development: postures toward an external schema</a></li>
-  <li><a href="#serialization-one-pair-of-functions-knows-the-wire" id="toc-serialization-one-pair-of-functions-knows-the-wire" class="nav-link" data-scroll-target="#serialization-one-pair-of-functions-knows-the-wire"><span class="header-section-number">7.4</span> Serialization: one pair of functions knows the wire</a></li>
-  <li><a href="#expression-languages-and-the-ast-escalation-ladder" id="toc-expression-languages-and-the-ast-escalation-ladder" class="nav-link" data-scroll-target="#expression-languages-and-the-ast-escalation-ladder"><span class="header-section-number">7.5</span> Expression languages and the AST escalation ladder</a></li>
-  <li><a href="#dsls-and-metaprogramming-rs-home-turf-with-guardrails" id="toc-dsls-and-metaprogramming-rs-home-turf-with-guardrails" class="nav-link" data-scroll-target="#dsls-and-metaprogramming-rs-home-turf-with-guardrails"><span class="header-section-number">7.6</span> DSLs and metaprogramming: R’s home turf, with guardrails</a></li>
+  <li><a href="#a-document-model-is-a-contract-between-representations" id="toc-a-document-model-is-a-contract-between-representations" class="nav-link active" data-scroll-target="#a-document-model-is-a-contract-between-representations"><span class="header-section-number">7.1</span> A document model is a contract between representations</a></li>
+  <li><a href="#documents-as-programs-within-limits" id="toc-documents-as-programs-within-limits" class="nav-link" data-scroll-target="#documents-as-programs-within-limits"><span class="header-section-number">7.2</span> Documents as programs, within limits</a></li>
+  <li><a href="#four-schema-and-model-architectures" id="toc-four-schema-and-model-architectures" class="nav-link" data-scroll-target="#four-schema-and-model-architectures"><span class="header-section-number">7.3</span> Four schema and model architectures</a></li>
+  <li><a href="#the-roles-of-external-authority" id="toc-the-roles-of-external-authority" class="nav-link" data-scroll-target="#the-roles-of-external-authority"><span class="header-section-number">7.4</span> The roles of external authority</a></li>
+  <li><a href="#typed-and-open-are-per-node-choices" id="toc-typed-and-open-are-per-node-choices" class="nav-link" data-scroll-target="#typed-and-open-are-per-node-choices"><span class="header-section-number">7.5</span> Typed and open are per-node choices</a></li>
+  <li><a href="#parser-adapter-compiler-and-conversion" id="toc-parser-adapter-compiler-and-conversion" class="nav-link" data-scroll-target="#parser-adapter-compiler-and-conversion"><span class="header-section-number">7.6</span> Parser, adapter, compiler, and conversion</a></li>
+  <li><a href="#round-trips-require-named-equivalence" id="toc-round-trips-require-named-equivalence" class="nav-link" data-scroll-target="#round-trips-require-named-equivalence"><span class="header-section-number">7.7</span> Round trips require named equivalence</a></li>
+  <li><a href="#native-serialization-is-not-a-durable-wire-contract" id="toc-native-serialization-is-not-a-durable-wire-contract" class="nav-link" data-scroll-target="#native-serialization-is-not-a-durable-wire-contract"><span class="header-section-number">7.8</span> Native serialization is not a durable wire contract</a></li>
+  <li><a href="#typed-state-and-raw-content-need-authority-rules" id="toc-typed-state-and-raw-content-need-authority-rules" class="nav-link" data-scroll-target="#typed-state-and-raw-content-need-authority-rules"><span class="header-section-number">7.9</span> Typed state and raw content need authority rules</a></li>
+  <li><a href="#model-and-dialect-as-a-compact-example" id="toc-model-and-dialect-as-a-compact-example" class="nav-link" data-scroll-target="#model-and-dialect-as-a-compact-example"><span class="header-section-number">7.10</span> Model and dialect as a compact example</a></li>
+  <li><a href="#embedded-languages-and-safe-generation" id="toc-embedded-languages-and-safe-generation" class="nav-link" data-scroll-target="#embedded-languages-and-safe-generation"><span class="header-section-number">7.11</span> Embedded languages and safe generation</a></li>
+  <li><a href="#metaprogramming-guardrails" id="toc-metaprogramming-guardrails" class="nav-link" data-scroll-target="#metaprogramming-guardrails"><span class="header-section-number">7.12</span> Metaprogramming guardrails</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/06-documents-schemas-dsls.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -445,9 +485,9 @@ ul.task-list li input[type="checkbox"] {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./06-documents-schemas-dsls.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./06-documents-schemas-dsls.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></h1>
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Authority at the Wire</span></h1>
 </div>
 
 
@@ -464,111 +504,185 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="the-document-object-model-pattern" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="the-document-object-model-pattern"><span class="header-section-number">7.1</span> The document-object-model pattern</h2>
-<p>A striking share of serious S7 usage models <strong>documents</strong>: a map style, a STAC catalog, a YAML configuration, a conversation transcript, a SQL statement, a typed program awaiting compilation. A document is a nested, typed, serializable <em>value</em> — declarative data with internal laws — and the recurring architecture for it deserves a name and an explicit anatomy:</p>
+<section id="a-document-model-is-a-contract-between-representations" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="a-document-model-is-a-contract-between-representations"><span class="header-section-number">7.1</span> A document model is a contract between representations</h2>
+<p>Map styles, configuration files, database schemas, and query trees are declarative values consumed by another system. A useful model identifies:</p>
 <ul>
-<li><strong>A class graph mirroring the document’s semantic structure.</strong> Composition edges (a style <em>contains</em> sources and layers; a catalog <em>contains</em> collections which contain items) become nested S7 properties. The graph is a tree of ownership.</li>
-<li><strong>Symbolic cross-references layered on the tree.</strong> Documents routinely encode relationships the tree cannot: a layer references a source <em>by id</em>; an item links to a collection <em>by key</em>. These are relational edges embedded in a hierarchical format — effectively foreign keys — and they generate the referential-integrity invariants (every reference resolves; ids are unique) that belong to an aggregate-root validator, per the ladder in <a href="./04-parse-dont-validate.html">04-parse-dont-validate.qmd</a>.</li>
-<li><strong>An aggregate root as the unit of consistency.</strong> Following Eric Evans: outsiders hold the root; all modification flows through it; its validator is the lowest point that sees every cross-object law. The root is also, naturally, the unit of serialization and of external validation.</li>
-<li><strong>Boundary constructors that lift native objects into the model.</strong> stacbuildr’s <code>item_from_terra()</code>, <code>items_from_sf()</code>, and lidR bridges are the pattern in its clearest form: users hold rasters and geometries, and the package parses those <em>native</em> objects into document nodes at the boundary, rather than asking users to hand-assemble metadata.</li>
+<li>semantic nodes and their containment;</li>
+<li>symbolic references that cross the containment tree;</li>
+<li>the aggregate boundary that can check those references;</li>
+<li>operations such as transform, render, inspect, and serialize;</li>
+<li>the external format or engine whose authority still applies.</li>
 </ul>
+<p>A root can certify unique names and resolvable references only when it sees the complete collection. It cannot certify behavior owned by a renderer, database, or version of an external specification. Chapter 4’s invariant visibility rule applies at the wire as well as inside ordinary values.</p>
+<p>This recurring anatomy is worth making explicit. Composition edges form an ownership tree: a style contains sources and layers, or a catalog contains collections and items. Symbolic references add a second graph over that tree: a layer names a source, and an item links to a collection. Those references behave like foreign keys. Their uniqueness and resolution laws belong to the aggregate root, the lowest object that can see both definitions and uses. That root is naturally the unit of consistency, mutation, and serialization.</p>
+<p>Boundary constructors complete the pattern by lifting objects users already have into document nodes. The public stacbuildr API, for example, provides constructors such as <code>item_from_terra()</code> and <code>item_from_sf()</code> rather than requiring users to transcribe raster and geometry metadata into nested lists. The constructor interprets the native object once, normalizes it, and enters the document model through its supported front door.</p>
 </section>
-<section id="documents-are-programs-your-package-is-a-front-end" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="documents-are-programs-your-package-is-a-front-end"><span class="header-section-number">7.2</span> Documents are programs; your package is a front-end</h2>
-<p>The deepest reframe available for this pattern: a declarative document is a <strong>program</strong> in a language you do not interpret. A map style is executed by a rendering engine; a STAC item is executed by search tooling; a SQL string by a database; a prompt-with-tools payload by an LLM provider. The R package producing such documents is therefore a <strong>compiler front-end</strong>: its job is to construct programs that are <em>well-formed by construction</em>, enforce the static semantics that are cheap and local (the ladder, rungs 1–6), and delegate full conformance to the engine’s own authority (rung 0).</p>
-<p>This framing settles several recurring debates at once. Should the model validate everything the spec says? No — front-ends do not re-implement the runtime; the official validator owns full conformance. Should documents be built by string templating? No — compilers build structured representations and serialize once, because templates cannot enforce structure. Is hand-editing generated output acceptable? No — you do not patch a compiler’s output; you change the source and regenerate. And the imperative/declarative boundary becomes crisp: the <em>document</em> is declarative (what should exist); the <em>pipeline</em> that fetches inputs, builds it, writes it, uploads it is imperative shell around a functional core, per <a href="./02-values-and-state.html">02-values-and-state.qmd</a>.</p>
+<section id="documents-as-programs-within-limits" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="documents-as-programs-within-limits"><span class="header-section-number">7.2</span> Documents as programs, within limits</h2>
+<p>A declarative document can often be treated as a program for another system: a map style is interpreted by a rendering engine, a SQL model by a database, and a query tree by a compiler. The package that builds it then resembles a front end. It parses convenient inputs, constructs a structured representation, checks the static facts it owns, and renders once at the boundary. This analogy explains why string templating is weak: strings erase the structure on which local checks and transformations depend.</p>
+<p>The analogy is bounded, however. A STAC item is also an interchange record, and a configuration document may chiefly be persisted data. The package may preserve a foreign language without interpreting it, and the external engine still owns runtime behavior and full conformance. Calling every serializer a compiler would obscure those authority limits. Use the compiler vocabulary when semantic lowering or target policy is real; otherwise parser, adapter, and serializer are more accurate names.</p>
+<p>There is no single correct relationship between an S7 model and a schema. Four architectures recur.</p>
 </section>
-<section id="schema-driven-development-postures-toward-an-external-schema" class="level2" data-number="7.3">
-<h2 data-number="7.3" class="anchored" data-anchor-id="schema-driven-development-postures-toward-an-external-schema"><span class="header-section-number">7.3</span> Schema-driven development: postures toward an external schema</h2>
-<p>Most documents come with a schema — JSON Schema, a TypeScript definition file, an OpenAPI component set, protobuf. Three postures toward <em>consuming</em> one recur, and mature designs usually combine the first two; a fourth relationship, pointing the opposite direction, appears when the model itself is the source of truth.</p>
-<p><strong>Schema as boundary contract.</strong> Validate wire input and output against the schema, mechanically, using the schema ecosystem’s own tooling. S7schema is this posture productized: YAML configuration in, AJV validation against JSON Schema via V8, and only then S7/list objects out for downstream typed extension. stacbuildr validates against the published STAC schemas. The posture is cheap, authoritative, and evolution-friendly (schema versions are explicit). Keep it wherever tooling exists.</p>
-<p><strong>Schema as design input.</strong> Read the schema as <em>evidence about the domain</em>: census which property shapes recur (how many enum fields, how many bounded numbers, how many string-or-expression slots), which fields are required, where the sum types hide (<code>oneOf</code> with a discriminator), what is genuinely extensible (<code>additionalProperties</code>). Then design the semantic layer — atoms, composites, variant families — <em>informed</em> by the census but organized around meaning. This is data-driven design in the first sense of <a href="./03-types-and-meaning.html">03-types-and-meaning.qmd</a>, and it is where design quality is actually determined.</p>
-<p><strong>Schema as codegen source.</strong> Mechanically emit one class per schema object. This is the tempting posture and almost always the wrong one, for a reason worth stating carefully: <strong>schemas encode structure, not semantics.</strong> A TypeScript interface file will happily contain fifteen interfaces that are structurally distinct but semantically one concept (a color, expressed fifteen ways), and zero indication of which nesting is a real domain object versus a serialization artifact. A 1:1 mirror faithfully imports the structure while discarding the one thing a domain model adds — meaning — and saddles you with a class count that tracks the schema’s quirks forever. What <em>does</em> mechanize well is the regular substrate: enum value tables, wire-name maps, requiredness matrices, version constants. Generate tables, not class graphs; hand-design the classes from the census.</p>
-<p>One legitimate exception deserves its own name so it stops being argued case by case: the <strong>generated transport model</strong>. When faithful transport is itself the requirement — an API surface too large and too churn-prone to hand-model, consumed mostly by code generators downstream — mechanically generated wire types are appropriate, <em>provided they are labeled as transport</em> and kept behind boundary parsers that lift them into the hand-designed domain layer (domain-driven design calls this arrangement an anti-corruption layer). The two models coexist: generated types absorb the schema’s churn; semantic types carry the meaning. The anti-pattern was never generation itself — it is mistaking the generated transport model for the domain model, which is what “schema cosplay” names.</p>
-<p><strong>The reverse arrow: schema as projection.</strong> The three postures above concern <em>consuming</em> an external schema. There is a fourth relationship, pointing the other way: when the domain model is the source of truth, the schema is one of its <em>outputs</em>. This only becomes possible under a specific precondition — <strong>constraints must be stored as data, not encoded as closures.</strong> A validator function can enforce a range but cannot be asked what the range is; a spec object carrying <code>minimum</code> and <code>maximum</code> fields can do both. rtemis is the fully developed exhibit: its property factories attach a <code>PropertySpec</code> object recording type, bounds, enum, nullability, container shape, and a dozen further axes as plain data, and from that one declaration the package mechanically derives the R validator, the default, a JSON Schema (via <code>S7_to_JSONSchema()</code>), and a TUI configuration form. sqlr is the same arrow in SQL: the schema value renders to per-dialect DDL, compares structurally, and diffs — projections a bag of <code>CREATE TABLE</code> strings could never support. The payoff in both cases is the single-source-of-truth guarantee: the validator and the published schema <em>cannot</em> disagree, because both are projections of one datum. When you find yourself writing a validator and separately documenting its rule, that is the signal this arrow wants to exist.</p>
-<p>A compact translation guide from external constructs to S7 mechanisms:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>External construct</th>
-<th>S7 mechanism</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>const</code> / literal type</td>
-<td>class identity: computed property or serializer-injected constant</td>
-</tr>
-<tr class="even">
-<td><code>enum</code>, closed</td>
-<td>validated character property (or a formalized enum class)</td>
-</tr>
-<tr class="odd">
-<td><code>enum</code>, extensible</td>
-<td>validated character property plus a parse-boundary version gate</td>
-</tr>
-<tr class="even">
-<td><code>oneOf</code> with discriminator</td>
-<td>abstract parent + subclass family; the tag is class identity</td>
-</tr>
-<tr class="odd">
-<td><code>oneOf</code> of primitives</td>
-<td><code>S7::new_union()</code> on the property</td>
-</tr>
-<tr class="even">
-<td><code>allOf</code> / interface extension</td>
-<td>composition first; a parent class only if is-a is honest</td>
-</tr>
-<tr class="odd">
-<td><code>additionalProperties</code></td>
-<td>a pass-through bag property with key discipline only</td>
-</tr>
-<tr class="even">
-<td>nullable / optional</td>
-<td><code>NULL</code> union member + explicit presence policy (four axes)</td>
-</tr>
-<tr class="odd">
-<td>nested object</td>
-<td>composed S7 class</td>
-</tr>
-<tr class="even">
-<td>array of typed objects</td>
-<td>list property with a membership validator</td>
-</tr>
-</tbody>
-</table>
+<section id="four-schema-and-model-architectures" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="four-schema-and-model-architectures"><span class="header-section-number">7.3</span> Four schema and model architectures</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="" aria-current="page">1. External-schema container</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">2. Generated transport facade</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false" href="">3. Hand-designed semantic model</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false" href="">4. Owned semantic specification with projections</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<p>An external schema owns the content contract. The package validates a foreign document with the schema’s tooling, then stores or wraps the resulting list-like content for navigation and extension.</p>
+<p>This architecture fits heterogeneous schemas supplied at runtime or systems whose main job is schema-mediated transport. The S7 properties may describe the wrapper and schema machinery while the external schema describes the contained entries. Editing arbitrary nested content does not automatically preserve conformance unless edits pass through another validation boundary.</p>
+<p>Its advantage is fidelity to an authority that can change independently. Its cost is a deliberately weak semantic core: navigation and preservation may be available while domain dispatch and invariant-rich transformations are not. It works best when the package is a transport or validation tool rather than an alternate implementation of the foreign language.</p>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<p>An external schema or interface definition generates classes, field maps, or serializers that mirror the wire. This is appropriate when faithful coverage of a large, changing transport surface is itself the requirement.</p>
+<p>Generated transport classes should be named and documented as transport types. They absorb foreign naming and version churn; an adapter can translate the subset with domain meaning into a hand-designed model. Generation does not establish semantics absent from the source, and generated code can still contain generator bugs. Test it against the external contract.</p>
+<p>This is an anti-corruption layer, not a claim that two class graphs should remain isomorphic forever. Regenerate the transport side when the foreign schema changes; evolve the semantic side when the package’s concepts change. The adapter is where version differences, omission policy, and unsupported foreign constructs become explicit.</p>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<p>The model is organized around concepts and operations rather than wire objects. It may combine several foreign fields into one semantic value, split one foreign object into several concepts, or omit incidental structure.</p>
+<p>This architecture earns its cost when nominal identity, invariants, generic operations, or multiple targets matter. The external schema remains evidence and a boundary authority, not the class diagram. Translation is often an adapter or compiler rather than a faithful conversion.</p>
+<p>Because it organizes around meaning, this model can be smaller than the wire surface and deeper where operations need it. The trade-off is an explicit translation burden: losses, preservation of unknown fields, and the equality relation for round trips can no longer be assumed from structural similarity.</p>
+</div>
+<div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-4-tab">
+<p>The package owns an inspectable semantic specification from which it derives some combination of classes, validators, schemas, documentation, interfaces, and renderers.</p>
+<p>This is stronger than reflecting arbitrary validator closures. Only explicitly represented knowledge can be projected reliably: a declaration carrying <code>minimum</code>, <code>maximum</code>, membership, presence, and default policy can be inspected; an opaque function may enforce the same rule without exposing it. Generated projections can still disagree because translators can be incomplete or wrong. Shared declarations remove independent definitions and make agreement testable; they do not guarantee agreement for free.</p>
+<p>Generation from an owned semantic specification is different from mirroring incidental foreign structure. The former can legitimately produce native domain classes when the specification actually contains their meaning.</p>
+<p>This architecture is appropriate when a package truly owns the declaration and several consumers need it. A property specification might project to an S7 validator, JSON Schema, documentation, and a form. The declaration reduces independent definitions, but every projector remains code that can be incomplete or wrong. Cross-projection agreement tests are therefore part of the architecture, not optional reassurance.</p>
+</div>
+</div>
+</div>
+<p>These architectures can coexist. A package may receive an external transport document, preserve its unknown fields, adapt known content into a semantic model, and render that model through projections derived from an owned specification.</p>
 </section>
-<section id="serialization-one-pair-of-functions-knows-the-wire" class="level2" data-number="7.4">
-<h2 data-number="7.4" class="anchored" data-anchor-id="serialization-one-pair-of-functions-knows-the-wire"><span class="header-section-number">7.4</span> Serialization: one pair of functions knows the wire</h2>
-<p>Serialization discipline compresses to a single rule: <strong>exactly one place in the package knows what the wire looks like</strong> — a <code>to_wire()</code> projection and a <code>from_wire()</code> parser, usually generic-dispatched over the class graph.</p>
-<p>The projection owns: wire-name mapping (<code>source_layer</code> → <code>"source-layer"</code>), the omit-empty policy per field (absent key versus <code>null</code> versus <code>[]</code>, per the presence axes of <a href="./03-types-and-meaning.html">03-types-and-meaning.qmd</a>), injection of identity constants (version numbers, type tags), and recursive descent through composed objects. The parser owns: version gating, coercion into canonical representations, the unknown-key policy, and construction through the front door so every law is checked on entry.</p>
-<p>Round-tripping is a <strong>law</strong>, not an aspiration: <code>from_wire(to_wire(x))</code> should equal <code>x</code>, and <code>to_wire(from_wire(doc))</code> should preserve every field you claim to preserve. State the law, test it against gold files, and where the round trip is deliberately lossy (normalization collapses equivalent forms), document the quotient explicitly. This is the most valuable single test family a document package can have, because it exercises the entire class graph, both boundary functions, and the presence policy at once.</p>
-<p>Stating the law <em>precisely</em> requires naming the equivalence relation, because “equals” hides four different contracts: <strong>representational identity</strong> (<code>identical()</code>, byte-for-byte); <strong>canonical equality</strong> (equal after normalization to the one stored form); <strong>semantic equivalence</strong> (equal ignoring non-meaningful variation — ordering, auto-generated names, whitespace); and <strong>wire equivalence</strong> (equal once omitted fields and defaults are resolved). Each round-trip promise should say which relation it uses, and for most document systems the honest law is canonical equality, not identity. sqlr models the discipline: its <code>sqlr_equal()</code> implements semantic equivalence — constraints matched on what they constrain rather than their order or auto-generated names — and its README says so explicitly, which is what makes a hand-written schema comparable to a reflected one.</p>
-<p>Two packages show how far the round-trip law scales as an organizing idea. sqlr’s counterpart to <code>from_wire()</code> is <code>sqlr_reflect()</code>, which reads a <em>live database’s</em> catalog back into the same schema representation the renderer consumes; the README calls the resulting equality “the package’s own test oracle,” and makes it meaningful by defining equality structurally — constraints matched on what they constrain rather than on order or auto-generated names, so a hand-written schema compares equal to a reflected one. typedjson goes further: the round trip is not a test of the product, it <em>is</em> the product — faithful, human-readable JSON for R values, achieved by annotating only what JSON cannot natively express (integer versus double, typed missing values, non-finite numbers, attributes, objects from the S3, S4, and S7 systems). Its design rule — keep ordinary JSON for ordinary values and add the minimum machinery that makes the identity hold — is presence policy elevated to a format’s founding principle.</p>
-<p>One structural decision deserves early attention: <strong>open versus closed nodes.</strong> Foreign documents may carry extensions you do not model. A closed node rejects unknown keys (maximal law enforcement, brittle against spec evolution); an open node carries them through in a pass-through bag (round-trip fidelity for foreign content, weaker guarantees). Real formats need both, chosen per node — strict where you claim semantics, permissive where the format is deliberately extensible (metadata blocks, vendor extensions). What does not work is deciding by accident.</p>
+<section id="the-roles-of-external-authority" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="the-roles-of-external-authority"><span class="header-section-number">7.4</span> The roles of external authority</h2>
+<p>An external authority can participate in at least three ways.</p>
+<p><strong>Wire gate.</strong> An official schema or validator decides whether input or output conforms to a published format. This is a boundary check, not a replacement for domain invariants.</p>
+<p><strong>Runtime metadata provider.</strong> A database catalog, driver registry, or remote capability endpoint supplies allowed values and limits only after context is known. Preparation resolves a request against that metadata, much like <code>prepare(specification, dataset)</code> in Chapter 4.</p>
+<p><strong>Test oracle.</strong> An independent parser, renderer, or validator checks generated artifacts in tests. It can reveal disagreement without becoming the package’s in-memory representation.</p>
+<p>State which role applies. “The schema is authoritative” is incomplete unless readers know whether it governs wire acceptance, dynamic capabilities, test comparison, or all three.</p>
 </section>
-<section id="expression-languages-and-the-ast-escalation-ladder" class="level2" data-number="7.5">
-<h2 data-number="7.5" class="anchored" data-anchor-id="expression-languages-and-the-ast-escalation-ladder"><span class="header-section-number">7.5</span> Expression languages and the AST escalation ladder</h2>
-<p>Documents frequently embed a second, smaller language: filter and styling expressions inside map styles, query fragments, template strings, tool-call schemas. The design question — how much structure to give the embedded language — has a clean escalation ladder, and the discipline is to <strong>climb only when the next rung’s analysis is actually needed.</strong></p>
-<p><strong>Rung 1: opaque passthrough.</strong> The expression is a list (or string) the model stores and emits verbatim; the engine’s validator is its only judge. Zero modeling cost, zero analysis capability. This is the correct <em>default</em>, and treating it as the default is what prevents the most seductive over-engineering in document modeling: rebuilding the engine’s expression type system in validators, forever, badly.</p>
-<p><strong>Rung 2: constructor combinators.</strong> Functions that <em>build</em> correct expressions — <code>expr_match(field, cases)</code>, <code>expr_interpolate(...)</code> — giving ergonomics, spelling safety, and partial static checking at construction time, while the representation stays the wire’s own (lists). This is a <em>shallow embedding</em> of the foreign language: the combinators are the DSL, and they compile immediately to the target form. Most packages should stop here; it captures the bulk of the value (humans stop hand-writing nested lists) at a fraction of the cost.</p>
-<p><strong>Rung 3: a typed AST.</strong> Node classes for the expression language, generic passes over them — type checking, optimization, translation to <em>multiple</em> targets. This is a <em>deep embedding</em>: the program is data (S7 objects), and interpretation is a separate, swappable step. It is exactly what quickr is — R functions with <code>declare(type())</code> annotations parsed into a typed S7 intermediate representation (typed nodes for subroutines, operations, analyses), passes over that IR, and Fortran emission at the back —, and what dbplyr does for SQL in S3 terms. The rung is justified when analysis or multi-target translation <em>is the product</em>; it is pure cost when the only consumer re-serializes to the single original wire format.</p>
-<p>The general lesson generalizes past expressions: <strong>representation should be as deep as your analysis, and no deeper.</strong></p>
+<section id="typed-and-open-are-per-node-choices" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="typed-and-open-are-per-node-choices"><span class="header-section-number">7.5</span> Typed and open are per-node choices</h2>
+<p>Typing depth should follow the guarantees and operations required at each node.</p>
+<ul>
+<li>Use a typed class where node identity, invariants, references, or dispatch matter.</li>
+<li>Use a validated open bag where keys are intentionally extensible but local shape rules still matter.</li>
+<li>Keep an embedded language opaque when the package only preserves it.</li>
+<li>Use a typed AST only when inspection, transformation, or multi-target compilation requires node semantics.</li>
+</ul>
+<p>A document can therefore have a typed root and typed reference-bearing nodes, an open metadata bag, and opaque expression payloads. “Typed document” need not mean that every leaf has a class; “open document” need not mean that nothing is checked.</p>
+<p>Every open bag should state its guarantees: key syntax, value types, duplicate policy, recursion limits, and whether unknown entries survive rendering.</p>
 </section>
-<section id="dsls-and-metaprogramming-rs-home-turf-with-guardrails" class="level2" data-number="7.6">
-<h2 data-number="7.6" class="anchored" data-anchor-id="dsls-and-metaprogramming-rs-home-turf-with-guardrails"><span class="header-section-number">7.6</span> DSLs and metaprogramming: R’s home turf, with guardrails</h2>
-<p>R is unusually good at embedded DSLs — quotation (<code>quote()</code>, <code>bquote()</code>), first-class environments, lazy evaluation, and rlang’s quasiquotation make building little languages almost frictionless, which is precisely why restraint is a design skill. Two patterns earn their keep in object-system work:</p>
-<p><strong>Checks as data.</strong> Validator logic represented as composable <em>quoted expressions</em>, assembled by a single function-builder into ordinary, inspectable validator functions (<code>rlang::new_function()</code> over a spliced body). This is a micro deep-embedding of a checking language, and it solves a real problem — validator factories that call validator factories accumulate argument-forwarding bugs; flat quoted checks compose without nesting. The guardrails: generated functions must be <em>inspectable</em> (printing the body shows exactly the checks, in order), <em>directly testable</em> (call the generated validator in tests, not just the factory), and built by splicing quoted expressions — never by <code>eval(parse(paste0(...)))</code>, which abandons hygiene, tooling, and safety at once.</p>
-<p><strong>Classes as data.</strong> Because S7 classes are first-class values (<a href="./01-object-systems.html">01-object-systems.qmd</a>), factories that <em>return classes</em> are ordinary code: an enum-class factory stamping variants from a character vector (the s7x pattern), a family generator producing parallel node classes from a table. The same guardrails apply, plus one more: generate <em>structural regularity</em> only. The moment generated classes need per-class special cases, the generator has become an obfuscation layer over what should be ordinary, readable class definitions.</p>
-<p>Both patterns assume the quoted material originates <em>inside the package</em>. The moment expressions, extension bags, or class metadata arrive from outside — a file, a wire, a user — the concern changes from hygiene to security, and the rules harden: never evaluate untrusted text or quoted structures; treat deserialization as parsing (rung 1 of the checking ladder), never as object restoration by fiat; keep pass-through extension bags inert data until something explicitly chooses to interpret them; and bound recursion depth and payload size before walking untrusted nested structures, because a parser that recurses on hostile input is a denial of service waiting for its input.</p>
-<p>The boundary that keeps metaprogramming honest is the one this whole document has been drawing: <strong>mechanize the regular, hand-write the meaningful.</strong> Wire-name tables, enum catalogs, repetitive property shapes — generate. Domain concepts, invariants, the verb vocabulary — write, by hand, where readers will look for them.</p>
+<section id="parser-adapter-compiler-and-conversion" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="parser-adapter-compiler-and-conversion"><span class="header-section-number">7.6</span> Parser, adapter, compiler, and conversion</h2>
+<p>Name a translation according to its contract.</p>
+<p><strong>A parser</strong> interprets external syntax or loose data and returns known, unknown, or partial document variants with diagnostics. It owns syntax, version gating, normalization, and unknown-key policy.</p>
+<p><strong>An adapter</strong> maps between existing representations under an explicit policy. It may be contextual or lossy, but it does not imply that one representation is source code for the other.</p>
+<p><strong>A compiler</strong> translates a semantic model into a target representation and applies target policy. It may reject a model that parsed successfully, lower one node into many target nodes, or report unsupported features.</p>
+<p><strong><code>S7::convert()</code></strong> is best reserved for faithful representation changes with a clear source and target class. A contextual, diagnostic-producing, lossy, or one-to-many translation deserves a named function.</p>
+<p><strong>A serializer</strong> projects an accepted in-memory representation to a wire shape. A <code>to_wire()</code> method owns wire names, required type tags and version constants, omission versus explicit <code>null</code>, ordering or canonicalization policy, recursive descent, and preservation of declared extension content.</p>
+<p>Its inverse, <code>from_wire()</code>, is a parser rather than object restoration by fiat. It owns syntax decoding, version gates, coercion to canonical values, unknown-key handling, migrations, diagnostics, and construction through the current front door. Keeping those responsibilities in one pair prevents wire knowledge from leaking into constructors, mutators, and render methods throughout the class graph.</p>
+<p>For each translation, document:</p>
+<ul>
+<li>what meaning and foreign content are preserved;</li>
+<li>what is normalized or deliberately lost;</li>
+<li>which context and target policy are applied;</li>
+<li>what diagnostics can be produced;</li>
+<li>which equality relation defines success.</li>
+</ul>
+<p>Do not introduce a shared intermediate representation merely by taking the union of several foreign formats. An IR is earned when multiple real inputs or outputs reveal stable shared semantics.</p>
+</section>
+<section id="round-trips-require-named-equivalence" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="round-trips-require-named-equivalence"><span class="header-section-number">7.7</span> Round trips require named equivalence</h2>
+<p>Two directions usually need different laws.</p>
+<p>For a semantic model:</p>
+<pre class="text"><code>parse(render(model, dialect), dialect) ≈ model</code></pre>
+<p>For a foreign document:</p>
+<pre class="text"><code>render(parse(document), dialect) ≈ document</code></pre>
+<p>The symbol <code>≈</code> must be defined. Possible relations include:</p>
+<ul>
+<li>exact representation identity, such as <code>identical()</code>;</li>
+<li>canonical equality after normalization;</li>
+<li>semantic equivalence that ignores non-meaningful order or generated names;</li>
+<li>wire equivalence after defaults and omission rules are resolved;</li>
+<li>preservation equivalence that additionally requires unknown extensions to survive.</li>
+</ul>
+<p>Most semantic document models promise canonical or semantic equivalence, not exact identity. A reflected database model may omit engine-specific details; a renderer may choose canonical whitespace; a parser may resolve defaults. Those can be sound round trips if the promised equivalence names the losses.</p>
+<p>Reflection is also bounded. It reports what the external system exposes and what the reflector understands; it does not reconstruct every original authoring decision. Tests should compare within that declared observation boundary.</p>
+<p>The public typedjson package offers a concrete round-trip design. For a supported value <code>x</code>, it tests <code>identical(json_read(json_write(x, path)), x)</code>. Ordinary values keep ordinary JSON spellings—<code>1L</code> becomes <code>1</code>, while the double <code>1</code> becomes <code>1.0</code>—and only information JSON cannot carry is annotated. Thus <code>NA_real_</code> receives a typed tag, <code>character()</code> records its empty-vector type, and an S7 object records the class identity needed to find current class code when reading. The worked point is not that every public format should preserve all R values. It is that the format states an exact equivalence, adds machinery only for distinctions needed by that equivalence, and tests the law over generated as well as curated values.</p>
+</section>
+<section id="native-serialization-is-not-a-durable-wire-contract" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="native-serialization-is-not-a-durable-wire-contract"><span class="header-section-number">7.8</span> Native serialization is not a durable wire contract</h2>
+<p><code>saveRDS()</code> is useful for trusted, version-bound caches and test fixtures. It is a poor default for a public or long-lived interchange format. S7 currently serializes the class specification with each object, so an object can retain an older class definition after package code evolves. R’s serialization version identifies the stream format; it does not migrate domain classes <span class="citation" data-cites="s7-release-020 r-serialization">(<a href="sources.html#ref-s7-release-020" role="doc-biblioref">Vaughan 2024</a>; <a href="sources.html#ref-r-serialization" role="doc-biblioref">R Core Team 2026</a>)</span>.</p>
+<p>Native serialization is also a trust boundary. R versions before 4.4.0 were affected by CVE-2024-27322 <span class="citation" data-cites="nvd2024 cert2024">(<a href="sources.html#ref-nvd2024" role="doc-biblioref">National Vulnerability Database 2024</a>; <a href="sources.html#ref-cert2024" role="doc-biblioref">CERT Coordination Center 2024</a>)</span>, and current RDS files can still contain executable or session-bound objects. Do not accept untrusted RDS as inert data. Prefer a bounded plain-data format, an explicit schema version, and current-code parsing and migration. When RDS is deliberately used as a cache, record relevant versions, constrain its source, and make cache invalidation cheaper than heroic migration.</p>
+</section>
+<section id="typed-state-and-raw-content-need-authority-rules" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="typed-state-and-raw-content-need-authority-rules"><span class="header-section-number">7.9</span> Typed state and raw content need authority rules</h2>
+<p>Preserving raw input beside typed state helps with unknown extensions and forward compatibility, but it creates two possible sources for the same field. The model must choose an authority rule.</p>
+<p>Common policies include:</p>
+<p><strong>Typed wins for known fields.</strong> Rendering regenerates known fields from typed state and carries only unknown raw fields through. Mutators cannot leave a stale raw copy of a known field authoritative.</p>
+<p><strong>Raw snapshot is provenance only.</strong> Original bytes or parsed content are retained for diagnostics and audit but never merged back into output.</p>
+<p><strong>Lossless editor with synchronized patches.</strong> Edits update both a typed view and retained syntax tree through dedicated operations. This is substantially more complex because comments, order, formatting, and unknown nodes may all be meaningful to the editor.</p>
+<p>Avoid an unspecified merge such as “typed values overwrite raw values where present.” Define collisions recursively:</p>
+<ul>
+<li>how known keys are recognized at each node;</li>
+<li>whether deleting a typed optional field removes or reveals a raw value;</li>
+<li>where unknown keys are retained;</li>
+<li>whether typed normalization changes raw spelling;</li>
+<li>what happens when an extension later becomes a known field;</li>
+<li>which version’s defaults apply.</li>
+</ul>
+<p>The safest general policy for a semantic model is typed authority for known content, isolated extension bags for unknown content, and raw snapshots used only as provenance. Other policies are valid when their additional guarantees justify the synchronization machinery.</p>
+<p>Consider a style document parsed from version 1. It contains a known layer with <code>opacity = 0.5</code> and an unknown vendor key. A user changes the typed opacity to <code>0.8</code>; meanwhile version 2 of the specification adopts the vendor key as a standard field with a default. Under “typed wins,” serialization must emit <code>0.8</code>, preserve the still-unknown extension only in locations where it does not collide, and apply defaults according to the target version—not resurrect the raw <code>0.5</code> or silently let the old extension override the new known field. Under “raw snapshot is provenance,” none of the original parsed tree is merged at all. This scenario is why authority, collision, deletion, and version rules must be specified recursively rather than summarized as “merge raw and typed.”</p>
+</section>
+<section id="model-and-dialect-as-a-compact-example" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="model-and-dialect-as-a-compact-example"><span class="header-section-number">7.10</span> Model and dialect as a compact example</h2>
+<p>Consider a small semantic query model with named relations and references, plus two dialect values. The model owns relational meaning and aggregate reference checks. The dialect owns quoting and target capabilities.</p>
+<p><code>render(model, dialect)</code> uses multiple dispatch because behavior depends on both concepts. A compiler may reject a valid model when a dialect lacks a feature, or lower it under a documented policy. <code>parse()</code> may preserve an unknown clause for inspection while compilation rejects that clause.</p>
+<p>The acceptance laws can then be explicit:</p>
+<ul>
+<li>supported transformations preserve model invariants;</li>
+<li>every published model–dialect pair has method coverage;</li>
+<li>unsupported pairs fail through a documented fallback;</li>
+<li>render-then-parse preserves semantic equivalence;</li>
+<li>unknown clauses survive only when preservation equivalence is promised;</li>
+<li>an external engine or parser serves as a test oracle for emitted syntax.</li>
+</ul>
+<p>The example connects all three chapters: Chapter 4 establishes what the model’s construction certifies, Chapter 5 defines the rendering operation and coverage contract, and this chapter defines authority and round-trip policy.</p>
+</section>
+<section id="embedded-languages-and-safe-generation" class="level2" data-number="7.11">
+<h2 data-number="7.11" class="anchored" data-anchor-id="embedded-languages-and-safe-generation"><span class="header-section-number">7.11</span> Embedded languages and safe generation</h2>
+<p>Use the shallowest representation that serves the consumers:</p>
+<ol type="1">
+<li>opaque data for pass-through;</li>
+<li>constructor functions that build a target form;</li>
+<li>typed AST nodes and separate compiler passes for analysis or multiple targets.</li>
+</ol>
+<p>Code generation should likewise follow represented knowledge. Enum catalogs, wire-name maps, repetitive transport fields, and projections from an owned semantic specification are good candidates. Domain distinctions absent from the source still require design.</p>
+<p>Generated validators, classes, schemas, and documentation need direct tests. Inspectability helps debugging but does not prove equivalence. Never evaluate untrusted document content as R code; keep unknown extensions inert, and bound the depth and size of recursive input before walking it.</p>
+<p>The ladder becomes concrete in query systems. At the opaque rung, a package stores a SQL fragment or foreign expression and promises only to preserve it. At the combinator rung, functions such as <code>select()</code>, <code>filter()</code>, or <code>expr_match()</code> build a valid target-shaped tree without giving every node a domain class. At the typed-AST rung, node identity supports independent analysis and compilation passes. The public quickr project takes this deeper route for typed R-to-Fortran translation, while dbplyr builds relational expressions and lowers them to database-specific SQL. Their depth is justified because analysis and multi-target translation are part of the product; a pass-through field with one renderer would not earn the same machinery.</p>
+</section>
+<section id="metaprogramming-guardrails" class="level2" data-number="7.12">
+<h2 data-number="7.12" class="anchored" data-anchor-id="metaprogramming-guardrails"><span class="header-section-number">7.12</span> Metaprogramming guardrails</h2>
+<p>R makes small languages easy to build, so generated checks and classes need stricter design discipline, not less. <strong>Checks as data</strong> can be useful when quoted, composable conditions are assembled into one inspectable validator. The generated function should print as ordinary understandable code and be tested directly. Splicing language objects created inside the package is appropriate; <code>eval(parse(paste0(...)))</code> and evaluation of document-supplied text are not.</p>
+<p><strong>Classes as data</strong> are equally legitimate because S7 classes are first-class values. A table can generate a regular family of enum or transport classes. Generation should stop where per-class meaning begins: if most generated classes need exceptions, readable hand-written definitions are the better model. In both patterns, generate structural regularity, keep inputs trusted, and test the generated artifact rather than only the factory.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-cert2024" class="csl-entry" role="listitem">
+CERT Coordination Center. 2024. <span>“R Programming Language Implementations Are Vulnerable to Arbitrary Code Execution During Deserialization.”</span> <a href="https://www.kb.cert.org/vuls/id/238194">https://www.kb.cert.org/vuls/id/238194</a>.
+</div>
+<div id="ref-nvd2024" class="csl-entry" role="listitem">
+National Vulnerability Database. 2024. <span>“CVE-2024-27322.”</span> <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-27322">https://nvd.nist.gov/vuln/detail/CVE-2024-27322</a>.
+</div>
+<div id="ref-r-serialization" class="csl-entry" role="listitem">
+R Core Team. 2026. <span>“Serialization Interface for Single Objects.”</span> <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/readRDS.html">https://stat.ethz.ch/R-manual/R-devel/library/base/html/readRDS.html</a>.
+</div>
+<div id="ref-s7-release-020" class="csl-entry" role="listitem">
+Vaughan, Davis. 2024. <span>“S7 0.2.0.”</span> November 18. <a href="https://tidyverse.org/blog/2024/11/s7-0-2-0/">https://tidyverse.org/blog/2024/11/s7-0-2-0/</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->
@@ -672,11 +786,6 @@ ul.task-list li input[type="checkbox"] {
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -992,13 +1101,13 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./05-composition-and-dispatch.html" class="pagination-link" aria-label="Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span>
+      <a href="./05-composition-and-dispatch.html" class="pagination-link" aria-label="Composition and Dispatch">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./07-ecosystem-field-guide.html" class="pagination-link" aria-label="Ecosystem Field Guide: What Real S7 Packages Teach">
-        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./07-ecosystem-field-guide.html" class="pagination-link" aria-label="Ecosystem Field Guide">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

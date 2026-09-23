@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
-<title>8&nbsp; Ecosystem Field Guide: What Real S7 Packages Teach – S7 Design Notes</title>
+<title>8&nbsp; Ecosystem Field Guide: Design Questions in Practice – S7 Design Notes</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -38,6 +39,7 @@ ul.task-list li input[type="checkbox"] {
 <meta name="quarto:offset" content="./">
 <link href="./08-doctrine.html" rel="next">
 <link href="./06-documents-schemas-dsls.html" rel="prev">
+<link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -49,9 +51,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1f846c7865d629590e2cadd4f479fcb7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-c13f21f511963f2a6363cc37617da2fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -81,6 +83,13 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
+<meta property="og:title" content="8&nbsp; Ecosystem Field Guide: Design Questions in Practice – S7 Design Notes">
+<meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta property="og:site_name" content="S7 Design Notes">
+<meta name="twitter:title" content="8&nbsp; Ecosystem Field Guide: Design Questions in Practice – S7 Design Notes">
+<meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/07-ecosystem-field-guide.html">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -254,7 +263,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./07-ecosystem-field-guide.html">Evidence</a></li><li class="breadcrumb-item"><a href="./07-ecosystem-field-guide.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./07-ecosystem-field-guide.html">Evidence</a></li><li class="breadcrumb-item"><a href="./07-ecosystem-field-guide.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -292,7 +301,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -307,19 +316,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span></a>
   </div>
 </li>
       </ul>
@@ -336,19 +345,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span></a>
   </div>
 </li>
       </ul>
@@ -365,7 +374,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span></a>
   </div>
 </li>
       </ul>
@@ -382,19 +391,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></span></a>
   </div>
 </li>
       </ul>
@@ -411,13 +420,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./sources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
   </div>
 </li>
       </ul>
@@ -432,40 +447,39 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#cluster-a-values-state-and-architecture" id="toc-cluster-a-values-state-and-architecture" class="nav-link active" data-scroll-target="#cluster-a-values-state-and-architecture"><span class="header-section-number">8.1</span> Cluster A — Values, state, and architecture</a>
+  <li><a href="#how-can-one-declaration-serve-several-consumers" id="toc-how-can-one-declaration-serve-several-consumers" class="nav-link active" data-scroll-target="#how-can-one-declaration-serve-several-consumers"><span class="header-section-number">8.1</span> How can one declaration serve several consumers?</a>
   <ul class="collapse">
-  <li><a href="#ellmer-the-hybrid-architecture-and-dispatch-as-a-plugin-system" id="toc-ellmer-the-hybrid-architecture-and-dispatch-as-a-plugin-system" class="nav-link" data-scroll-target="#ellmer-the-hybrid-architecture-and-dispatch-as-a-plugin-system"><span class="header-section-number">8.1.1</span> ellmer — the hybrid architecture, and dispatch as a plugin system</a></li>
-  <li><a href="#ragnar-honest-base-type-inheritance-and-the-enriched-table" id="toc-ragnar-honest-base-type-inheritance-and-the-enriched-table" class="nav-link" data-scroll-target="#ragnar-honest-base-type-inheritance-and-the-enriched-table"><span class="header-section-number">8.1.2</span> ragnar — honest base-type inheritance and the enriched table</a></li>
-  <li><a href="#tooey-the-elm-architecture-as-a-whole-program-design" id="toc-tooey-the-elm-architecture-as-a-whole-program-design" class="nav-link" data-scroll-target="#tooey-the-elm-architecture-as-a-whole-program-design"><span class="header-section-number">8.1.3</span> tooey — the Elm architecture as a whole-program design</a></li>
+  <li><a href="#rtemis-property-contracts-as-inspectable-data" id="toc-rtemis-property-contracts-as-inspectable-data" class="nav-link" data-scroll-target="#rtemis-property-contracts-as-inspectable-data"><span class="header-section-number">8.1.1</span> rtemis: property contracts as inspectable data</a></li>
   </ul></li>
-  <li><a href="#cluster-b-documents-schemas-and-serialization" id="toc-cluster-b-documents-schemas-and-serialization" class="nav-link" data-scroll-target="#cluster-b-documents-schemas-and-serialization"><span class="header-section-number">8.2</span> Cluster B — Documents, schemas, and serialization</a>
+  <li><a href="#which-objects-are-values-snapshots-or-runtime-owners" id="toc-which-objects-are-values-snapshots-or-runtime-owners" class="nav-link" data-scroll-target="#which-objects-are-values-snapshots-or-runtime-owners"><span class="header-section-number">8.2</span> Which objects are values, snapshots, or runtime owners?</a>
   <ul class="collapse">
-  <li><a href="#stacbuildr-the-document-object-model-pattern-complete" id="toc-stacbuildr-the-document-object-model-pattern-complete" class="nav-link" data-scroll-target="#stacbuildr-the-document-object-model-pattern-complete"><span class="header-section-number">8.2.1</span> stacbuildr — the document-object-model pattern, complete</a></li>
-  <li><a href="#s7schema-schema-as-boundary-contract-productized" id="toc-s7schema-schema-as-boundary-contract-productized" class="nav-link" data-scroll-target="#s7schema-schema-as-boundary-contract-productized"><span class="header-section-number">8.2.2</span> S7schema — schema as boundary contract, productized</a></li>
-  <li><a href="#rapid-an-external-specification-as-a-strict-domain-object" id="toc-rapid-an-external-specification-as-a-strict-domain-object" class="nav-link" data-scroll-target="#rapid-an-external-specification-as-a-strict-domain-object"><span class="header-section-number">8.2.3</span> rapid — an external specification as a strict domain object</a></li>
-  <li><a href="#sqlr-and-its-dialects-schema-as-the-middle-term-round-trip-as-oracle" id="toc-sqlr-and-its-dialects-schema-as-the-middle-term-round-trip-as-oracle" class="nav-link" data-scroll-target="#sqlr-and-its-dialects-schema-as-the-middle-term-round-trip-as-oracle"><span class="header-section-number">8.2.4</span> sqlr and its dialects — schema as the middle term, round-trip as oracle</a></li>
-  <li><a href="#typedjson-round-trip-fidelity-as-the-entire-product" id="toc-typedjson-round-trip-fidelity-as-the-entire-product" class="nav-link" data-scroll-target="#typedjson-round-trip-fidelity-as-the-entire-product"><span class="header-section-number">8.2.5</span> typedjson — round-trip fidelity as the entire product</a></li>
-  <li><a href="#structr-the-contrast-case-a-compiled-schema-not-an-object-system" id="toc-structr-the-contrast-case-a-compiled-schema-not-an-object-system" class="nav-link" data-scroll-target="#structr-the-contrast-case-a-compiled-schema-not-an-object-system"><span class="header-section-number">8.2.6</span> structr — the contrast case: a compiled schema, not an object system</a></li>
+  <li><a href="#deputy-portable-definitions-at-a-permission-boundary" id="toc-deputy-portable-definitions-at-a-permission-boundary" class="nav-link" data-scroll-target="#deputy-portable-definitions-at-a-permission-boundary"><span class="header-section-number">8.2.1</span> deputy: portable definitions at a permission boundary</a></li>
   </ul></li>
-  <li><a href="#cluster-c-errors-contracts-and-introspection" id="toc-cluster-c-errors-contracts-and-introspection" class="nav-link" data-scroll-target="#cluster-c-errors-contracts-and-introspection"><span class="header-section-number">8.3</span> Cluster C — Errors, contracts, and introspection</a>
+  <li><a href="#when-is-a-semantic-middle-representation-worth-its-cost" id="toc-when-is-a-semantic-middle-representation-worth-its-cost" class="nav-link" data-scroll-target="#when-is-a-semantic-middle-representation-worth-its-cost"><span class="header-section-number">8.3</span> When is a semantic middle representation worth its cost?</a>
   <ul class="collapse">
-  <li><a href="#resultr-errors-as-values-the-resultoption-sum-type" id="toc-resultr-errors-as-values-the-resultoption-sum-type" class="nav-link" data-scroll-target="#resultr-errors-as-values-the-resultoption-sum-type"><span class="header-section-number">8.3.1</span> resultr — errors as values, the Result/Option sum type</a></li>
-  <li><a href="#s7contract-interfaces-traits-and-executable-laws" id="toc-s7contract-interfaces-traits-and-executable-laws" class="nav-link" data-scroll-target="#s7contract-interfaces-traits-and-executable-laws"><span class="header-section-number">8.3.2</span> s7contract — interfaces, traits, and executable laws</a></li>
-  <li><a href="#datarr-reflect-the-metaobject-payoff-of-classes-as-values" id="toc-datarr-reflect-the-metaobject-payoff-of-classes-as-values" class="nav-link" data-scroll-target="#datarr-reflect-the-metaobject-payoff-of-classes-as-values"><span class="header-section-number">8.3.3</span> datarr (reflect) — the metaobject payoff of classes-as-values</a></li>
+  <li><a href="#sqlr-one-model-for-rendering-reflection-and-comparison" id="toc-sqlr-one-model-for-rendering-reflection-and-comparison" class="nav-link" data-scroll-target="#sqlr-one-model-for-rendering-reflection-and-comparison"><span class="header-section-number">8.3.1</span> sqlr: one model for rendering, reflection, and comparison</a></li>
+  <li><a href="#additional-exhibit-quickrs-typed-compiler-ir" id="toc-additional-exhibit-quickrs-typed-compiler-ir" class="nav-link" data-scroll-target="#additional-exhibit-quickrs-typed-compiler-ir"><span class="header-section-number">8.3.2</span> Additional exhibit: quickr’s typed compiler IR</a></li>
   </ul></li>
-  <li><a href="#cluster-d-systems-built-on-s7-at-scale" id="toc-cluster-d-systems-built-on-s7-at-scale" class="nav-link" data-scroll-target="#cluster-d-systems-built-on-s7-at-scale"><span class="header-section-number">8.4</span> Cluster D — Systems built on S7 at scale</a>
+  <li><a href="#who-owns-the-contract-s7-properties-or-an-external-schema" id="toc-who-owns-the-contract-s7-properties-or-an-external-schema" class="nav-link" data-scroll-target="#who-owns-the-contract-s7-properties-or-an-external-schema"><span class="header-section-number">8.4</span> Who owns the contract: S7 properties or an external schema?</a>
   <ul class="collapse">
-  <li><a href="#rtemis-constraints-as-data-one-declaration-to-rule-four-artifacts" id="toc-rtemis-constraints-as-data-one-declaration-to-rule-four-artifacts" class="nav-link" data-scroll-target="#rtemis-constraints-as-data-one-declaration-to-rule-four-artifacts"><span class="header-section-number">8.4.1</span> rtemis — constraints as data, one declaration to rule four artifacts</a></li>
-  <li><a href="#quickr-s7-as-a-compilers-intermediate-representation" id="toc-quickr-s7-as-a-compilers-intermediate-representation" class="nav-link" data-scroll-target="#quickr-s7-as-a-compilers-intermediate-representation"><span class="header-section-number">8.4.2</span> quickr — S7 as a compiler’s intermediate representation</a></li>
-  <li><a href="#optimizers7-and-parameters7-extracting-the-private-re-implementations" id="toc-optimizers7-and-parameters7-extracting-the-private-re-implementations" class="nav-link" data-scroll-target="#optimizers7-and-parameters7-extracting-the-private-re-implementations"><span class="header-section-number">8.4.3</span> optimizers7 and parameters7 — extracting the private re-implementations</a></li>
+  <li><a href="#s7schema-an-externally-validated-container" id="toc-s7schema-an-externally-validated-container" class="nav-link" data-scroll-target="#s7schema-an-externally-validated-container"><span class="header-section-number">8.4.1</span> S7schema: an externally validated container</a></li>
+  <li><a href="#stacbuildr-native-boundary-constructors-plus-conformance" id="toc-stacbuildr-native-boundary-constructors-plus-conformance" class="nav-link" data-scroll-target="#stacbuildr-native-boundary-constructors-plus-conformance"><span class="header-section-number">8.4.2</span> stacbuildr: native boundary constructors plus conformance</a></li>
+  <li><a href="#additional-exhibit-typedjsons-minimal-annotations" id="toc-additional-exhibit-typedjsons-minimal-annotations" class="nav-link" data-scroll-target="#additional-exhibit-typedjsons-minimal-annotations"><span class="header-section-number">8.4.3</span> Additional exhibit: typedjson’s minimal annotations</a></li>
   </ul></li>
-  <li><a href="#cluster-e-foundations-and-utilities" id="toc-cluster-e-foundations-and-utilities" class="nav-link" data-scroll-target="#cluster-e-foundations-and-utilities"><span class="header-section-number">8.5</span> Cluster E — Foundations and utilities</a>
+  <li><a href="#should-failure-be-a-condition-or-a-value" id="toc-should-failure-be-a-condition-or-a-value" class="nav-link" data-scroll-target="#should-failure-be-a-condition-or-a-value"><span class="header-section-number">8.5</span> Should failure be a condition or a value?</a>
   <ul class="collapse">
-  <li><a href="#s7x-and-the-r-arcgis-stack-convergent-evolution-of-the-foundation-layer" id="toc-s7x-and-the-r-arcgis-stack-convergent-evolution-of-the-foundation-layer" class="nav-link" data-scroll-target="#s7x-and-the-r-arcgis-stack-convergent-evolution-of-the-foundation-layer"><span class="header-section-number">8.5.1</span> s7x and the R-ArcGIS stack — convergent evolution of the foundation layer</a></li>
-  <li><a href="#objectstore-interface-first-design-embryonic" id="toc-objectstore-interface-first-design-embryonic" class="nav-link" data-scroll-target="#objectstore-interface-first-design-embryonic"><span class="header-section-number">8.5.2</span> objectstore — interface-first design, embryonic</a></li>
-  <li><a href="#provider-the-adjacent-case" id="toc-provider-the-adjacent-case" class="nav-link" data-scroll-target="#provider-the-adjacent-case"><span class="header-section-number">8.5.3</span> provider — the adjacent case</a></li>
+  <li><a href="#resultr-explicit-outcome-sequencing" id="toc-resultr-explicit-outcome-sequencing" class="nav-link" data-scroll-target="#resultr-explicit-outcome-sequencing"><span class="header-section-number">8.5.1</span> resultr: explicit outcome sequencing</a></li>
   </ul></li>
-  <li><a href="#cross-cutting-observations" id="toc-cross-cutting-observations" class="nav-link" data-scroll-target="#cross-cutting-observations"><span class="header-section-number">8.6</span> Cross-cutting observations</a></li>
+  <li><a href="#how-much-behavior-belongs-in-a-reusable-contract" id="toc-how-much-behavior-belongs-in-a-reusable-contract" class="nav-link" data-scroll-target="#how-much-behavior-belongs-in-a-reusable-contract"><span class="header-section-number">8.6</span> How much behavior belongs in a reusable contract?</a>
+  <ul class="collapse">
+  <li><a href="#additional-exhibit-s7contracts-executable-laws" id="toc-additional-exhibit-s7contracts-executable-laws" class="nav-link" data-scroll-target="#additional-exhibit-s7contracts-executable-laws"><span class="header-section-number">8.6.1</span> Additional exhibit: s7contract’s executable laws</a></li>
+  </ul></li>
+  <li><a href="#when-should-policy-become-a-composable-object" id="toc-when-should-policy-become-a-composable-object" class="nav-link" data-scroll-target="#when-should-policy-become-a-composable-object"><span class="header-section-number">8.7</span> When should policy become a composable object?</a>
+  <ul class="collapse">
+  <li><a href="#additional-exhibit-optimizers7-and-parameters7" id="toc-additional-exhibit-optimizers7-and-parameters7" class="nav-link" data-scroll-target="#additional-exhibit-optimizers7-and-parameters7"><span class="header-section-number">8.7.1</span> Additional exhibit: optimizers7 and parameters7</a></li>
+  </ul></li>
+  <li><a href="#cross-case-synthesis" id="toc-cross-case-synthesis" class="nav-link" data-scroll-target="#cross-case-synthesis"><span class="header-section-number">8.8</span> Cross-case synthesis</a></li>
+  <li><a href="#questions-to-carry-into-a-design" id="toc-questions-to-carry-into-a-design" class="nav-link" data-scroll-target="#questions-to-carry-into-a-design"><span class="header-section-number">8.9</span> Questions to carry into a design</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/07-ecosystem-field-guide.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -473,9 +487,9 @@ ul.task-list li input[type="checkbox"] {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./07-ecosystem-field-guide.html">Evidence</a></li><li class="breadcrumb-item"><a href="./07-ecosystem-field-guide.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./07-ecosystem-field-guide.html">Evidence</a></li><li class="breadcrumb-item"><a href="./07-ecosystem-field-guide.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></h1>
+<h1 class="title"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: Design Questions in Practice</span></h1>
 </div>
 
 
@@ -492,123 +506,105 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Each package below was verified against its current documentation or source (September 2026). The interest is not in their domains but in the <em>design moves</em> they demonstrate — each is the clearest available exhibit for at least one pattern from the preceding documents. The guide is organized into five thematic clusters, with cross-cutting observations at the end.</p>
-<hr>
-<section id="cluster-a-values-state-and-architecture" class="level2" data-number="8.1">
-<h2 data-number="8.1" class="anchored" data-anchor-id="cluster-a-values-state-and-architecture"><span class="header-section-number">8.1</span> Cluster A — Values, state, and architecture</h2>
-<section id="ellmer-the-hybrid-architecture-and-dispatch-as-a-plugin-system" class="level3" data-number="8.1.1">
-<h3 data-number="8.1.1" class="anchored" data-anchor-id="ellmer-the-hybrid-architecture-and-dispatch-as-a-plugin-system"><span class="header-section-number">8.1.1</span> ellmer — the hybrid architecture, and dispatch as a plugin system</h3>
-<p><a href="https://ellmer.tidyverse.org/">ellmer</a> (tidyverse; LLM chat from R) is the reference example for mixing object systems by semantics rather than ideology. The <a href="https://ellmer.tidyverse.org/reference/Chat.html"><code>Chat</code></a> object is <strong>R6</strong>, and the documentation is explicit about why: a conversation is mutable state with identity — you send messages to <em>it</em>, it accumulates turns, it runs the tool-invocation loop — and value semantics would force callers to reassign after every exchange. Branching a conversation requires an explicit <code>$clone()</code>, exactly the ceremony value semantics would have made free, and ellmer accepts that trade consciously.</p>
-<p>Everything flowing <em>through</em> the Chat is <strong>S7 values</strong>: <a href="https://ellmer.tidyverse.org/reference/Turn.html"><code>Turn</code></a> (with <code>UserTurn</code>, <code>SystemTurn</code>, <code>AssistantTurn</code> subclasses — a sum type as a subclass family, where the assistant variant carries extra fields like tokens, cost, and finish reason), <code>Content</code> objects inside turns (text, images, tool requests, tool results — another variant family), <a href="https://ellmer.tidyverse.org/reference/Model.html"><code>Model</code></a> (a small immutable configuration value), and <code>Provider</code>. Records of fact are values; the ongoing process is a reference.</p>
-<p>The <code>Provider</code> hierarchy doubles as the package’s plugin system: the README lists ten official and nine community providers, and supporting a new LLM service means subclassing <code>Provider</code> and registering methods on the existing generic vocabulary for request building and response parsing. The data axis of the expression problem, held open on purpose — community providers extend ellmer without touching its core.</p>
-</section>
-<section id="ragnar-honest-base-type-inheritance-and-the-enriched-table" class="level3" data-number="8.1.2">
-<h3 data-number="8.1.2" class="anchored" data-anchor-id="ragnar-honest-base-type-inheritance-and-the-enriched-table"><span class="header-section-number">8.1.2</span> ragnar — honest base-type inheritance and the enriched table</h3>
-<p><a href="https://ragnar.tidyverse.org/">ragnar</a> (tidyverse; retrieval-augmented generation) contributes two small, perfect exhibits.</p>
-<p><a href="https://ragnar.tidyverse.org/reference/MarkdownDocument.html"><code>MarkdownDocument</code></a> is an S7 class inheriting from <strong>character</strong>: a document <em>is</em> a length-one markdown string, with an <code>@origin</code> property riding along. The inheritance passes the honesty test of <a href="./05-composition-and-dispatch.html">05-composition-and-dispatch.qmd</a> — treating the object as text is semantically sound, not merely convenient. Its constructor is a boundary parser in miniature: it <em>normalizes</em> (collapses lines, enforces UTF-8) so that, quoting the docs, “downstream code can rely on a consistent format” — parse-don’t-validate stated as user documentation.</p>
-<p><code>MarkdownDocumentChunks</code> inherits from <strong>tibble</strong>: chunk data is genuinely tabular (start, end, context columns; users will filter and mutate it), so it should <em>be</em> a data frame — but it carries the source document as a <code>@document</code> property, keeping the provenance attached to the value rather than in a parallel variable the user must not lose. An enriched table: structural behavior from the base class, domain identity and payload from S7.</p>
-</section>
-<section id="tooey-the-elm-architecture-as-a-whole-program-design" class="level3" data-number="8.1.3">
-<h3 data-number="8.1.3" class="anchored" data-anchor-id="tooey-the-elm-architecture-as-a-whole-program-design"><span class="header-section-number">8.1.3</span> tooey — the Elm architecture as a whole-program design</h3>
-<p><a href="https://github.com/devOpifex/tooey">tooey</a> (devOpifex) is a terminal UI framework built on the <strong>Model–View–Update</strong> architecture (The Elm Architecture): an application is three pure functions — <code>init(model)</code> producing initial commands, <code>update(model, msg)</code> mapping a state and a message to a new state plus commands, and <code>view(model, buf)</code> rendering state into a screen buffer — while a runtime loop owns the terminal, the clock, and input events, feeding them in as messages (<code>is_key</code>, <code>is_tick</code>) and executing returned commands (<code>cmd_tick</code>, <code>cmd_quit</code>).</p>
-<p>This is the functional core / imperative shell of <a href="./02-values-and-state.html">02-values-and-state.qmd</a> in its most disciplined published form: <em>all</em> state transitions are pure data-to-data functions, <em>all</em> effects are values (commands) interpreted by the shell, and the framework — not convention — enforces the boundary. Even in a domain as imperative-seeming as a live terminal UI, mutation is confined to a runtime the application author never touches. It is also a working answer to “where do messages and events fit in a value-oriented design”: as plain data dispatched over, exactly like any other variant family.</p>
-<hr>
+<p>This guide is organized by decisions, not package inventory. Each exhibit is public and reader-verifiable, and each is evidence for a bounded design claim rather than a recommendation to copy a package wholesale.</p>
+<section id="how-can-one-declaration-serve-several-consumers" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="how-can-one-declaration-serve-several-consumers"><span class="header-section-number">8.1</span> How can one declaration serve several consumers?</h2>
+<section id="rtemis-property-contracts-as-inspectable-data" class="level3" data-number="8.1.1">
+<h3 data-number="8.1.1" class="anchored" data-anchor-id="rtemis-property-contracts-as-inspectable-data"><span class="header-section-number">8.1.1</span> rtemis: property contracts as inspectable data</h3>
+<p><a href="https://github.com/rtemis-org/rtemis">rtemis</a> treats a property declaration as more than a validator closure. Its public <a href="https://github.com/rtemis-org/rtemis/blob/f60ac02b32f58373a2ba7f965b9c1c450dd2200a/R/010_Props.R"><code>PropertySpec</code> implementation</a> retains value type, container shape, bounds, choices, defaults, null behavior, tuning intent, conditional applicability, and data-dependent bounds as data. That choice is causal: once the declaration can be inspected, the package can use the same facts to build executable S7 properties, establish defaults, project schemas and interfaces, and prepare a configuration against training data. A closure alone could enforce a value locally, but it could not explain the rule to those other consumers.</p>
+<p>The distinction between a value and a candidate set shows why the extra model matters. Shape is not enough: a length-two vector might be one value, a range, or a search space. By recording tuning intent independently, <code>PropertySpec</code> prevents downstream code from reverse-engineering semantics from shape. Similarly, a data-dependent bound remains declared with the property even though it cannot be resolved until the training data supplies the missing context. Declaration and enforcement can therefore happen at different times without becoming different rules.</p>
+<p>This concentration of knowledge creates obligations. A default should satisfy its own declaration; incompatible metadata axes should fail when the property is defined; and generated validators, schemas, and interfaces need alignment tests. Contract-as-data removes independently maintained definitions, not the possibility of a faulty projection. Nor does it make every rule reversible: reconstruction is credible only for the vocabulary that the declaration actually records.</p>
+<p><strong>Decision test.</strong> Use contract-as-data when several real consumers need the same facts and their agreement can be tested. A handwritten <code>S7::new_property()</code> remains simpler when construction is the only consumer.</p>
 </section>
 </section>
-<section id="cluster-b-documents-schemas-and-serialization" class="level2" data-number="8.2">
-<h2 data-number="8.2" class="anchored" data-anchor-id="cluster-b-documents-schemas-and-serialization"><span class="header-section-number">8.2</span> Cluster B — Documents, schemas, and serialization</h2>
-<section id="stacbuildr-the-document-object-model-pattern-complete" class="level3" data-number="8.2.1">
-<h3 data-number="8.2.1" class="anchored" data-anchor-id="stacbuildr-the-document-object-model-pattern-complete"><span class="header-section-number">8.2.1</span> stacbuildr — the document-object-model pattern, complete</h3>
-<p><a href="https://github.com/stevenpawley/stacbuildr">stacbuildr</a> (STAC geospatial catalogs) is the fullest single exhibit of <a href="./06-documents-schemas-dsls.html">06-documents-schemas-dsls.qmd</a>: STAC 1.1.0 Catalogs, Collections, and Items as an S7 class graph, serialized to STAC JSON, <strong>validated against the published JSON schemas</strong> (rung 0 delegated to the specification’s own authority), with extensions (electro-optical, raster, projection, and more) layered onto the core following the spec’s own shared <code>bands</code> model.</p>
-<p>Two moves stand out beyond the basics. First, the boundary-constructor family: <code>item_from_terra()</code>, <code>item_from_sf()</code>, <code>item_from_lidr()</code> lift <em>native</em> geospatial objects — rasters, geometries, point clouds users already hold — into document nodes, extracting extents, projections, and band metadata at the boundary. Second, the <strong>document as data</strong>: a Collection supports <code>length()</code>, <code>[[</code>, <code>as.data.frame()</code> (one row per item, properties as columns, list-columns for structured values), and <code>sf::st_as_sf()</code> — the object graph projects into the tabular and spatial idioms R users already know, rather than forcing graph navigation. Its <code>write_stac()</code> also encodes the STAC best-practices catalog layouts (self-contained, relative, absolute) as an explicit enum that maps one-to-one onto PySTAC’s <code>CatalogType</code> — cross-ecosystem vocabulary alignment as API design.</p>
-</section>
-<section id="s7schema-schema-as-boundary-contract-productized" class="level3" data-number="8.2.2">
-<h3 data-number="8.2.2" class="anchored" data-anchor-id="s7schema-schema-as-boundary-contract-productized"><span class="header-section-number">8.2.2</span> S7schema — schema as boundary contract, productized</h3>
-<p><a href="https://cran.r-project.org/package=S7schema">S7schema</a> (Novo Nordisk; CRAN) is the schema-as-boundary-contract posture as a reusable framework: YAML configuration files validated against JSON Schema definitions using AJV (via V8), with the resulting configuration objects inheriting from <strong>both S7 classes and base lists</strong> — full conformance checking delegated to the schema ecosystem’s standard tooling, R-side typing layered on for downstream extension through custom classes and methods. Notably it does <em>not</em> re-derive the schema’s rules as property validators — the two layers check different things.</p>
-</section>
-<section id="rapid-an-external-specification-as-a-strict-domain-object" class="level3" data-number="8.2.3">
-<h3 data-number="8.2.3" class="anchored" data-anchor-id="rapid-an-external-specification-as-a-strict-domain-object"><span class="header-section-number">8.2.3</span> rapid — an external specification as a strict domain object</h3>
-<p><a href="https://github.com/api2r/rapid">rapid</a> (api2r) converts OpenAPI descriptions into R objects of a new S7 class that, in its own words, “enforces a strict, opinionated schema.” The design posture is instructive: rather than wrapping the OpenAPI JSON loosely, it parses the specification into a validated domain object intended as the substrate for downstream <em>code generation</em> (the beekeeper and mockplumber packages). An API description is exactly the kind of declarative document <a href="./06-documents-schemas-dsls.html">06</a> describes, and rapid is the front-end that makes it lawful before generators consume it — parse once at the boundary, generate from the certified object.</p>
-</section>
-<section id="sqlr-and-its-dialects-schema-as-the-middle-term-round-trip-as-oracle" class="level3" data-number="8.2.4">
-<h3 data-number="8.2.4" class="anchored" data-anchor-id="sqlr-and-its-dialects-schema-as-the-middle-term-round-trip-as-oracle"><span class="header-section-number">8.2.4</span> sqlr and its dialects — schema as the middle term, round-trip as oracle</h3>
-<p><a href="https://github.com/nbenn/sqlr">nbenn/sqlr</a> has matured into one of the most architecturally articulate S7 packages anywhere, and its README states its thesis in one sentence: what R lacked was “a representation of a schema that is neither a string nor a connection, which you can build, render, reflect and compare.” That middle term — the schema as a first-class <em>value</em> between the DDL text and the live database — is the document-object-model argument made for SQL.</p>
-<p>Four design moves reward study. <strong>Dialects are objects, not connections</strong>: rendering (<code>sqlr_render(schema, sqlite())</code>) needs no server, no driver, and the core package renders nothing on its own — dialect packages (<code>sqlr.postgres</code>, <code>sqlr.sqlite</code>) supply the spellings via multiple dispatch (<code>render_sql(x, con)</code> dispatching on object and dialect at once). <strong>There is deliberately no generic fallback</strong>: nothing renders “ANSI SQL,” because no engine implements it faithfully and “an untestable default would quietly accumulate behaviour no database had ever accepted” — an unregistered dialect is an error rather than a guess. <strong>Reflection closes the loop</strong>: <code>sqlr_reflect(con)</code> reads a live database’s catalog back into the same representation <code>sqlr_render()</code> consumes, and the round trip (<code>sqlr_equal(schema, sqlr_reflect(con))</code>) is, in the package’s own words, “the package’s own test oracle.” <strong>Equality is structural and semantic</strong>: constraints and indexes are matched on <em>what they constrain</em>, not their order or auto-generated names, so a hand-written schema compares equal to a reflected one — and <code>sqlr_diff()</code> reports meaningful differences, the explicit groundwork for a future migration generator. Rendering even performs real compilation work: tables emit in dependency order and cycle-closing foreign keys are lifted into trailing <code>ALTER TABLE</code> statements.</p>
-</section>
-<section id="typedjson-round-trip-fidelity-as-the-entire-product" class="level3" data-number="8.2.5">
-<h3 data-number="8.2.5" class="anchored" data-anchor-id="typedjson-round-trip-fidelity-as-the-entire-product"><span class="header-section-number">8.2.5</span> typedjson — round-trip fidelity as the entire product</h3>
-<p><a href="https://github.com/nbenn/typedjson">typedjson</a> (same author) makes the round-trip <em>law</em> of <a href="./06-documents-schemas-dsls.html">06</a> into a package: it “writes an R value as JSON a human can read, and reads it back unchanged.” Its README diagnoses the existing landscape precisely — <code>jsonlite</code> is readable but lossy (doubles return as integers, all-<code>NA</code> vectors lose their type, empty typed vectors collapse to <code>list()</code>), <code>serializeJSON</code> is faithful but unreadable — and stakes out the missing quadrant: ordinary JSON for ordinary values, with annotations <em>only for what JSON cannot express</em> (integer versus double, typed missing values, non-finite doubles, attributes, language objects, and S3/S4/S7 objects). That principle — annotate the minimum needed to make the round trip an identity — is the presence-policy and wire-universe discussion of <a href="./03-types-and-meaning.html">03-types-and-meaning.qmd</a> turned into a serialization format.</p>
-</section>
-<section id="structr-the-contrast-case-a-compiled-schema-not-an-object-system" class="level3" data-number="8.2.6">
-<h3 data-number="8.2.6" class="anchored" data-anchor-id="structr-the-contrast-case-a-compiled-schema-not-an-object-system"><span class="header-section-number">8.2.6</span> structr — the contrast case: a compiled schema, not an object system</h3>
-<p><a href="https://github.com/ixpantia/structr">structr</a> (ixpantia) is deliberately <em>not</em> S7 — it is Rust (<code>serde</code>, <code>simd_json</code>) behind an R schema DSL (<code>s_map()</code>, <code>s_integer()</code>, <code>s_optional()</code>, <code>build_structure()</code>) — and it earns its place here as the boundary of the boundary. structr compiles a schema once and then parses <em>and</em> serializes against it, strictly: type mismatches, missing fields, and unexpected nulls are errors. It is rungs 0–1 of the checking ladder as a standalone, high-performance tool, with no domain objects at all — the output is plain R lists that are <em>known</em> to conform. The lesson is about division of labor: when the need is pure wire conformance at speed, a compiled schema validator beats an object system, and an S7 domain layer is what you build <em>on top of</em> such a boundary when invariants, identity, and dispatch are needed beyond the parse. Its “all fields required unless <code>s_optional()</code>” default is also the right polarity for presence policy — opt into looseness, never out of it.</p>
-<hr>
+<section id="which-objects-are-values-snapshots-or-runtime-owners" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="which-objects-are-values-snapshots-or-runtime-owners"><span class="header-section-number">8.2</span> Which objects are values, snapshots, or runtime owners?</h2>
+<section id="deputy-portable-definitions-at-a-permission-boundary" class="level3" data-number="8.2.1">
+<h3 data-number="8.2.1" class="anchored" data-anchor-id="deputy-portable-definitions-at-a-permission-boundary"><span class="header-section-number">8.2.1</span> deputy: portable definitions at a permission boundary</h3>
+<p><a href="https://github.com/JamesHWade/deputy">deputy</a> runs tasks with an <a href="https://ellmer.tidyverse.org/">ellmer</a> chat and R tools. Its <a href="https://jameshwade.github.io/deputy/articles/runtime-integration.html">public documentation</a> separates declarative configuration from a live run: tool definitions, permission policies, and usage limits describe requested behavior, while the <code>Agent</code> owns execution, streaming, counters, and host interaction. <code>AgentResult</code> records how a completed run ended, including stop reason and usage information.</p>
+<p>The split follows ownership. Definitions and policies can travel as data because they do not themselves contain a live model connection or grant a capability. At execution time, the host binds symbolic tools and applies its permission policy; valid configuration is therefore not confused with authority. The running agent needs identity because it coordinates changing state and effects, while its completed result can become a value-like fact. Deputy also composes with ellmer’s public tool and structured-output meanings instead of inventing parallel ones, keeping package policy at the layer that owns it.</p>
+<p>Read-only result fields, where used, express the lifecycle of completed facts. They are not evidence that every S7 value should be read-only. Editable configuration can retain value semantics and invariant-preserving replacement.</p>
+<p><strong>Decision test.</strong> Choose a reference owner for shared identity, live resources, or an observable lifecycle. Use values for portable definitions and completed facts, and keep requested capability distinct from host-granted authority.</p>
 </section>
 </section>
-<section id="cluster-c-errors-contracts-and-introspection" class="level2" data-number="8.3">
-<h2 data-number="8.3" class="anchored" data-anchor-id="cluster-c-errors-contracts-and-introspection"><span class="header-section-number">8.3</span> Cluster C — Errors, contracts, and introspection</h2>
-<section id="resultr-errors-as-values-the-resultoption-sum-type" class="level3" data-number="8.3.1">
-<h3 data-number="8.3.1" class="anchored" data-anchor-id="resultr-errors-as-values-the-resultoption-sum-type"><span class="header-section-number">8.3.1</span> resultr — errors as values, the Result/Option sum type</h3>
-<p><a href="https://github.com/TransGirlCodes/resultr">resultr</a> implements Rust’s <code>Result</code>/<code>Option</code> vocabulary in S7, and its <a href="https://github.com/TransGirlCodes/resultr/blob/main/R/Result.R"><code>Result.R</code></a> is a compact tour of the sum-type playbook: an abstract <code>Result</code> parent “used for the purposes of dispatch,” <code>Success</code> and <code>Failure</code> subclasses each carrying one property, and the full monadic combinator set as generics — <code>unwrap()</code>, <code>unwrap_or_default()</code>, <code>unwrap_or_else()</code>, <code>and_then()</code>, <code>inspect()</code>, <code>expect()</code> — with per-variant methods (the <code>Failure</code> method for <code>and_then</code> simply returns itself, which <em>is</em> railway-oriented short-circuiting).</p>
-<p>Three details are worth stealing. First, the <strong>boundary between conditions and values</strong> is a generic: <code>wrap_in_result()</code> has methods for <code>class_any</code> (wrap in <code>Success</code>), <code>class_error</code> and <code>class_warning</code> (wrap in <code>Failure</code>), and <code>Result</code> itself (pass through) — so R’s condition system is converted into value-level errors at exactly one point, inside <code>and_then()</code>’s <code>rlang::try_fetch()</code>. Second, <strong>write-once properties</strong>: both <code>@value</code> and <code>@error</code> use a setter that errors if the slot is already set — a poor man’s immutability enforcement, making the certificate tamper-evident. Third, <code>expect()</code> dispatches on <code>list(Success, class_character)</code> — multiple dispatch pressed into service for argument typing. The broader lesson feeds <a href="./04-parse-dont-validate.html">04-parse-dont-validate.qmd</a>: R has <em>two</em> error channels, conditions (control flow) and values (data flow), and a design should choose per boundary which one crosses it.</p>
+<section id="when-is-a-semantic-middle-representation-worth-its-cost" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="when-is-a-semantic-middle-representation-worth-its-cost"><span class="header-section-number">8.3</span> When is a semantic middle representation worth its cost?</h2>
+<section id="sqlr-one-model-for-rendering-reflection-and-comparison" class="level3" data-number="8.3.1">
+<h3 data-number="8.3.1" class="anchored" data-anchor-id="sqlr-one-model-for-rendering-reflection-and-comparison"><span class="header-section-number">8.3.1</span> sqlr: one model for rendering, reflection, and comparison</h3>
+<p><a href="https://github.com/nbenn/sqlr">sqlr</a> supplies a representation of a database schema that is neither SQL text nor a live connection. Constructors create that model; dialect objects render it; <code>sqlr_reflect()</code> reconstructs it from a catalog; and <code>sqlr_equal()</code> and <code>sqlr_diff()</code> compare its meaning. These are independent consumers, so the schema model prevents each operation from re-parsing text or inventing a private account of tables and constraints.</p>
+<p>The model also makes policy visible. Rendering can order tables by dependency and defer cycle-closing foreign keys to later statements. Dialects carry engine-specific behavior without requiring a live connection, and the package deliberately declines to offer an untested “ANSI SQL” fallback. Reflection is bounded by what a database exposes, so missing catalog facts remain documented limits instead of guessed values. Comparison can then ignore incidental constraint order or generated names and report differences in domain terms.</p>
+<p>The resulting round-trip law is semantic, not textual: rendering into a particular engine and reflecting back should preserve the modeled meaning that engine can represent. Exact representation, canonical form, and domain equality remain separate claims. The <a href="https://github.com/nbenn/sqlr/blob/8325581ad859b408408738dcc289bcad05360d58/R/generics.R">public generic definitions at revision <code>8325581</code></a> make that operation vocabulary inspectable.</p>
 </section>
-<section id="s7contract-interfaces-traits-and-executable-laws" class="level3" data-number="8.3.2">
-<h3 data-number="8.3.2" class="anchored" data-anchor-id="s7contract-interfaces-traits-and-executable-laws"><span class="header-section-number">8.3.2</span> s7contract — interfaces, traits, and executable laws</h3>
-<p><a href="https://github.com/sounkou-bioinfo/s7contract">s7contract</a> (CRAN) imports the Go-interface/Rust-trait worldview onto S7 dispatch, and its README now shows the full progression. <strong>Structural interfaces</strong> are named sets of required generics, checked by method availability (<code>implements(Circle, Shape)</code>), with <code>missing_requirements()</code> reporting exactly which verb is absent — Go’s implicit satisfaction, made queryable. <strong>Traits</strong> require explicit <code>impl_trait()</code> registration and support default methods and associated constants — Rust’s explicit opt-in. <strong>Progressive runtime checks</strong> let an interface requirement carry argument and return specifications, enforced in contract-scoped evaluation (<code>with(Interface, expr)</code>), so a method that returns the wrong type fails at the call with a typed message. <strong>Generative laws</strong> combine named generators, shrinking, and tinytest expectations (<code>expect_law()</code>), testing the behavioral half of the contract that no dispatch table can see. Its stated limits are as instructive as its features: all checks are runtime, and passing generated cases proves nothing universally — honest about what a dynamic language can and cannot recover of Rust’s compile-time story.</p>
-</section>
-<section id="datarr-reflect-the-metaobject-payoff-of-classes-as-values" class="level3" data-number="8.3.3">
-<h3 data-number="8.3.3" class="anchored" data-anchor-id="datarr-reflect-the-metaobject-payoff-of-classes-as-values"><span class="header-section-number">8.3.3</span> datarr (reflect) — the metaobject payoff of classes-as-values</h3>
-<p><a href="https://github.com/SanD94/datarr">datarr</a> (package name <code>reflect</code>) builds runtime <strong>reflection</strong> for base R and S7: immutable descriptor objects for properties, methods, and callables, with explicit capability predicates. Its <a href="https://github.com/SanD94/datarr/blob/main/R/s7.R"><code>s7.R</code></a> shows what S7’s classes-as-first-class-values design makes possible in ordinary R code: <code>reflect_properties()</code> walks <code>class@properties</code> and the constructor’s formals to report each property’s declared type, default presence, requiredness (a formal equal to the empty symbol), validator presence, and whether it is <em>inherited</em> (tracing the declaring class up the parent chain); <code>reflect_methods()</code> enumerates a generic’s method table and can attach S7’s own <code>method_explain()</code> dispatch trace; <code>reflect_callable()</code> distinguishes generics, methods, and closures with their signatures. The descriptors are themselves S7 objects — reflection modeled in the system being reflected.</p>
-<p>Two further touches: <code>reflect_validate()</code> wraps <code>S7::validate()</code> with a chained, classed condition (the error-design discipline of <a href="./04-parse-dont-validate.html">04</a> applied to the metalevel), and <code>reflect_check_project()</code> audits a <em>package</em> against declared conventions (export naming policy, dependency policy, lifecycle documentation) — conventions turned into executable checks, which is the same move as s7contract’s laws applied to project structure instead of object behavior.</p>
-<hr>
+<section id="additional-exhibit-quickrs-typed-compiler-ir" class="level3" data-number="8.3.2">
+<h3 data-number="8.3.2" class="anchored" data-anchor-id="additional-exhibit-quickrs-typed-compiler-ir"><span class="header-section-number">8.3.2</span> Additional exhibit: quickr’s typed compiler IR</h3>
+<p><a href="https://github.com/t-kalinowski/quickr">quickr</a> gives an IR a different reason to exist. Its R-to-Fortran compiler reads an in-language type declaration, lowers source through typed objects, and passes those objects between analysis and code-generation stages; the public <a href="https://github.com/t-kalinowski/quickr/blob/edd403766e612ef4867ad817ead3dc366dc15d77/R/quick.R"><code>quick.R</code> source</a> shows compiled artifacts such as <code>FortranSubroutine</code> being consumed as structured values. A typed IR is justified here because translation and analysis are the product. For a single textual rewrite, the same class graph would be ceremony.</p>
+<p><strong>Decision test.</strong> Introduce an intermediate representation after at least two consumers need the same stable meaning. Rendering alone may need an adapter; rendering plus reflection and comparison, or analysis plus code generation, can justify a shared typed model.</p>
 </section>
 </section>
-<section id="cluster-d-systems-built-on-s7-at-scale" class="level2" data-number="8.4">
-<h2 data-number="8.4" class="anchored" data-anchor-id="cluster-d-systems-built-on-s7-at-scale"><span class="header-section-number">8.4</span> Cluster D — Systems built on S7 at scale</h2>
-<section id="rtemis-constraints-as-data-one-declaration-to-rule-four-artifacts" class="level3" data-number="8.4.1">
-<h3 data-number="8.4.1" class="anchored" data-anchor-id="rtemis-constraints-as-data-one-declaration-to-rule-four-artifacts"><span class="header-section-number">8.4.1</span> rtemis — constraints as data, one declaration to rule four artifacts</h3>
-<p><a href="https://github.com/rtemis-org/rtemis">rtemis</a> (machine learning framework, 150+ stars) rewrote its entire supervised/unsupervised backend from R6 and S3 onto S7, and its <a href="https://github.com/rtemis-org/rtemis/blob/main/R/010_Props.R"><code>010_Props.R</code></a> is the most sophisticated property foundation yet published. The core idea: every <code>prop_*</code> factory attaches a <strong><code>PropertySpec</code></strong> — a nested S7 object in which the property’s type, bounds, enum, default, nullability, and roughly twenty further axes are stored <em>as data rather than closures</em>. Because the constraints are data, one declaration mechanically produces four artifacts: the R validator, the default, a JSON Schema (via <code>S7_to_JSONSchema()</code>), and downstream a TUI configuration form. This is the “one canonical artifact, many projections” principle executed at the level of individual properties, and it is the reverse arrow of schema-driven development: the model <em>generates</em> the schema.</p>
-<p>The spec’s axes are a checklist of presence-and-arity distinctions most designs never separate: <code>container</code> (none / array / map / matrix / table / struct / factor, each with a documented rationale — a factor serializes as <code>{levels, codes}</code> because a label array would lose level order and empty levels); <code>broadcast</code> (a scalar stands for the whole container) kept mutually exclusive with <code>tunable</code> (an array alongside a value is a <em>search space</em>, one nesting level above the value’s own type — the comment warns “a reader must never infer one from the other’s shape”); <code>tune_on_null</code> versus <code>default_on_null</code> (two different meanings of NULL, declared rather than guessed); <code>constant</code> (class identity) versus fixed-but-settable; <code>applies_when</code> (conditional applicability among sibling properties, encoded as data and checked centrally); and <code>data_bound</code> — validity constraints tied to <em>training-data dimensions</em> (<code>n_features</code>, <code>n_cases</code>, class names) that cannot be checked at construction and are instead resolved in one pass against the data before any training begins.</p>
-<p>Around this foundation sit two more discipline exhibits. <strong>Factory-time validation</strong>: a PropertySpec’s validator checks that the declared default conforms to its own spec, so a bad declaration “fails at factory time — i.e.&nbsp;at package load — rather than at first instantiation.” <strong>Eager configuration validation</strong>: the user-facing <code>setup_*()</code> functions (<code>setup_LightGBM()</code>, <code>setup_GridSearch()</code>) construct validated configuration values <em>before</em> a run that may train thousands of models, so user error surfaces in milliseconds, not hours. There is even an authorship-policy annotation (<code>agent_writable</code>) deliberately excluded from published schemas because <em>who may set a property</em> can change while <em>what the property is</em> cannot — a crisp example of keeping volatile policy out of stable contracts.</p>
+<section id="who-owns-the-contract-s7-properties-or-an-external-schema" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="who-owns-the-contract-s7-properties-or-an-external-schema"><span class="header-section-number">8.4</span> Who owns the contract: S7 properties or an external schema?</h2>
+<section id="s7schema-an-externally-validated-container" class="level3" data-number="8.4.1">
+<h3 data-number="8.4.1" class="anchored" data-anchor-id="s7schema-an-externally-validated-container"><span class="header-section-number">8.4.1</span> S7schema: an externally validated container</h3>
+<p><a href="https://cran.r-project.org/package=S7schema">S7schema</a> validates YAML configuration against JSON Schema using AJV through V8. S7 classes supply the surrounding configuration and extension machinery, while detailed domain entries remain list content whose contract belongs to the external schema. This avoids translating every foreign rule into a second property system and keeps conformance with the authority that other implementations can share.</p>
+<p>The cost is a wider gap between manipulation and certification. Arbitrary list editing does not automatically preserve validity, so an API must say which boundaries revalidate and which operations merely rearrange content. External authority removes duplicate rules only if consumers continue to consult it.</p>
 </section>
-<section id="quickr-s7-as-a-compilers-intermediate-representation" class="level3" data-number="8.4.2">
-<h3 data-number="8.4.2" class="anchored" data-anchor-id="quickr-s7-as-a-compilers-intermediate-representation"><span class="header-section-number">8.4.2</span> quickr — S7 as a compiler’s intermediate representation</h3>
-<p><a href="https://github.com/t-kalinowski/quickr">quickr</a> (Tomasz Kalinowski; CRAN) compiles R functions to Fortran. Users annotate functions with an in-language type DSL — <code>declare(type(x = double(NA)))</code>, a runtime no-op the compiler reads, expressing element modes, shapes, and <em>size relationships between arguments</em> (<code>double(n)</code> twice means “same length”) — and <code>quick()</code> lowers the R code through a typed intermediate representation to generated Fortran compiled via <code>R CMD SHLIB</code>. That IR is S7: typed values (e.g.&nbsp;a <code>FortranSubroutine</code> consumed as <code>fsub@name</code>, <code>fsub@closure</code>) flow between compiler stages. This is rung 3 of the AST escalation ladder, justified because analysis and translation <em>are the product</em>. The broader pattern — R syntax as source language, S7 objects as typed IR, a foreign language as target — recurs wherever multi-target analysis appears.</p>
+<section id="stacbuildr-native-boundary-constructors-plus-conformance" class="level3" data-number="8.4.2">
+<h3 data-number="8.4.2" class="anchored" data-anchor-id="stacbuildr-native-boundary-constructors-plus-conformance"><span class="header-section-number">8.4.2</span> stacbuildr: native boundary constructors plus conformance</h3>
+<p><a href="https://stevenpawley.r-universe.dev/stacbuildr">stacbuildr</a> makes the other trade-off. It gives STAC catalogs, collections, and items native classes, projects them into familiar tabular or spatial forms, and validates emitted documents against published STAC schemas. Its <code>item_from_terra()</code>, <code>item_from_sf()</code>, and <code>item_from_lidr()</code> constructors translate objects users already hold while extracting spatial metadata. The native layer is useful because R-side construction, navigation, and projection need nominal concepts; the external validator remains useful because STAC, not the R package, owns wire conformance.</p>
+<p>The contrast is not “schema versus classes.” S7schema keeps detailed entries under external-schema authority because the container and extension machinery are the main R-side concern. stacbuildr adds a semantic layer because its major nodes have operations in R, but still refuses to make that layer the sole judge of an external specification. In both designs, authority follows the knowledge rather than the implementation language.</p>
 </section>
-<section id="optimizers7-and-parameters7-extracting-the-private-re-implementations" class="level3" data-number="8.4.3">
-<h3 data-number="8.4.3" class="anchored" data-anchor-id="optimizers7-and-parameters7-extracting-the-private-re-implementations"><span class="header-section-number">8.4.3</span> optimizers7 and parameters7 — extracting the private re-implementations</h3>
-<p>The <a href="https://github.com/statmodels7">statmodels7</a> family (<a href="https://github.com/statmodels7/optimizers7">optimizers7</a>, <a href="https://github.com/statmodels7/parameters7">parameters7</a>, with distributions7, linkfunctions7, basis7 as siblings) is built on one sharp observation, stated in both READMEs: almost every modeling package privately re-implements the same mathematics — optimizers as <code>while (!converged)</code> loops with “a tolerance compared against whatever quantity the author had to hand,” constrained parameters as bespoke parametrizations (nlme’s <code>pdMat</code>, lme4’s <code>theta</code>, every mixture package’s softmax) — “none exposing a derivative, none reusable from outside.”</p>
-<p>The response is semantic atoms at the level of <em>mathematical behavior</em>: an optimizer is an S7 object carrying its algorithm and settings, written once against one objective interface; a <strong>stopping rule is a separate, composable object</strong> — the observation that “the stopping rule, which decides what the whole procedure means by <em>finished</em>, is usually a number buried three levels down” is an indirection-rent argument of unusual clarity. A constrained parameter is “a fixed mathematical object: a map from an unconstrained vector onto the set where the parameter lives … with its inverse, its derivatives, and the quantities a likelihood asks of the value” — evaluated, inverted, differentiated to fourth order, as an object. Both packages are also deliberately <em>narrow</em> (“an optimizer here minimizes the function it is given, with no notion of an observation”) — boundary discipline about which layer is allowed to know what.</p>
-<hr>
-</section>
-</section>
-<section id="cluster-e-foundations-and-utilities" class="level2" data-number="8.5">
-<h2 data-number="8.5" class="anchored" data-anchor-id="cluster-e-foundations-and-utilities"><span class="header-section-number">8.5</span> Cluster E — Foundations and utilities</h2>
-<section id="s7x-and-the-r-arcgis-stack-convergent-evolution-of-the-foundation-layer" class="level3" data-number="8.5.1">
-<h3 data-number="8.5.1" class="anchored" data-anchor-id="s7x-and-the-r-arcgis-stack-convergent-evolution-of-the-foundation-layer"><span class="header-section-number">8.5.1</span> s7x and the R-ArcGIS stack — convergent evolution of the foundation layer</h3>
-<p><a href="http://s7x.josiah.rs/">s7x</a> (Josiah Parry) is a utility layer over S7 providing an extensible <strong><code>Enum</code></strong> class (value + variants, validated, castable to character), <strong>scalar properties</strong>, <strong>range properties</strong>, and <strong>property unions and intersections</strong>. The R-ArcGIS packages (arcgisutils, arcgisviz) consume it at scale to model a very large TypeScript-shaped API surface. Together with rtemis’s PropertySpec factories and the private property-factory layers appearing in document-modeling codebases, this is now a three-way independent convergence on the same helper stratum — enum formalization, scalar/bounded factories, presence-aware wrappers — which is strong evidence about which foundation abstractions are genuinely load-bearing.</p>
-</section>
-<section id="objectstore-interface-first-design-embryonic" class="level3" data-number="8.5.2">
-<h3 data-number="8.5.2" class="anchored" data-anchor-id="objectstore-interface-first-design-embryonic"><span class="header-section-number">8.5.2</span> objectstore — interface-first design, embryonic</h3>
-<p><a href="https://github.com/Bisaloo/objectstore">objectstore</a> (Hugo Gruson) is an “Object Store Interface in R with S7” at a very early stage (a handful of commits). Its interest is the shape of the bet: defining the <em>abstract interface</em> to object storage as the package’s product, with backends to dispatch beneath it — the generic-vocabulary-as-plugin-contract pattern (ellmer’s Providers, sqlr’s dialects) applied to storage. One to watch rather than to study yet.</p>
-</section>
-<section id="provider-the-adjacent-case" class="level3" data-number="8.5.3">
-<h3 data-number="8.5.3" class="anchored" data-anchor-id="provider-the-adjacent-case"><span class="header-section-number">8.5.3</span> provider — the adjacent case</h3>
-<p><a href="https://github.com/andrewallenbruce/provider">provider</a> (healthcare provider APIs) is included for completeness as a data-domain API client in this orbit; its published surface is a tidyverse-style httr2 client rather than an S7 architecture. It illustrates the <em>before</em> state of the patterns in this guide — a domain of record types (providers, enrollments, claims) currently represented as tibbles, which is entirely reasonable, and exactly the kind of surface where semantic atoms and typed records would be the next step if invariants started to matter.</p>
-<hr>
+<section id="additional-exhibit-typedjsons-minimal-annotations" class="level3" data-number="8.4.3">
+<h3 data-number="8.4.3" class="anchored" data-anchor-id="additional-exhibit-typedjsons-minimal-annotations"><span class="header-section-number">8.4.3</span> Additional exhibit: typedjson’s minimal annotations</h3>
+<p><a href="https://github.com/nbenn/typedjson">typedjson</a> addresses a narrower authority problem: JSON cannot express every distinction among R values. Its <a href="https://github.com/nbenn/typedjson/blob/7160c060e260bec3d284c39e51a9a5331779aa14/README.md">public design at revision <code>7160c06</code></a> keeps ordinary values as ordinary JSON and adds annotations only where the wire format would otherwise lose information. Ordinary numeric spellings can preserve integer versus double (<code>1</code> versus <code>1.0</code>); annotations carry distinctions such as typed missing or empty values, non-finite numbers, attributes, and object-system metadata. The round-trip goal determines the annotations; it does not justify turning the whole document into an opaque serialization envelope. This is a useful minimum-metadata rule whenever readability and fidelity compete.</p>
+<p><strong>Decision test.</strong> Ask whether downstream operations need nominal identity and invariants inside R. If not, a validated external-schema container may suffice. If they do, add a semantic layer while retaining the external conformance oracle. Annotate a wire form only for distinctions its native vocabulary cannot preserve.</p>
 </section>
 </section>
-<section id="cross-cutting-observations" class="level2" data-number="8.6">
-<h2 data-number="8.6" class="anchored" data-anchor-id="cross-cutting-observations"><span class="header-section-number">8.6</span> Cross-cutting observations</h2>
-<p>Reading the ecosystem as a whole rather than package by package:</p>
-<p><strong>Hybrids are the norm, not the exception.</strong> ellmer (R6 + S7), ragnar (S7 + tibble), S7schema (S7 + list + V8/AJV), sqlr (S7 generics + S4 DBI connections), structr (Rust boundary + plain R values), tooey (pure functional core + runtime shell). Mature designs choose per-object semantics and let the compatibility layer do its job.</p>
-<p><strong>Constraints-as-data keeps winning.</strong> rtemis stores property constraints in a spec object and generates validators, schemas, and forms from it; sqlr stores a schema as a value and generates DDL, comparisons, and diffs from it; rapid parses OpenAPI into a strict object that generators consume; structr compiles a schema once and parses against it. The common shape: represent the contract as inspectable data, derive every enforcement and projection mechanically, and never encode the same fact twice.</p>
-<p><strong>Round-trip as oracle recurs independently.</strong> sqlr’s render/reflect equality is “the package’s own test oracle”; typedjson’s entire product is the identity round trip; stacbuildr writes and reads catalogs through the same representation. When a package models a wire format, the round-trip law is the highest-value test it can own.</p>
-<p><strong>Errors have two channels, and good designs choose deliberately.</strong> Conditions (rlang/cli, chained, classed — datarr’s <code>reflect_validate</code>) for control-flow errors; values (resultr’s <code>Result</code>, converted from conditions at exactly one boundary) for data-flow errors. The anti-pattern is mixing them ad hoc.</p>
-<p><strong>Base-type inheritance appears exactly where it is honest.</strong> A markdown document is text (ragnar); an enum value is a string (s7x). Nobody publishes a subclassed primitive stuffed with structure.</p>
-<p><strong>Multiple dispatch is rare and decisive.</strong> sqlr’s <code>render_sql(x, con)</code> (object × dialect), resultr’s <code>expect(Success, class_character)</code>, S7’s own <code>convert(from, to)</code>. Everywhere it appears, the alternative was a conditionals matrix.</p>
-<p><strong>Rung 0 is always delegated.</strong> stacbuildr to the STAC schemas, S7schema to AJV, sqlr to the actual database engines (refusing even to pretend a generic dialect exists), structr to a compiled Rust validator. None re-implements an external specification internally.</p>
-<p><strong>The document-object-model shape recurs across unrelated domains.</strong> Catalogs, configurations, conversations, styles, SQL schemas, API descriptions, typed IRs, even terminal screens (tooey’s buffer): nested values, aggregate roots, boundary parsers, projection serializers. The domain changes; the anatomy does not.</p>
+<section id="should-failure-be-a-condition-or-a-value" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="should-failure-be-a-condition-or-a-value"><span class="header-section-number">8.5</span> Should failure be a condition or a value?</h2>
+<section id="resultr-explicit-outcome-sequencing" class="level3" data-number="8.5.1">
+<h3 data-number="8.5.1" class="anchored" data-anchor-id="resultr-explicit-outcome-sequencing"><span class="header-section-number">8.5.1</span> resultr: explicit outcome sequencing</h3>
+<p><a href="https://github.com/TransGirlCodes/resultr">resultr</a> defines an abstract <code>Result</code> parent with <code>Success</code> and <code>Failure</code> variants. Its <a href="https://github.com/TransGirlCodes/resultr/blob/0f53d4ee03138cc93a3feef4900746f672d12fe8/R/Result.R"><code>Result.R</code> implementation</a> provides inspection, unwrapping, defaults, and <code>and_then()</code>. A <code>Success</code> applies the next computation; a <code>Failure</code> returns itself, making short-circuiting part of the protocol rather than a convention repeated by each caller.</p>
+<p>The same source makes the condition/value boundary explicit. <code>wrap_in_result()</code> maps ordinary values to <code>Success</code>, errors and warnings to <code>Failure</code>, and existing results to themselves; <code>and_then()</code> uses <code>rlang::try_fetch()</code> at that boundary. This adapter matters because R conditions and result values serve different traffic. Conditions support immediate non-local control flow. Outcome values can be stored, inspected, combined, or returned through an ordinary value channel.</p>
+<p>The exhibit therefore supports a choice, not a universal replacement for conditions. Programmer errors and failures requiring immediate unwinding still belong in the condition channel. A result protocol must also say whether failures short-circuit or accumulate; resultr demonstrates the former, while validation systems often need the latter.</p>
+<p><strong>Decision test.</strong> Choose the channel per subsystem, then define one deliberate adapter. Do not alternate ad hoc between thrown conditions and returned failures.</p>
+</section>
+</section>
+<section id="how-much-behavior-belongs-in-a-reusable-contract" class="level2" data-number="8.6">
+<h2 data-number="8.6" class="anchored" data-anchor-id="how-much-behavior-belongs-in-a-reusable-contract"><span class="header-section-number">8.6</span> How much behavior belongs in a reusable contract?</h2>
+<section id="additional-exhibit-s7contracts-executable-laws" class="level3" data-number="8.6.1">
+<h3 data-number="8.6.1" class="anchored" data-anchor-id="additional-exhibit-s7contracts-executable-laws"><span class="header-section-number">8.6.1</span> Additional exhibit: s7contract’s executable laws</h3>
+<p><a href="https://github.com/sounkou-bioinfo/s7contract">s7contract</a> separates several strengths of agreement. Its <a href="https://github.com/sounkou-bioinfo/s7contract/blob/41dce50d482ad4bfac382e859662abcae0ba56c4/README.md">public README at revision <code>41dce50</code></a> describes structural interfaces as named sets of required generics, explicit traits with registration and defaults, runtime argument and return checks, and generative laws with generators and shrinking. Method availability can show that an object has the required vocabulary; executable laws probe whether implementations preserve behavioral promises that a dispatch table cannot express.</p>
+<p>The causal lesson is that “implements” has layers. Structural conformance is cheap and queryable, runtime contracts can localize bad inputs or outputs, and generative laws can be reused by third-party implementations. None supplies a compile-time proof, and sampled laws do not establish a theorem. Their value is to turn otherwise prose-only obligations into public, repeatable tests.</p>
+<p><strong>Decision test.</strong> Add reusable conformance laws when independent implementations share behavior important enough to test. Do not mistake method presence or generated examples for proof of all valid inputs.</p>
+</section>
+</section>
+<section id="when-should-policy-become-a-composable-object" class="level2" data-number="8.7">
+<h2 data-number="8.7" class="anchored" data-anchor-id="when-should-policy-become-a-composable-object"><span class="header-section-number">8.7</span> When should policy become a composable object?</h2>
+<section id="additional-exhibit-optimizers7-and-parameters7" class="level3" data-number="8.7.1">
+<h3 data-number="8.7.1" class="anchored" data-anchor-id="additional-exhibit-optimizers7-and-parameters7"><span class="header-section-number">8.7.1</span> Additional exhibit: optimizers7 and parameters7</h3>
+<p><a href="https://github.com/statmodels7/optimizers7">optimizers7</a> and <a href="https://github.com/statmodels7/parameters7">parameters7</a> extract mathematical policies that modeling packages often bury inside loops and parameterizations. The public <a href="https://github.com/statmodels7/optimizers7/blob/c50e41416c411b530124f2329679cdc72ec85ff0/README.md">optimizers7 design</a> models an optimizer separately from its stopping rule. Because “finished” is an independent policy, users can compose or replace stopping criteria without forking the algorithm. The <a href="https://github.com/statmodels7/parameters7/blob/21076ad92cd2442b8be767d1b0546f7f783937c5/README.md">parameters7 design</a> models constrained parameters as reusable maps with inverses and derivatives, so an optimizer or likelihood can depend on a stable mathematical interface instead of one package’s private encoding.</p>
+<p>This decomposition pays when behavior varies independently and has operations of its own. A tolerance used by exactly one loop may remain an argument. A stopping rule that combines criteria, or a parameter map that must be evaluated, inverted, and differentiated, has earned nominal identity and dispatch. Both packages also keep their abstractions narrow: optimization need not know what an observation is, and a parameter map need not own a statistical model.</p>
+<p><strong>Decision test.</strong> Promote policy to an object when it varies independently, composes with peers, or supports a reusable operation vocabulary. Keep a scalar option as data when no consumer needs those capabilities.</p>
+</section>
+</section>
+<section id="cross-case-synthesis" class="level2" data-number="8.8">
+<h2 data-number="8.8" class="anchored" data-anchor-id="cross-case-synthesis"><span class="header-section-number">8.8</span> Cross-case synthesis</h2>
+<p>Across these cases, S7 is valuable less as a syntax for records than as a way to put authority and variation in inspectable places. rtemis centralizes facts because several projections need them. sqlr and quickr introduce middle representations because several transformations share stable semantics. S7schema and stacbuildr keep external specifications authoritative even when R-side objects add ergonomics. resultr names a control protocol, s7contract names conformance obligations, and optimizers7 makes an independently varying policy composable.</p>
+<p>The recurring limit is equally important. Central metadata needs projection tests; an IR needs multiple substantive consumers; a native document model does not supersede its wire specification; a result value does not replace all conditions; generated laws are evidence rather than proof; and a policy object must earn its indirection. These are not package-specific cautions. They are the costs created by the same design moves that provide the benefit.</p>
+</section>
+<section id="questions-to-carry-into-a-design" class="level2" data-number="8.9">
+<h2 data-number="8.9" class="anchored" data-anchor-id="questions-to-carry-into-a-design"><span class="header-section-number">8.9</span> Questions to carry into a design</h2>
+<ul>
+<li>How many consumers need the same declared knowledge?</li>
+<li>Is this object a portable value, completed snapshot, or live owner?</li>
+<li>Does a middle representation have more than one substantive consumer?</li>
+<li>Is contract authority local, external, or shared through tested projections?</li>
+<li>What equality relation makes a round trip meaningful?</li>
+<li>Does failure control execution immediately, or travel as data?</li>
+<li>Is a behavior merely configurable, or independently composable?</li>
+<li>Which unknown content is rejected, preserved inertly, or interpreted?</li>
+</ul>
+<p>S7 earns its place when nominal meaning, invariant placement, or generic operations simplify consumers—not merely because structured data exists.</p>
 
 
 </section>
@@ -714,11 +710,6 @@ ul.task-list li input[type="checkbox"] {
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -1034,13 +1025,13 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./06-documents-schemas-dsls.html" class="pagination-link" aria-label="Documents, Schemas, and Languages: Object Models at the Wire">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span>
+      <a href="./06-documents-schemas-dsls.html" class="pagination-link" aria-label="Documents, Schemas, and Languages">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./08-doctrine.html" class="pagination-link" aria-label="Doctrine: Principles, Decision Guides, and Named Anti-Patterns">
-        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./08-doctrine.html" class="pagination-link" aria-label="Doctrine">
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
-<title>11&nbsp; The Middlegame: From Doctrine to a Real Package – S7 Design Notes</title>
+<title>11&nbsp; The Middlegame: Choosing Representation Under Pressure – S7 Design Notes</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -73,6 +74,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./open-questions.html" rel="next">
 <link href="./09-playbooks.html" rel="prev">
+<link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -84,9 +86,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1f846c7865d629590e2cadd4f479fcb7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-c13f21f511963f2a6363cc37617da2fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -116,6 +118,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
+<meta property="og:title" content="11&nbsp; The Middlegame: Choosing Representation Under Pressure – S7 Design Notes">
+<meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta property="og:site_name" content="S7 Design Notes">
+<meta name="twitter:title" content="11&nbsp; The Middlegame: Choosing Representation Under Pressure – S7 Design Notes">
+<meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/10-middlegame.html">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -289,7 +298,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./08-doctrine.html">Practice</a></li><li class="breadcrumb-item"><a href="./10-middlegame.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./08-doctrine.html">Practice</a></li><li class="breadcrumb-item"><a href="./10-middlegame.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -327,7 +336,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -342,19 +351,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span></a>
   </div>
 </li>
       </ul>
@@ -371,19 +380,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span></a>
   </div>
 </li>
       </ul>
@@ -400,7 +409,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span></a>
   </div>
 </li>
       </ul>
@@ -417,19 +426,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></span></a>
   </div>
 </li>
       </ul>
@@ -446,13 +455,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./sources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
   </div>
 </li>
       </ul>
@@ -467,30 +482,53 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#the-gap-this-document-exists-to-close" id="toc-the-gap-this-document-exists-to-close" class="nav-link active" data-scroll-target="#the-gap-this-document-exists-to-close"><span class="header-section-number">11.1</span> The gap this document exists to close</a></li>
-  <li><a href="#part-i-how-the-mature-four-absorbed-complexity" id="toc-part-i-how-the-mature-four-absorbed-complexity" class="nav-link" data-scroll-target="#part-i-how-the-mature-four-absorbed-complexity"><span class="header-section-number">11.2</span> Part I: How the mature four absorbed complexity</a>
+  <li><a href="#the-position" id="toc-the-position" class="nav-link active" data-scroll-target="#the-position"><span class="header-section-number">11.1</span> The position</a>
   <ul class="collapse">
-  <li><a href="#ellmer-one-requirement-forces-the-hybrid" id="toc-ellmer-one-requirement-forces-the-hybrid" class="nav-link" data-scroll-target="#ellmer-one-requirement-forces-the-hybrid"><span class="header-section-number">11.2.1</span> ellmer: one requirement forces the hybrid</a></li>
-  <li><a href="#ragnar-the-price-tag-on-base-type-inheritance" id="toc-ragnar-the-price-tag-on-base-type-inheritance" class="nav-link" data-scroll-target="#ragnar-the-price-tag-on-base-type-inheritance"><span class="header-section-number">11.2.2</span> ragnar: the price tag on base-type inheritance</a></li>
-  <li><a href="#quickr-power-through-refusal" id="toc-quickr-power-through-refusal" class="nav-link" data-scroll-target="#quickr-power-through-refusal"><span class="header-section-number">11.2.3</span> quickr: power through refusal</a></li>
-  <li><a href="#rtemis-the-fixed-cost-of-constraints-as-data" id="toc-rtemis-the-fixed-cost-of-constraints-as-data" class="nav-link" data-scroll-target="#rtemis-the-fixed-cost-of-constraints-as-data"><span class="header-section-number">11.2.4</span> rtemis: the fixed cost of constraints-as-data</a></li>
-  <li><a href="#the-shared-shape" id="toc-the-shared-shape" class="nav-link" data-scroll-target="#the-shared-shape"><span class="header-section-number">11.2.5</span> The shared shape</a></li>
+  <li><a href="#meanings-and-consumers" id="toc-meanings-and-consumers" class="nav-link" data-scroll-target="#meanings-and-consumers"><span class="header-section-number">11.1.1</span> Meanings and consumers</a></li>
+  <li><a href="#representative-values-and-variants" id="toc-representative-values-and-variants" class="nav-link" data-scroll-target="#representative-values-and-variants"><span class="header-section-number">11.1.2</span> Representative values and variants</a></li>
+  <li><a href="#property-inventory" id="toc-property-inventory" class="nav-link" data-scroll-target="#property-inventory"><span class="header-section-number">11.1.3</span> Property inventory</a></li>
+  <li><a href="#rule-placement" id="toc-rule-placement" class="nav-link" data-scroll-target="#rule-placement"><span class="header-section-number">11.1.4</span> Rule placement</a></li>
+  <li><a href="#operations-and-laws" id="toc-operations-and-laws" class="nav-link" data-scroll-target="#operations-and-laws"><span class="header-section-number">11.1.5</span> Operations and laws</a></li>
   </ul></li>
-  <li><a href="#part-ii-an-annotated-game" id="toc-part-ii-an-annotated-game" class="nav-link" data-scroll-target="#part-ii-an-annotated-game"><span class="header-section-number">11.3</span> Part II: An annotated game</a>
+  <li><a href="#candidate-a-property-rich-native-model" id="toc-candidate-a-property-rich-native-model" class="nav-link" data-scroll-target="#candidate-a-property-rich-native-model"><span class="header-section-number">11.2</span> Candidate A: property-rich native model</a>
   <ul class="collapse">
-  <li><a href="#move-1-scope-model-what-your-operations-touch" id="toc-move-1-scope-model-what-your-operations-touch" class="nav-link" data-scroll-target="#move-1-scope-model-what-your-operations-touch"><span class="header-section-number">11.3.1</span> Move 1: Scope — model what your operations touch</a></li>
-  <li><a href="#move-2-rung-0-the-engines-validator-and-gold-files" id="toc-move-2-rung-0-the-engines-validator-and-gold-files" class="nav-link" data-scroll-target="#move-2-rung-0-the-engines-validator-and-gold-files"><span class="header-section-number">11.3.2</span> Move 2: Rung 0 — the engine’s validator, and gold files</a></li>
-  <li><a href="#move-3-the-layer-family-three-principles-collide" id="toc-move-3-the-layer-family-three-principles-collide" class="nav-link" data-scroll-target="#move-3-the-layer-family-three-principles-collide"><span class="header-section-number">11.3.3</span> Move 3: The layer family — three principles collide</a></li>
-  <li><a href="#move-4-expressions-rung-1-stated-as-a-policy-not-an-omission" id="toc-move-4-expressions-rung-1-stated-as-a-policy-not-an-omission" class="nav-link" data-scroll-target="#move-4-expressions-rung-1-stated-as-a-policy-not-an-omission"><span class="header-section-number">11.3.4</span> Move 4: Expressions — rung 1, stated as a policy not an omission</a></li>
-  <li><a href="#move-5-the-layer-classes-thin-because-the-table-is-thick" id="toc-move-5-the-layer-classes-thin-because-the-table-is-thick" class="nav-link" data-scroll-target="#move-5-the-layer-classes-thin-because-the-table-is-thick"><span class="header-section-number">11.3.5</span> Move 5: The layer classes — thin, because the table is thick</a></li>
-  <li><a href="#move-6-presence-and-the-round-trip-law-decided-together-or-wrong" id="toc-move-6-presence-and-the-round-trip-law-decided-together-or-wrong" class="nav-link" data-scroll-target="#move-6-presence-and-the-round-trip-law-decided-together-or-wrong"><span class="header-section-number">11.3.6</span> Move 6: Presence and the round-trip law — decided together, or wrong</a></li>
-  <li><a href="#move-7-the-root-and-the-laws-only-it-can-see" id="toc-move-7-the-root-and-the-laws-only-it-can-see" class="nav-link" data-scroll-target="#move-7-the-root-and-the-laws-only-it-can-see"><span class="header-section-number">11.3.7</span> Move 7: The root, and the laws only it can see</a></li>
-  <li><a href="#move-8-mutators-the-front-door-with-preconditions" id="toc-move-8-mutators-the-front-door-with-preconditions" class="nav-link" data-scroll-target="#move-8-mutators-the-front-door-with-preconditions"><span class="header-section-number">11.3.8</span> Move 8: Mutators — the front door, with preconditions</a></li>
-  <li><a href="#move-9-ids-the-tier-1-answer-to-the-atoms-versus-earning-tension" id="toc-move-9-ids-the-tier-1-answer-to-the-atoms-versus-earning-tension" class="nav-link" data-scroll-target="#move-9-ids-the-tier-1-answer-to-the-atoms-versus-earning-tension"><span class="header-section-number">11.3.9</span> Move 9: Ids — the tier-1 answer to the atoms-versus-earning tension</a></li>
-  <li><a href="#move-10-the-manager-that-must-not-exist" id="toc-move-10-the-manager-that-must-not-exist" class="nav-link" data-scroll-target="#move-10-the-manager-that-must-not-exist"><span class="header-section-number">11.3.10</span> Move 10: The manager that must not exist</a></li>
-  <li><a href="#the-games-concessions-tallied" id="toc-the-games-concessions-tallied" class="nav-link" data-scroll-target="#the-games-concessions-tallied"><span class="header-section-number">11.3.11</span> The game’s concessions, tallied</a></li>
+  <li><a href="#what-it-buys" id="toc-what-it-buys" class="nav-link" data-scroll-target="#what-it-buys"><span class="header-section-number">11.2.1</span> What it buys</a></li>
+  <li><a href="#what-it-costs" id="toc-what-it-costs" class="nav-link" data-scroll-target="#what-it-costs"><span class="header-section-number">11.2.2</span> What it costs</a></li>
+  <li><a href="#when-it-wins" id="toc-when-it-wins" class="nav-link" data-scroll-target="#when-it-wins"><span class="header-section-number">11.2.3</span> When it wins</a></li>
   </ul></li>
-  <li><a href="#part-iii-the-loop-that-actually-transfers-the-wisdom" id="toc-part-iii-the-loop-that-actually-transfers-the-wisdom" class="nav-link" data-scroll-target="#part-iii-the-loop-that-actually-transfers-the-wisdom"><span class="header-section-number">11.4</span> Part III: The loop that actually transfers the wisdom</a></li>
+  <li><a href="#candidate-b-typed-known-nodes-plus-extension-bag" id="toc-candidate-b-typed-known-nodes-plus-extension-bag" class="nav-link" data-scroll-target="#candidate-b-typed-known-nodes-plus-extension-bag"><span class="header-section-number">11.3</span> Candidate B: typed known nodes plus extension bag</a>
+  <ul class="collapse">
+  <li><a href="#what-it-buys-1" id="toc-what-it-buys-1" class="nav-link" data-scroll-target="#what-it-buys-1"><span class="header-section-number">11.3.1</span> What it buys</a></li>
+  <li><a href="#what-it-costs-1" id="toc-what-it-costs-1" class="nav-link" data-scroll-target="#what-it-costs-1"><span class="header-section-number">11.3.2</span> What it costs</a></li>
+  <li><a href="#when-it-wins-1" id="toc-when-it-wins-1" class="nav-link" data-scroll-target="#when-it-wins-1"><span class="header-section-number">11.3.3</span> When it wins</a></li>
+  </ul></li>
+  <li><a href="#candidate-c-validated-open-bag" id="toc-candidate-c-validated-open-bag" class="nav-link" data-scroll-target="#candidate-c-validated-open-bag"><span class="header-section-number">11.4</span> Candidate C: validated open bag</a>
+  <ul class="collapse">
+  <li><a href="#what-it-buys-2" id="toc-what-it-buys-2" class="nav-link" data-scroll-target="#what-it-buys-2"><span class="header-section-number">11.4.1</span> What it buys</a></li>
+  <li><a href="#what-it-costs-2" id="toc-what-it-costs-2" class="nav-link" data-scroll-target="#what-it-costs-2"><span class="header-section-number">11.4.2</span> What it costs</a></li>
+  <li><a href="#when-it-wins-2" id="toc-when-it-wins-2" class="nav-link" data-scroll-target="#when-it-wins-2"><span class="header-section-number">11.4.3</span> When it wins</a></li>
+  </ul></li>
+  <li><a href="#comparing-candidates-by-consumer" id="toc-comparing-candidates-by-consumer" class="nav-link" data-scroll-target="#comparing-candidates-by-consumer"><span class="header-section-number">11.5</span> Comparing candidates by consumer</a>
+  <ul class="collapse">
+  <li><a href="#construction" id="toc-construction" class="nav-link" data-scroll-target="#construction"><span class="header-section-number">11.5.1</span> Construction</a></li>
+  <li><a href="#supported-transformation" id="toc-supported-transformation" class="nav-link" data-scroll-target="#supported-transformation"><span class="header-section-number">11.5.2</span> Supported transformation</a></li>
+  <li><a href="#external-evolution" id="toc-external-evolution" class="nav-link" data-scroll-target="#external-evolution"><span class="header-section-number">11.5.3</span> External evolution</a></li>
+  <li><a href="#projection-and-interface-generation" id="toc-projection-and-interface-generation" class="nav-link" data-scroll-target="#projection-and-interface-generation"><span class="header-section-number">11.5.4</span> Projection and interface generation</a></li>
+  <li><a href="#analysis-and-dispatch" id="toc-analysis-and-dispatch" class="nav-link" data-scroll-target="#analysis-and-dispatch"><span class="header-section-number">11.5.5</span> Analysis and dispatch</a></li>
+  </ul></li>
+  <li><a href="#an-annotated-choice" id="toc-an-annotated-choice" class="nav-link" data-scroll-target="#an-annotated-choice"><span class="header-section-number">11.6</span> An annotated choice</a>
+  <ul class="collapse">
+  <li><a href="#one-implementation-slice" id="toc-one-implementation-slice" class="nav-link" data-scroll-target="#one-implementation-slice"><span class="header-section-number">11.6.1</span> One implementation slice</a></li>
+  </ul></li>
+  <li><a href="#conversion-pressure-three-different-jobs" id="toc-conversion-pressure-three-different-jobs" class="nav-link" data-scroll-target="#conversion-pressure-three-different-jobs"><span class="header-section-number">11.7</span> Conversion pressure: three different jobs</a>
+  <ul class="collapse">
+  <li><a href="#faithful-conversion" id="toc-faithful-conversion" class="nav-link" data-scroll-target="#faithful-conversion"><span class="header-section-number">11.7.1</span> Faithful conversion</a></li>
+  <li><a href="#adapter-or-compiler" id="toc-adapter-or-compiler" class="nav-link" data-scroll-target="#adapter-or-compiler"><span class="header-section-number">11.7.2</span> Adapter or compiler</a></li>
+  <li><a href="#earned-intermediate-representation" id="toc-earned-intermediate-representation" class="nav-link" data-scroll-target="#earned-intermediate-representation"><span class="header-section-number">11.7.3</span> Earned intermediate representation</a></li>
+  </ul></li>
+  <li><a href="#acceptance-laws" id="toc-acceptance-laws" class="nav-link" data-scroll-target="#acceptance-laws"><span class="header-section-number">11.8</span> Acceptance laws</a></li>
+  <li><a href="#what-remains-unsettled" id="toc-what-remains-unsettled" class="nav-link" data-scroll-target="#what-remains-unsettled"><span class="header-section-number">11.9</span> What remains unsettled</a></li>
+  <li><a href="#keeping-the-decision-live" id="toc-keeping-the-decision-live" class="nav-link" data-scroll-target="#keeping-the-decision-live"><span class="header-section-number">11.10</span> Keeping the decision live</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/10-middlegame.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -498,9 +536,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./08-doctrine.html">Practice</a></li><li class="breadcrumb-item"><a href="./10-middlegame.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./08-doctrine.html">Practice</a></li><li class="breadcrumb-item"><a href="./10-middlegame.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></h1>
+<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: Choosing Representation Under Pressure</span></h1>
 </div>
 
 
@@ -517,173 +555,324 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="the-gap-this-document-exists-to-close" class="level2" data-number="11.1">
-<h2 data-number="11.1" class="anchored" data-anchor-id="the-gap-this-document-exists-to-close"><span class="header-section-number">11.1</span> The gap this document exists to close</h2>
-<p>Be honest about what the folder contained before this document. The conceptual chapters justify a worldview. The doctrine compresses it into defaults. The field guide shows <em>positions</em> — snapshots of finished packages with the pattern each one exhibits. The playbooks give <em>opening theory</em> — the first eight moves for six recognizable situations. In chess terms, the collection had openings, annotated positions, and endgame tables, and was missing the genre that actually teaches judgment: <strong>annotated full games</strong>, where you watch the decisions get made in sequence, interacting, under pressure, with the alternatives visible and the concessions priced.</p>
-<p>The gap is structural, not editorial. Doctrine is stated per decision — one principle, one rung, one encoding choice at a time — but a real package is a <em>system of coupled decisions</em>: the presence policy constrains the round-trip law, which constrains the open/closed choice, which feeds back into what the validators may assume. Toy examples cannot exhibit coupling, because coupling only appears when there are enough decisions to couple. This is why the mature packages — ellmer, ragnar, quickr, rtemis — feel categorically more complicated than anything in the playbooks: they are not applying more patterns; they are absorbing the <em>interactions</em>.</p>
-<p>So this document does two things. First it re-reads the mature four, not for their patterns (the field guide’s job) but for their <strong>pressure chains</strong> — the sequence by which one hard requirement forced a cascade of design consequences, including the concessions. Then it plays one annotated game at realistic fidelity: a style-document core, derived decision by decision, with the doctrine cited where it was followed and overruled where reality outvoted it. The code for the load-bearing spine was verified against S7 0.2.2 on R 4.6.1.</p>
-</section>
-<section id="part-i-how-the-mature-four-absorbed-complexity" class="level2" data-number="11.2">
-<h2 data-number="11.2" class="anchored" data-anchor-id="part-i-how-the-mature-four-absorbed-complexity"><span class="header-section-number">11.2</span> Part I: How the mature four absorbed complexity</h2>
-<section id="ellmer-one-requirement-forces-the-hybrid" class="level3" data-number="11.2.1">
-<h3 data-number="11.2.1" class="anchored" data-anchor-id="ellmer-one-requirement-forces-the-hybrid"><span class="header-section-number">11.2.1</span> ellmer: one requirement forces the hybrid</h3>
-<p>The instructive way to read ellmer is to ask what <em>forced</em> each piece of its architecture, and the answer starts with a product requirement, not a philosophy: <strong>streaming</strong>. A streamed response is a value that does not exist yet — tokens accumulate over seconds, consumers want them as they arrive, and the eventual <code>Turn</code> is only a fact once the stream closes. Partial state must live <em>somewhere</em>, and no amount of value-semantics conviction changes that. That single requirement makes the mutable <code>Chat</code> object load-bearing: R6 is not a stylistic lapse but the honest home for an accumulation-in-progress, and the doctrine’s actual contribution is <em>containment</em> — completed turns crystallize into immutable S7 values, the conversation is reconstructible from the values alone, and the mutable rim stays one class wide.</p>
-<p>The second chain: <strong>provider variation</strong>. Every supported provider has quirks — capabilities, wire formats, authentication, streaming protocols — and the <code>Provider</code> dispatch surface absorbs them. The price, visible if you watch the package evolve, is that a plugin surface <em>grows</em>: each new provider capability becomes a new generic or a new argument somewhere, and the interface can never again be reorganized cheaply because third parties stand on it. The lesson for the middlegame: doctrine 10 tells you to design the verb vocabulary carefully; ellmer shows <em>why the stakes are asymmetric</em> — under-designing an internal function costs a refactor, under-designing an extension surface costs an ecosystem migration.</p>
-</section>
-<section id="ragnar-the-price-tag-on-base-type-inheritance" class="level3" data-number="11.2.2">
-<h3 data-number="11.2.2" class="anchored" data-anchor-id="ragnar-the-price-tag-on-base-type-inheritance"><span class="header-section-number">11.2.2</span> ragnar: the price tag on base-type inheritance</h3>
-<p>The compendium praises <code>MarkdownDocumentChunks</code> inheriting from tibble as “honest base-type inheritance” — the value really is a table. The middlegame reading adds the invoice: <strong>inheriting a base type means the parent’s entire API becomes your unvalidated mutator set.</strong> Every dplyr verb, every <code>[</code> method, every tool in the tibble ecosystem can transform the object along paths where the subclass’s laws are never consulted — drop the columns the class depends on, break the alignment with <code>@document</code>, or silently strip the subclass entirely. ragnar’s concession is that its invariants on that surface are documented rather than enforced, and re-established at the operations that matter. That is a rational trade — the whole point of inheriting tibble is to <em>get</em> that ecosystem — but it is a trade, and the doctrine’s “construction is the proof” holds only on the package’s own front doors, not on the thousand side doors the parent class ships with. When you inherit a base type, you are choosing which of those doors to guard, and accepting the rest.</p>
-</section>
-<section id="quickr-power-through-refusal" class="level3" data-number="11.2.3">
-<h3 data-number="11.2.3" class="anchored" data-anchor-id="quickr-power-through-refusal"><span class="header-section-number">11.2.3</span> quickr: power through refusal</h3>
-<p>quickr compiles R to Fortran, and the design decision that makes it possible is what it <em>declines</em>: it accepts a subset of R, requires <code>declare(type())</code> annotations, and errors on constructs it cannot compile faithfully rather than approximating their semantics. This is doctrine 17 — refuse to guess — applied not to an argument default but to the entire domain of the tool: <strong>shrink the promise until you can keep it.</strong> The middlegame lesson generalizes to every “model an existing thing” project: the fastest route to a robust core is usually not handling more of the input space, it is drawing a smaller boundary you can defend completely, with loud errors at the fence. Coverage grows later, fence post by fence post, each one tested. The packages that tried to accept everything on day one are the ones whose validators are full of guesses.</p>
-</section>
-<section id="rtemis-the-fixed-cost-of-constraints-as-data" class="level3" data-number="11.2.4">
-<h3 data-number="11.2.4" class="anchored" data-anchor-id="rtemis-the-fixed-cost-of-constraints-as-data"><span class="header-section-number">11.2.4</span> rtemis: the fixed cost of constraints-as-data</h3>
-<p>rtemis’s property-factory stratum — the <code>PropertySpec</code> machinery deriving validators, defaults, JSON Schema, and TUI forms from single declarations — is the compendium’s favorite exhibit for constraints-as-data. The middlegame reading prices it: that stratum is itself a serious system, hundreds of lines of meta-machinery that every contributor must understand before they can add a property, and every error message now has an extra layer of indirection between the symptom and the declaration. It amortizes because rtemis has <em>hundreds</em> of hyperparameters across dozens of models and genuinely needs all four projections. Below some scale threshold — and most packages are below it — hand-written <code>new_property()</code> calls are not a failure to apply the pattern; they are the pattern correctly not applied (doctrine 15: the third occurrence, not the first). The factory stratum is the right move exactly when you can name the projections you need and count the declarations that will pay for it.</p>
-</section>
-<section id="the-shared-shape" class="level3" data-number="11.2.5">
-<h3 data-number="11.2.5" class="anchored" data-anchor-id="the-shared-shape"><span class="header-section-number">11.2.5</span> The shared shape</h3>
-<p>Four packages, one shape: each met a pressure that made the naive, doctrine-by-the-letter design uneconomic — streaming broke pure values, ecosystem reuse broke enforced invariants, R’s full semantics broke compilability, hyperparameter count broke hand-written validation. And each responded the same way: <strong>not by abandoning a principle but by moving where it applies</strong> — containing state instead of forbidding it, guarding chosen doors instead of all doors, shrinking the promise instead of diluting it, buying machinery only where the census showed volume. That move — relocating a principle’s jurisdiction instead of revoking it — is the core middlegame skill, and it is exactly what per-decision doctrine cannot teach and an annotated game can.</p>
-</section>
-</section>
-<section id="part-ii-an-annotated-game" class="level2" data-number="11.3">
-<h2 data-number="11.3" class="anchored" data-anchor-id="part-ii-an-annotated-game"><span class="header-section-number">11.3</span> Part II: An annotated game</h2>
-<p>The domain: a core for map-style documents — the root, its sources, its layers, their paint. Chosen because it is real, the spec pressure is genuine (hundreds of paint properties, embedded expressions, ongoing spec evolution), and it exercises three playbooks at once (spec modeling, embedded language, and the temptation of a stateful manager). What follows is a derivation, not project work: ten decisions in dependency order, each with its pressure, its options, and its resolution — doctrine cited when followed, named when overruled.</p>
-<section id="move-1-scope-model-what-your-operations-touch" class="level3" data-number="11.3.1">
-<h3 data-number="11.3.1" class="anchored" data-anchor-id="move-1-scope-model-what-your-operations-touch"><span class="header-section-number">11.3.1</span> Move 1: Scope — model what your operations touch</h3>
-<p>The census (playbook 1, move 2) says the spec is far too large to model at once: root, sources, layers, sprite, glyphs, terrain, fog, transitions, and a paint vocabulary in the hundreds. The pressure is real and the answer is an ordering, not an ambition: model the nodes your <em>operations</em> touch — construction, mutation, serialization of root/sources/layers — and let everything else pass through as inert wire data until an operation needs it. Deferral is not debt if the pass-through is lossless; it is the vertical-slice discipline applied to scope.</p>
-</section>
-<section id="move-2-rung-0-the-engines-validator-and-gold-files" class="level3" data-number="11.3.2">
-<h3 data-number="11.3.2" class="anchored" data-anchor-id="move-2-rung-0-the-engines-validator-and-gold-files"><span class="header-section-number">11.3.2</span> Move 2: Rung 0 — the engine’s validator, and gold files</h3>
-<p>The engine ships an authoritative validator; re-implementing it in R would be expression-system envy at document scale. Rung 0 is: gold files produced by reference tooling, round-trip tests against them, and the engine validator run in CI where a JS runtime is available. Every subsequent decision about what <em>we</em> validate assumes this floor exists.</p>
-</section>
-<section id="move-3-the-layer-family-three-principles-collide" class="level3" data-number="11.3.3">
-<h3 data-number="11.3.3" class="anchored" data-anchor-id="move-3-the-layer-family-three-principles-collide"><span class="header-section-number">11.3.3</span> Move 3: The layer family — three principles collide</h3>
-<p>The pivotal decision of the whole game. Layers come in a dozen types (fill, line, symbol, raster, …) that differ in behavior and in their paint vocabularies — doctrine 8 says subclass family, and dispatch genuinely wants it (validation, legend generation, rendering hints all vary by type). But each type’s paint vocabulary is dozens of properties, churned by spec releases — hand-modeling four hundred paint properties as S7 properties is schema cosplay by volume, and doctrine 16 says generate tables, not class graphs. Meanwhile the paint values themselves can be literals <em>or</em> expressions, which doctrine 8 would encode as a union.</p>
-<p>The resolution is a <strong>two-level hybrid, with the split placed exactly at the dispatch boundary</strong>: layer <em>types</em> become subclasses, because behavior dispatches on them; paint becomes a <em>validated bag</em> — one list property, checked against a generated spec table. The bag is a denormalization doctrine 8 would frown at, chosen consciously: variant honesty is paid for where dispatch collects the benefit (the type level) and declined where it would cost four hundred properties tracking a moving spec (the paint level). The spec table is constraints-as-data — rtemis’s pattern at the scale where it actually amortizes:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># generated from the engine's style-spec json, one row per paint property;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># excerpt shown - the real table is machine-derived, never hand-edited</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>paint_spec <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">fill =</span> <span class="fu">list</span>(</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">fill-color</span><span class="st">`</span>   <span class="ot">=</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">"color"</span>),</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">fill-opacity</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">"number"</span>, <span class="at">minimum =</span> <span class="dv">0</span>, <span class="at">maximum =</span> <span class="dv">1</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">line =</span> <span class="fu">list</span>(</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">line-color</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">"color"</span>),</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">line-width</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">"number"</span>, <span class="at">minimum =</span> <span class="dv">0</span>)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>check_paint <span class="ot">&lt;-</span> <span class="cf">function</span>(paint, type) {</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  spec <span class="ot">&lt;-</span> paint_spec[[type]]</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  bad <span class="ot">&lt;-</span> <span class="fu">character</span>()</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (nm <span class="cf">in</span> <span class="fu">names</span>(paint)) {</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    rule <span class="ot">&lt;-</span> spec[[nm]]</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.null</span>(rule)) {</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>      bad <span class="ot">&lt;-</span> <span class="fu">c</span>(bad, <span class="fu">paste0</span>(<span class="st">"unknown paint property '"</span>, nm, <span class="st">"'"</span>))</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>      <span class="cf">next</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    val <span class="ot">&lt;-</span> paint[[nm]]</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is_expression</span>(val)) <span class="cf">next</span>   <span class="co"># move 4: rung 1, the engine judges these</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">identical</span>(rule<span class="sc">$</span>type, <span class="st">"number"</span>) <span class="sc">&amp;&amp;</span> <span class="fu">is.numeric</span>(val)) {</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(rule<span class="sc">$</span>minimum) <span class="sc">&amp;&amp;</span> val <span class="sc">&lt;</span> rule<span class="sc">$</span>minimum) {</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        bad <span class="ot">&lt;-</span> <span class="fu">c</span>(bad, <span class="fu">paste0</span>(<span class="st">"'"</span>, nm, <span class="st">"' below minimum "</span>, rule<span class="sc">$</span>minimum))</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(rule<span class="sc">$</span>maximum) <span class="sc">&amp;&amp;</span> val <span class="sc">&gt;</span> rule<span class="sc">$</span>maximum) {</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        bad <span class="ot">&lt;-</span> <span class="fu">c</span>(bad, <span class="fu">paste0</span>(<span class="st">"'"</span>, nm, <span class="st">"' above maximum "</span>, rule<span class="sc">$</span>maximum))</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(bad)) bad</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Note what the interaction did: doctrine 16 (generate tables) is what made overruling doctrine 8 (honest variants) <em>safe</em> — the bag is lawless only as a class shape; the table restores the laws at validation time, and the same table can later project documentation or a paint-builder UI (the reverse arrow of <a href="./06-documents-schemas-dsls.html">06-documents-schemas-dsls.qmd</a>). Neither principle alone produces this design; their collision does.</p>
-</section>
-<section id="move-4-expressions-rung-1-stated-as-a-policy-not-an-omission" class="level3" data-number="11.3.4">
-<h3 data-number="11.3.4" class="anchored" data-anchor-id="move-4-expressions-rung-1-stated-as-a-policy-not-an-omission"><span class="header-section-number">11.3.4</span> Move 4: Expressions — rung 1, stated as a policy not an omission</h3>
-<p>Paint values may be expressions (<code>["interpolate", ["zoom"], ...]</code>). The escalation ladder says opaque passthrough until analysis is the product, so <code>check_paint()</code> contains one line — <code>if (is_expression(val)) next</code> — and that line <em>is</em> the policy: expressions are the engine’s jurisdiction. The trap this dodges is the validator slowly learning the expression grammar, one special case at a time, until it is a bad reimplementation of the engine (expression-system envy). The upgrade path is already written down: if legend generation ever becomes a requirement, that is the <code>fields_used()</code> justification test from <a href="./09-playbooks.html">09-playbooks.qmd</a>, and the climb goes to combinators, not directly to an AST.</p>
-</section>
-<section id="move-5-the-layer-classes-thin-because-the-table-is-thick" class="level3" data-number="11.3.5">
-<h3 data-number="11.3.5" class="anchored" data-anchor-id="move-5-the-layer-classes-thin-because-the-table-is-thick"><span class="header-section-number">11.3.5</span> Move 5: The layer classes — thin, because the table is thick</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>layer <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(<span class="st">"layer"</span>, <span class="at">abstract =</span> <span class="cn">TRUE</span>, <span class="at">properties =</span> <span class="fu">list</span>(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">id     =</span> S7<span class="sc">::</span>class_character,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">source =</span> S7<span class="sc">::</span>class_character,</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">paint  =</span> S7<span class="sc">::</span><span class="fu">new_property</span>(S7<span class="sc">::</span>class_list, <span class="at">default =</span> <span class="fu">list</span>())</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>))</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>fill_layer <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(<span class="st">"fill_layer"</span>, <span class="at">parent =</span> layer,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">validator =</span> <span class="cf">function</span>(self) <span class="fu">check_paint</span>(self<span class="sc">@</span>paint, <span class="st">"fill"</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>line_layer <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(<span class="st">"line_layer"</span>, <span class="at">parent =</span> layer,</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">validator =</span> <span class="cf">function</span>(self) <span class="fu">check_paint</span>(self<span class="sc">@</span>paint, <span class="st">"line"</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Each subclass validator is one delegation line. This is the checking ladder holding under load: type lives on the property classes, paint law lives in the table, and the subclass’s only job is to bind its type tag to the table lookup. A dozen layer types cost a dozen three-line classes — which is also the honest test that the move-3 hybrid was right: had we hand-modeled paint, each of these classes would be a hundred lines of property declarations chasing the spec.</p>
-</section>
-<section id="move-6-presence-and-the-round-trip-law-decided-together-or-wrong" class="level3" data-number="11.3.6">
-<h3 data-number="11.3.6" class="anchored" data-anchor-id="move-6-presence-and-the-round-trip-law-decided-together-or-wrong"><span class="header-section-number">11.3.6</span> Move 6: Presence and the round-trip law — decided together, or wrong</h3>
-<p>Paint properties have engine-defined defaults (<code>fill-opacity</code> defaults to 1 in the engine). The presence decision: <strong>do not store engine defaults.</strong> An omitted key means “engine default,” and the model preserves the distinction between <em>omitted</em> and <em>explicitly set to the default value</em> — because a user who wrote <code>fill-opacity: 1</code> and a user who wrote nothing have expressed different things, and a future spec release could change the default out from under the silent one. This immediately constrains the round-trip law (the equality taxonomy of <a href="./06-documents-schemas-dsls.html">06-documents-schemas-dsls.qmd</a>): the promise is <em>canonical equality</em> on modeled fields and <em>representational preservation</em> on the paint bag — not wire equivalence, precisely because wire equivalence would license resolving defaults, which is the one normalization this design forbids. Two decisions, one lock: neither the presence policy nor the equality relation could have been chosen alone.</p>
-</section>
-<section id="move-7-the-root-and-the-laws-only-it-can-see" class="level3" data-number="11.3.7">
-<h3 data-number="11.3.7" class="anchored" data-anchor-id="move-7-the-root-and-the-laws-only-it-can-see"><span class="header-section-number">11.3.7</span> Move 7: The root, and the laws only it can see</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>style <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(<span class="st">"style"</span>, <span class="at">properties =</span> <span class="fu">list</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">sources =</span> S7<span class="sc">::</span><span class="fu">new_property</span>(S7<span class="sc">::</span>class_list, <span class="at">default =</span> <span class="fu">list</span>()),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">layers  =</span> S7<span class="sc">::</span><span class="fu">new_property</span>(S7<span class="sc">::</span>class_list, <span class="at">default =</span> <span class="fu">list</span>())</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>), <span class="at">validator =</span> <span class="cf">function</span>(self) {</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  ids  <span class="ot">&lt;-</span> <span class="fu">vapply</span>(self<span class="sc">@</span>layers, <span class="cf">function</span>(l) l<span class="sc">@</span>id, <span class="fu">character</span>(<span class="dv">1</span>))</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  refs <span class="ot">&lt;-</span> <span class="fu">vapply</span>(self<span class="sc">@</span>layers, <span class="cf">function</span>(l) l<span class="sc">@</span>source, <span class="fu">character</span>(<span class="dv">1</span>))</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  msgs <span class="ot">&lt;-</span> <span class="fu">character</span>()</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">anyDuplicated</span>(ids)) msgs <span class="ot">&lt;-</span> <span class="fu">c</span>(msgs, <span class="st">"layer ids must be unique"</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  missing_refs <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(refs, <span class="fu">names</span>(self<span class="sc">@</span>sources))</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(missing_refs)) {</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    msgs <span class="ot">&lt;-</span> <span class="fu">c</span>(msgs, <span class="fu">paste</span>(<span class="st">"layer references unknown source:"</span>, missing_refs))</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(msgs)) msgs</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Id uniqueness and source resolution are laws no layer can check — they mention the collection. The aggregate-root rung earns its place here, and note the granularity call (an open question the ledger tracks): this design has <em>one</em> root despite the document’s depth, because both cross-object laws happen to be visible from the top. A spec with cross-references three levels down would force the nested-root question this game gets to skip.</p>
-</section>
-<section id="move-8-mutators-the-front-door-with-preconditions" class="level3" data-number="11.3.8">
-<h3 data-number="11.3.8" class="anchored" data-anchor-id="move-8-mutators-the-front-door-with-preconditions"><span class="header-section-number">11.3.8</span> Move 8: Mutators — the front door, with preconditions</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>add_layer <span class="ot">&lt;-</span> <span class="cf">function</span>(style, layer, <span class="at">before =</span> <span class="cn">NULL</span>) {</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  layers <span class="ot">&lt;-</span> style<span class="sc">@</span>layers</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(before)) {</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    ids <span class="ot">&lt;-</span> <span class="fu">vapply</span>(layers, <span class="cf">function</span>(l) l<span class="sc">@</span>id, <span class="fu">character</span>(<span class="dv">1</span>))</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    pos <span class="ot">&lt;-</span> <span class="fu">match</span>(before, ids)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(pos)) {</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>      cli<span class="sc">::</span><span class="fu">cli_abort</span>(<span class="st">"no layer with id {.val {before}} to insert before."</span>)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    layers <span class="ot">&lt;-</span> <span class="fu">append</span>(layers, <span class="fu">list</span>(layer), <span class="at">after =</span> pos <span class="sc">-</span> <span class="dv">1</span>)</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    layers <span class="ot">&lt;-</span> <span class="fu">c</span>(layers, <span class="fu">list</span>(layer))</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  S7<span class="sc">::</span><span class="fu">set_props</span>(style, <span class="at">layers =</span> layers)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><code>before</code> not existing is an <em>operation</em> error (rung: method precondition), distinct from the structural laws below it — the message can therefore speak the operation’s language (“insert before”), which no class validator could. And a verified interaction worth knowing: <code>set_props()</code> re-runs the root validator, so a duplicate id introduced <em>through the mutator</em> is rejected by the root’s law without the mutator checking it — the rungs genuinely do not duplicate each other, and the insertion order, precondition failure, and duplicate rejection were all confirmed live.</p>
-</section>
-<section id="move-9-ids-the-tier-1-answer-to-the-atoms-versus-earning-tension" class="level3" data-number="11.3.9">
-<h3 data-number="11.3.9" class="anchored" data-anchor-id="move-9-ids-the-tier-1-answer-to-the-atoms-versus-earning-tension"><span class="header-section-number">11.3.9</span> Move 9: Ids — the tier-1 answer to the atoms-versus-earning tension</h3>
-<p>Should <code>layer_id</code> be a semantic type? It is a meaning, not just a string — doctrine 1 wants it named early; doctrine 15 wants abstraction earned. The concrete resolution uses the tiers: a <em>reused property definition</em> (tier 1 — one <code>new_property()</code> value shared by every id-shaped slot) names the meaning and centralizes its law at near-zero cost, while a full class (tier 2/3) waits until something dispatches on ids or ids grow structure. The tension between two principles, unresolvable in the abstract, costs one line to resolve in the concrete — which is itself a middlegame lesson: many doctrinal collisions are cheap at the point of decision and only look profound in prose.</p>
-</section>
-<section id="move-10-the-manager-that-must-not-exist" class="level3" data-number="11.3.10">
-<h3 data-number="11.3.10" class="anchored" data-anchor-id="move-10-the-manager-that-must-not-exist"><span class="header-section-number">11.3.10</span> Move 10: The manager that must not exist</h3>
-<p>Every document model eventually tempts its author with a <code>StyleManager</code> R6 class — “convenient” mutable state holding the current style, an undo stack, a dirty flag. The fact/process sort (playbook 5) says no: a style is a fact through and through; reading, patching, and writing it are shell <em>functions</em>; and an undo stack, if wanted, is a list of immutable snapshots — which value semantics makes nearly free (structural sharing: the copies share every untouched payload, per the verified probes in <a href="./02-values-and-state.html">02-values-and-state.qmd</a>). The mutable manager would buy nothing and sell local reasoning. Declined, by name, on the record.</p>
-</section>
-<section id="the-games-concessions-tallied" class="level3" data-number="11.3.11">
-<h3 data-number="11.3.11" class="anchored" data-anchor-id="the-games-concessions-tallied"><span class="header-section-number">11.3.11</span> The game’s concessions, tallied</h3>
-<p>An annotated game ends by admitting what it conceded, because the concessions are where the doctrine’s edges live:</p>
+<p>Opening principles become useful only when plausible designs are compared against actual consumers. This chapter follows one semantic-document problem through three defensible representations:</p>
+<ol type="1">
+<li>a property-rich model;</li>
+<li>typed known nodes with an extension bag;</li>
+<li>a validated open bag.</li>
+</ol>
+<p>None is the inevitable S7 answer. Streaming does not force a particular owner architecture, a large field count does not disqualify native classes, and metamodel size alone does not justify a schema engine. The choice turns on guarantees and operations.</p>
+<section id="the-position" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="the-position"><span class="header-section-number">11.1</span> The position</h2>
+<p>Suppose a package works with style documents containing named sources, typed layers, paint settings, references from layers to sources, and embedded expressions. It must support:</p>
 <ul>
-<li><strong>The paint bag is a flattened product</strong> (overrules the letter of doctrine 8), made safe by the generated table (doctrine 16) — the overrule and its mitigation are one decision, not two.</li>
-<li><strong>Unknown paint keys are currently rejected</strong> (closed node), which is the strict choice; a package prioritizing round-trip fidelity for foreign styles would flip this to a pass-through with the table checking only known keys. The choice is defensible either way; making it <em>by accident</em> is not. This one is flagged for revisit.</li>
-<li><strong>The spec table is trusted, not verified</strong> — its correctness is inherited from the generation pipeline against the engine’s spec JSON, which quietly relocates rung 0 upstream. A stale table is now the design’s single most dangerous failure mode, which is exactly the single-source-of-truth trade: one datum, one point of failure.</li>
-<li><strong>What the toy still hides:</strong> the real table generation pipeline, the sprite and glyph subsystems, wire-version migration, and every print method, error message, and documentation page — the unglamorous majority of a real package that no design document shortens much.</li>
+<li>constructing known fragments;</li>
+<li>adding and reordering layers while preserving references;</li>
+<li>reading documents from a changing external specification;</li>
+<li>writing them back without casually dropping extensions;</li>
+<li>producing at least one engine projection;</li>
+<li>possibly adding inspection or analysis later.</li>
+</ul>
+<p>Before choosing classes, apply the shared opening workflow.</p>
+<section id="meanings-and-consumers" class="level3" data-number="11.1.1">
+<h3 data-number="11.1.1" class="anchored" data-anchor-id="meanings-and-consumers"><span class="header-section-number">11.1.1</span> Meanings and consumers</h3>
+<p>The stable meanings are source identity, layer identity, layer kind, source references, paint declarations, and expression payloads. Consumers include constructors, invariant-preserving transformations, serializer/parser boundaries, the external validator, and perhaps a later analysis.</p>
+</section>
+<section id="representative-values-and-variants" class="level3" data-number="11.1.2">
+<h3 data-number="11.1.2" class="anchored" data-anchor-id="representative-values-and-variants"><span class="header-section-number">11.1.2</span> Representative values and variants</h3>
+<p>Sketch one source, one known fill layer, one known line layer, one unknown future layer, one literal paint value, and one opaque expression. Draw containment separately from the layer-to-source reference.</p>
+</section>
+<section id="property-inventory" class="level3" data-number="11.1.3">
+<h3 data-number="11.1.3" class="anchored" data-anchor-id="property-inventory"><span class="header-section-number">11.1.3</span> Property inventory</h3>
+<p>For every modeled field, record shape, presence, nullability, emptiness, defaults, and wire omission. An engine default must not automatically become an R constructor default: omission may carry version-sensitive meaning.</p>
+</section>
+<section id="rule-placement" class="level3" data-number="11.1.4">
+<h3 data-number="11.1.4" class="anchored" data-anchor-id="rule-placement"><span class="header-section-number">11.1.4</span> Rule placement</h3>
+<ul>
+<li>scalar shape and bounded literal rules belong to properties;</li>
+<li>relationships among a layer’s known fields belong to that layer;</li>
+<li>unique ids and resolvable source references belong to the root;</li>
+<li>expression validity and full conformance may remain with the engine;</li>
+<li>version compatibility belongs at parsing or compilation boundaries.</li>
 </ul>
 </section>
+<section id="operations-and-laws" class="level3" data-number="11.1.5">
+<h3 data-number="11.1.5" class="anchored" data-anchor-id="operations-and-laws"><span class="header-section-number">11.1.5</span> Operations and laws</h3>
+<p>The package needs <code>add_layer()</code>, reorder, parse, and serialize. It must name its round-trip relation and unknown-content policy. If it later interprets expressions or supports several engines, those consumers may change the representation choice.</p>
+<p>All three models can now be evaluated fairly.</p>
 </section>
-<section id="part-iii-the-loop-that-actually-transfers-the-wisdom" class="level2" data-number="11.4">
-<h2 data-number="11.4" class="anchored" data-anchor-id="part-iii-the-loop-that-actually-transfers-the-wisdom"><span class="header-section-number">11.4</span> Part III: The loop that actually transfers the wisdom</h2>
-<p>The last honest thing this document can say is that no document — not this one — converts wisdom into skill. The mature four were not designed by consulting a compendium; they were designed by people making decisions, hitting walls, and revising. What a compendium can do is shorten that loop: make the decision points visible sooner, the options nameable, and the concessions explicit instead of accidental. The transfer mechanism is a practice, and it is cheap:</p>
-<p><strong>Keep a design journal in the project.</strong> One entry per real decision, five lines: the decision, the pressure, the options considered, the choice, and the principle followed <em>or overruled, with the reason</em>. The annotated game above is exactly this journal, written after the fact; writing it during the fact is faster and truer. The journal does two jobs at once: it makes “selectively considering the proper aspects” an explicit act instead of an anxiety (you consulted the doctrine, you cited or overruled it, done — no lingering doubt about whether you <em>should</em> have used some sophisticated pattern you decided against), and it produces the evidence stream the compendium needs to stay alive — a recurring overrule in your journals is a counterexample entry for <a href="./open-questions.html">open-questions.qmd</a>, and a pattern that keeps earning across your projects is a promotion candidate.</p>
-<p><strong>Review the journal at complexity checkpoints, not on a schedule.</strong> The natural checkpoints: the first mutator (is the invariant placement holding?), the first serializer (did presence and equality get decided together?), the tenth class (is a factory stratum starting to amortize?), the first external implementor (is the interface really a contract?). These are the moments the middlegame pressure chains start, and a half-hour against the doctrine’s decision guides at each one is worth more than any amount of up-front design piety.</p>
-<p>That is the whole method: openings from the playbooks, this document’s annotated game as the model for the middlegame, the journal as your own annotation habit, and the ledger as the place your games feed back into the theory. Eating our own food is not a property the compendium can have by itself — it is a loop the compendium and the projects run together.</p>
+</section>
+<section id="candidate-a-property-rich-native-model" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="candidate-a-property-rich-native-model"><span class="header-section-number">11.2</span> Candidate A: property-rich native model</h2>
+<p>At the first design review, Candidate A is the natural proposal. Users will construct layers in R, the package promises invariant-preserving edits, and future interface or documentation generation could consume declared property metadata. A native model appears to put every known fact where S7 can reflect and validate it.</p>
+<p>Known layer kinds are classes, and meaningful paint entries are S7 properties with local validators. Repeated scalar, enum, color, or expression contracts can be shared as property definitions or generated from an owned specification.</p>
+<section id="what-it-buys" class="level3" data-number="11.2.1">
+<h3 data-number="11.2.1" class="anchored" data-anchor-id="what-it-buys"><span class="header-section-number">11.2.1</span> What it buys</h3>
+<ul>
+<li>constructor signatures and reflection expose known fields directly;</li>
+<li>local edits can re-run precise property and class validators;</li>
+<li>documentation and interfaces can project declared metadata;</li>
+<li>differences among layer kinds remain available for dispatch;</li>
+<li>typos in known property names fail at the native boundary.</li>
+</ul>
+</section>
+<section id="what-it-costs" class="level3" data-number="11.2.2">
+<h3 data-number="11.2.2" class="anchored" data-anchor-id="what-it-costs"><span class="header-section-number">11.2.2</span> What it costs</h3>
+<ul>
+<li>specification changes require regenerating or editing declarations;</li>
+<li>presence and omission semantics must survive defaults and serialization;</li>
+<li>generated code needs an explicit authority and review strategy;</li>
+<li>unknown future fields still need a policy;</li>
+<li>metadata may duplicate an external schema unless one source is authoritative and agreement is tested.</li>
+</ul>
+</section>
+<section id="when-it-wins" class="level3" data-number="11.2.3">
+<h3 data-number="11.2.3" class="anchored" data-anchor-id="when-it-wins"><span class="header-section-number">11.2.3</span> When it wins</h3>
+<p>Choose this model when users construct and edit known fields heavily, native introspection matters, several projections consume property metadata, or layer-specific operations need distinctions. The number of fields is not itself an argument against it. Generation from an owned semantic specification can make a large native surface maintainable.</p>
+</section>
+</section>
+<section id="candidate-b-typed-known-nodes-plus-extension-bag" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="candidate-b-typed-known-nodes-plus-extension-bag"><span class="header-section-number">11.3</span> Candidate B: typed known nodes plus extension bag</h2>
+<p>The next review introduces real documents from newer engine versions. Known layer kinds still drive <code>add_layer()</code>, reordering, and eventual analysis, but unrecognized paint keys and future layer fields must survive a read-modify- write cycle. Candidate B is plausible because it keeps nominal meaning at the operation boundary while declining to pretend that this release understands every foreign field.</p>
+<p>Major concepts and known variants are classes, while unknown or intentionally extensible content is stored separately in a disciplined bag. Known paint entries might be properties or a validated known-key map; foreign entries remain inert.</p>
+<section id="what-it-buys-1" class="level3" data-number="11.3.1">
+<h3 data-number="11.3.1" class="anchored" data-anchor-id="what-it-buys-1"><span class="header-section-number">11.3.1</span> What it buys</h3>
+<ul>
+<li>nominal identity and dispatch remain available where operations use them;</li>
+<li>foreign keys can be preserved without claiming to understand them;</li>
+<li>the native surface can focus on stable, high-value meanings;</li>
+<li>version churn is localized to parsers, key tables, and merge rules.</li>
+</ul>
+</section>
+<section id="what-it-costs-1" class="level3" data-number="11.3.2">
+<h3 data-number="11.3.2" class="anchored" data-anchor-id="what-it-costs-1"><span class="header-section-number">11.3.2</span> What it costs</h3>
+<ul>
+<li>authority is split between typed and extension state;</li>
+<li>collisions need a deterministic rule: typed value wins, extension wins, or rejection;</li>
+<li>transformations and serializers must preserve extensions deliberately;</li>
+<li>unknown content cannot participate in core logic without promotion;</li>
+<li>read-modify-write cycles need tests proving extensions survive.</li>
+</ul>
+</section>
+<section id="when-it-wins-1" class="level3" data-number="11.3.3">
+<h3 data-number="11.3.3" class="anchored" data-anchor-id="when-it-wins-1"><span class="header-section-number">11.3.3</span> When it wins</h3>
+<p>Choose the hybrid when known concepts drive operations but round-trip fidelity across evolving foreign documents also matters. It is often a strong compromise, but the merge policy is part of the public contract.</p>
+</section>
+</section>
+<section id="candidate-c-validated-open-bag" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="candidate-c-validated-open-bag"><span class="header-section-number">11.4</span> Candidate C: validated open bag</h2>
+<p>Candidate C becomes plausible when the team asks whether native construction is truly the product. If most work is ingest, conformance checking, small patches, and pass-through serialization, translating a rapidly changing external document into dozens of classes may add ceremony without removing interpretation from any important consumer.</p>
+<p>The document or selected nodes remain lists. A schema, generated key table, or boundary validator checks known constraints, while operations use accessors and explicit validation stages.</p>
+<section id="what-it-buys-2" class="level3" data-number="11.4.1">
+<h3 data-number="11.4.1" class="anchored" data-anchor-id="what-it-buys-2"><span class="header-section-number">11.4.1</span> What it buys</h3>
+<ul>
+<li>close fidelity to an open or changing external representation;</li>
+<li>straightforward preservation of unknown keys;</li>
+<li>schema updates can change data tables rather than class signatures;</li>
+<li>low translation overhead when the package mostly transports documents.</li>
+</ul>
+</section>
+<section id="what-it-costs-2" class="level3" data-number="11.4.2">
+<h3 data-number="11.4.2" class="anchored" data-anchor-id="what-it-costs-2"><span class="header-section-number">11.4.2</span> What it costs</h3>
+<ul>
+<li>nominal meaning and dispatch axes are weaker;</li>
+<li>arbitrary list edits can bypass validity unless operations revalidate;</li>
+<li>consumers may repeat lookups, presence checks, and interpretation;</li>
+<li>reflection reveals list shape rather than domain intent;</li>
+<li>aggregate errors can arrive later and with less local context.</li>
+</ul>
+</section>
+<section id="when-it-wins-2" class="level3" data-number="11.4.3">
+<h3 data-number="11.4.3" class="anchored" data-anchor-id="when-it-wins-2"><span class="header-section-number">11.4.3</span> When it wins</h3>
+<p>Choose the open bag when transport, validation, and pass-through are the main product and native semantic operations are few. It can be the correct stable architecture under external-schema authority.</p>
+</section>
+</section>
+<section id="comparing-candidates-by-consumer" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="comparing-candidates-by-consumer"><span class="header-section-number">11.5</span> Comparing candidates by consumer</h2>
+<section id="construction" class="level3" data-number="11.5.1">
+<h3 data-number="11.5.1" class="anchored" data-anchor-id="construction"><span class="header-section-number">11.5.1</span> Construction</h3>
+<p>A property-rich model gives the strongest discoverable constructor surface. The hybrid gives strong constructors for known concepts and an extension escape hatch. The open bag minimizes translation but depends more heavily on boundary validation and documentation.</p>
+</section>
+<section id="supported-transformation" class="level3" data-number="11.5.2">
+<h3 data-number="11.5.2" class="anchored" data-anchor-id="supported-transformation"><span class="header-section-number">11.5.2</span> Supported transformation</h3>
+<p>For <code>add_layer()</code>, all three can enforce root-level id and reference laws if the operation goes through a validated root. The difference is bypass risk: native replacement paths can revalidate declared contracts, while ordinary list mutation requires convention or an explicit validation pass.</p>
+</section>
+<section id="external-evolution" class="level3" data-number="11.5.3">
+<h3 data-number="11.5.3" class="anchored" data-anchor-id="external-evolution"><span class="header-section-number">11.5.3</span> External evolution</h3>
+<p>The property-rich model can evolve safely when generation and versioning are disciplined. The hybrid absorbs unknown additions but must preserve and merge them. The open bag accepts change most easily but exposes fewer guarantees.</p>
+</section>
+<section id="projection-and-interface-generation" class="level3" data-number="11.5.4">
+<h3 data-number="11.5.4" class="anchored" data-anchor-id="projection-and-interface-generation"><span class="header-section-number">11.5.4</span> Projection and interface generation</h3>
+<p>Property-rich declarations help when documentation, schema, and UI consumers need the same metadata. A hybrid can project the typed portion and label extensions separately. An open bag should project from its external schema rather than infer contracts from observed values.</p>
+</section>
+<section id="analysis-and-dispatch" class="level3" data-number="11.5.5">
+<h3 data-number="11.5.5" class="anchored" data-anchor-id="analysis-and-dispatch"><span class="header-section-number">11.5.5</span> Analysis and dispatch</h3>
+<p>If legend generation, field usage, or renderer behavior varies by layer kind, typed variants earn their cost. If serialization is the only consumer, open data plus validation may suffice.</p>
+</section>
+</section>
+<section id="an-annotated-choice" class="level2" data-number="11.6">
+<h2 data-number="11.6" class="anchored" data-anchor-id="an-annotated-choice"><span class="header-section-number">11.6</span> An annotated choice</h2>
+<p>Assume the first release promises known-layer construction, invariant-preserving reorder/add operations, round-trip preservation of foreign keys, and one engine serializer. It does not interpret expressions.</p>
+<p>A typed-known-plus-extension model is reasonable under those promises:</p>
+<ol type="1">
+<li>source and known layer identities are classes because operations validate or dispatch by kind;</li>
+<li>ids and source references use shared property contracts;</li>
+<li>known paint literals are checked from declared metadata;</li>
+<li>expressions remain opaque and delegated to the external validator;</li>
+<li>unknown fields on known layer variants are retained in an extension bag, while wholly unknown variants become an explicit <code>unknown_layer</code> carrying their uninterpreted source record;</li>
+<li>the root checks unique ids and references;</li>
+<li>named mutators use <code>S7::set_props()</code> so root validation follows edits;</li>
+<li>serialization rejects collisions between typed fields and extension keys.</li>
+</ol>
+<p>The list is the end of a decision chain, not a scorecard result. Start with the promised operations: they need stable layer identity and root-level reference laws, which rules out an entirely unstructured core. Next apply external evolution: foreign keys must survive even when the package cannot interpret them, which rules out a closed property-only model. Put the split where behavior changes—typed layer variants above it, inert extension data below it. Then place checks by visibility: variant-local paint rules on each known layer, id and source laws on the style root, expression conformance at the external engine. Finally choose round-trip equality: known fields compare semantically, while unknown fields require representational preservation. Each step constrains the next; none follows from class count alone.</p>
+<p>This is contingent, not a destination every design approaches. If interface generation becomes central, more properties may move into the native model. If lossless transport becomes the product, more nodes may move toward validated bags. If expression analysis becomes a product, opaque expressions may become typed nodes.</p>
+<section id="one-implementation-slice" class="level3" data-number="11.6.1">
+<h3 data-number="11.6.1" class="anchored" data-anchor-id="one-implementation-slice"><span class="header-section-number">11.6.1</span> One implementation slice</h3>
+<p>The following load-bearing slice was verified with S7 0.2.2 on R 4.6.1: insertion order, aggregate rejection of duplicate ids, and aggregate rejection of missing source references were exercised. It deliberately models only variant identity, aggregate laws, and the supported edit; parsing, paint validation, and serialization remain separate boundaries.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>layer <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"layer"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">abstract =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">properties =</span> <span class="fu">list</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> S7<span class="sc">::</span>class_character,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">source =</span> S7<span class="sc">::</span>class_character,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">extensions =</span> S7<span class="sc">::</span><span class="fu">new_property</span>(S7<span class="sc">::</span>class_list, <span class="at">default =</span> <span class="fu">list</span>())</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>fill_layer <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"fill_layer"</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">parent =</span> layer,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">properties =</span> <span class="fu">list</span>(</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">paint =</span> S7<span class="sc">::</span><span class="fu">new_property</span>(S7<span class="sc">::</span>class_list, <span class="at">default =</span> <span class="fu">list</span>())</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>line_layer <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"line_layer"</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">parent =</span> layer,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">properties =</span> <span class="fu">list</span>(</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">paint =</span> S7<span class="sc">::</span><span class="fu">new_property</span>(S7<span class="sc">::</span>class_list, <span class="at">default =</span> <span class="fu">list</span>())</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>unknown_layer <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"unknown_layer"</span>,</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">parent =</span> layer,</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">properties =</span> <span class="fu">list</span>(<span class="at">raw =</span> S7<span class="sc">::</span>class_list)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>layer_list <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_property</span>(</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">class =</span> S7<span class="sc">::</span>class_list,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">default =</span> <span class="fu">list</span>(),</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">validator =</span> <span class="cf">function</span>(value) {</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    valid <span class="ot">&lt;-</span> <span class="fu">vapply</span>(</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>      value,</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>      S7<span class="sc">::</span>S7_inherits,</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>      <span class="fu">logical</span>(<span class="dv">1</span>),</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>      <span class="at">class =</span> layer</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">all</span>(valid)) {</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>      <span class="st">"every element must inherit from layer"</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>style <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  <span class="st">"style"</span>,</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="at">properties =</span> <span class="fu">list</span>(</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">sources =</span> S7<span class="sc">::</span><span class="fu">new_property</span>(S7<span class="sc">::</span>class_list, <span class="at">default =</span> <span class="fu">list</span>()),</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    <span class="at">layers =</span> layer_list,</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">extensions =</span> S7<span class="sc">::</span><span class="fu">new_property</span>(S7<span class="sc">::</span>class_list, <span class="at">default =</span> <span class="fu">list</span>())</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>  <span class="at">validator =</span> <span class="cf">function</span>(self) {</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    ids <span class="ot">&lt;-</span> <span class="fu">vapply</span>(self<span class="sc">@</span>layers, <span class="cf">function</span>(x) x<span class="sc">@</span>id, <span class="fu">character</span>(<span class="dv">1</span>))</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    refs <span class="ot">&lt;-</span> <span class="fu">vapply</span>(self<span class="sc">@</span>layers, <span class="cf">function</span>(x) x<span class="sc">@</span>source, <span class="fu">character</span>(<span class="dv">1</span>))</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>    messages <span class="ot">&lt;-</span> <span class="fu">character</span>()</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">anyDuplicated</span>(ids)) {</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>      messages <span class="ot">&lt;-</span> <span class="fu">c</span>(messages, <span class="st">"layer ids must be unique"</span>)</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>    missing_refs <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(refs, <span class="fu">names</span>(self<span class="sc">@</span>sources))</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(missing_refs)) {</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>      messages <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>        messages,</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>        <span class="fu">paste</span>(<span class="st">"layers reference unknown sources:"</span>, <span class="fu">paste</span>(missing_refs, <span class="at">collapse =</span> <span class="st">", "</span>))</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(messages)) messages</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>add_layer <span class="ot">&lt;-</span> <span class="cf">function</span>(x, value, <span class="at">before =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span>S7<span class="sc">::</span><span class="fu">S7_inherits</span>(value, layer)) {</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>    cli<span class="sc">::</span><span class="fu">cli_abort</span>(<span class="st">"{.arg value} must inherit from {.cls layer}."</span>)</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>  layers <span class="ot">&lt;-</span> x<span class="sc">@</span>layers</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(before)) {</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>    layers <span class="ot">&lt;-</span> <span class="fu">c</span>(layers, <span class="fu">list</span>(value))</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>    ids <span class="ot">&lt;-</span> <span class="fu">vapply</span>(layers, <span class="cf">function</span>(item) item<span class="sc">@</span>id, <span class="fu">character</span>(<span class="dv">1</span>))</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>    position <span class="ot">&lt;-</span> <span class="fu">match</span>(before, ids)</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(position)) {</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>      cli<span class="sc">::</span><span class="fu">cli_abort</span>(<span class="st">"No layer with id {.val {before}} exists."</span>)</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>    layers <span class="ot">&lt;-</span> <span class="fu">append</span>(layers, <span class="fu">list</span>(value), <span class="at">after =</span> position <span class="sc">-</span> <span class="dv">1</span>L)</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>  S7<span class="sc">::</span><span class="fu">set_props</span>(x, <span class="at">layers =</span> layers)</span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>add_layer()</code> owns the operation precondition, then performs one grouped replacement through <code>S7::set_props()</code>. Root validation consequently rejects a duplicate id or unresolved source after the proposed edit; the mutator does not duplicate those laws. Additional related root fields should be included in the same <code>set_props()</code> call rather than replaced one at a time.</p>
+<p>The parser for an unknown layer extracts the common <code>id</code> and <code>source</code> fields needed by aggregate laws and stores the complete original record in <code>raw</code>. Supported edits treat that record as inert, and the serializer emits it unchanged unless a documented operation explicitly promotes it to a known variant. The <code>layer_list</code> contract ensures the aggregate validator never dereferences an arbitrary list element as though it were a layer.</p>
+<p>There is an important limit to that guarantee. If a semantic class inherits from a parent with its own mutation API—most notably a data-frame or tibble base—then <code>[</code>, replacement methods, and ecosystem verbs become inherited side doors that may bypass subclass validation or drop the subclass. Base-type inheritance can still be honest, but “construction certifies validity” then applies only to guarded front doors; the package must document which parent operations preserve the class and where invariants are re-established.</p>
+</section>
+</section>
+<section id="conversion-pressure-three-different-jobs" class="level2" data-number="11.7">
+<h2 data-number="11.7" class="anchored" data-anchor-id="conversion-pressure-three-different-jobs"><span class="header-section-number">11.7</span> Conversion pressure: three different jobs</h2>
+<section id="faithful-conversion" class="level3" data-number="11.7.1">
+<h3 data-number="11.7.1" class="anchored" data-anchor-id="faithful-conversion"><span class="header-section-number">11.7.1</span> Faithful conversion</h3>
+<p>Use <code>S7::convert()</code> when two representations preserve the same meaning without policy, diagnostics, or contextual choices. The acceptance law should be a genuine inverse or clearly named equivalence.</p>
+</section>
+<section id="adapter-or-compiler" class="level3" data-number="11.7.2">
+<h3 data-number="11.7.2" class="anchored" data-anchor-id="adapter-or-compiler"><span class="header-section-number">11.7.2</span> Adapter or compiler</h3>
+<p>Use <code>parse_style()</code>, <code>adapt_style()</code>, or <code>compile_style()</code> when work is tolerant, lossy, contextual, one-to-many, version-aware, or diagnostic-producing. A parser may preserve unknown variants that a compiler later rejects. Naming policy is more honest than calling this conversion.</p>
+</section>
+<section id="earned-intermediate-representation" class="level3" data-number="11.7.3">
+<h3 data-number="11.7.3" class="anchored" data-anchor-id="earned-intermediate-representation"><span class="header-section-number">11.7.3</span> Earned intermediate representation</h3>
+<p>Do not create a universal style IR by unioning every foreign field. Earn an IR when at least two real inputs or outputs reveal stable shared semantics and operations consume those semantics. <a href="./07-ecosystem-field-guide.html#sqlr-one-model-for-rendering-reflection-and-comparison">sqlr</a> earns its middle representation through rendering, reflection, semantic comparison, and diffing. One serializer does not provide the same evidence.</p>
+</section>
+</section>
+<section id="acceptance-laws" class="level2" data-number="11.8">
+<h2 data-number="11.8" class="anchored" data-anchor-id="acceptance-laws"><span class="header-section-number">11.8</span> Acceptance laws</h2>
+<ul>
+<li>parsing and serializing preserves unknown extensions under the chosen equality relation;</li>
+<li>supported edits preserve untouched extensions;</li>
+<li>duplicate layer ids and missing source references fail at the root;</li>
+<li>typed/extension key collisions fail explicitly;</li>
+<li>every known layer variant supports required operations;</li>
+<li>opaque expressions pass through unchanged but are not claimed valid;</li>
+<li>external conformance is checked after serialization;</li>
+<li>consumers do not repeat intrinsic id, presence, or reference checks.</li>
+</ul>
+</section>
+<section id="what-remains-unsettled" class="level2" data-number="11.9">
+<h2 data-number="11.9" class="anchored" data-anchor-id="what-remains-unsettled"><span class="header-section-number">11.9</span> What remains unsettled</h2>
+<p>This comparison does not decide how large property metadata should become, when an id deserves promotion from shared property to class, whether expression analysis will justify typed nodes, how version migration should work, or which equality relation users need. Those remain in the <a href="./open-questions.html">open-questions ledger</a>.</p>
+</section>
+<section id="keeping-the-decision-live" class="level2" data-number="11.10">
+<h2 data-number="11.10" class="anchored" data-anchor-id="keeping-the-decision-live"><span class="header-section-number">11.10</span> Keeping the decision live</h2>
+<p>Record consequential choices in a five-field decision journal:</p>
+<ol type="1">
+<li><strong>Decision</strong> — the representation or boundary being chosen.</li>
+<li><strong>Pressure</strong> — the concrete consumer, law, or cost forcing attention.</li>
+<li><strong>Options</strong> — the plausible candidates considered.</li>
+<li><strong>Choice</strong> — the selected option and its accepted concessions.</li>
+<li><strong>Doctrine</strong> — the principle followed or overruled, with the reason.</li>
+</ol>
+<p>For this scenario, the entry would say that layer variants remain typed while unknown fields use extension bags; the pressure is native edit operations plus foreign round-trip fidelity; the alternatives are the three candidates above; the concession is split authority; and the doctrine trade is honest alternatives balanced against external-schema authority.</p>
+<p>Review the journal at complexity checkpoints, not by calendar: the first mutator tests invariant placement; the first parser/serializer pair tests presence and equality together; the second output target tests whether an intermediate representation is emerging; the tenth repeated declaration tests whether generation now amortizes; and the first external implementation tests whether generics plus laws form a real contract. A checkpoint may move the design toward any candidate. The balanced conclusion remains: complexity and field count are pressures to price, not automatic votes for or against native classes.</p>
 
 
 </section>
@@ -789,11 +978,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -1109,13 +1293,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./09-playbooks.html" class="pagination-link" aria-label="Playbooks: How to Approach S7, by Situation">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span>
+      <a href="./09-playbooks.html" class="pagination-link" aria-label="Playbooks">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./open-questions.html" class="pagination-link" aria-label="Open Questions: The Inquiry Ledger">
-        <span class="nav-page-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./open-questions.html" class="pagination-link" aria-label="Open Questions">
+        <span class="nav-page-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -7,7 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Jimmy Briggs">
-<meta name="dcterms.date" content="2026-09-16">
+<meta name="dcterms.date" content="2026-09-23">
+<meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
 <title>S7 Design Notes</title>
 <style>
@@ -39,6 +40,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
 <link href="./00-overview.html" rel="next">
+<link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -50,9 +52,10 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1f846c7865d629590e2cadd4f479fcb7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-c13f21f511963f2a6363cc37617da2fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/quarto-contrib/glossary/glossary.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -82,6 +85,13 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
+<meta property="og:title" content="S7 Design Notes">
+<meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta property="og:site_name" content="S7 Design Notes">
+<meta name="twitter:title" content="S7 Design Notes">
+<meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -293,7 +303,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -308,19 +318,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span></a>
   </div>
 </li>
       </ul>
@@ -337,19 +347,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span></a>
   </div>
 </li>
       </ul>
@@ -366,7 +376,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span></a>
   </div>
 </li>
       </ul>
@@ -383,19 +393,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></span></a>
   </div>
 </li>
       </ul>
@@ -412,13 +422,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./sources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
   </div>
 </li>
       </ul>
@@ -435,9 +451,9 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#preface" id="toc-preface" class="nav-link active" data-scroll-target="#preface">Preface</a>
   <ul class="collapse">
+  <li><a href="#evidence-and-register" id="toc-evidence-and-register" class="nav-link" data-scroll-target="#evidence-and-register">Evidence and register</a></li>
   <li><a href="#how-to-read" id="toc-how-to-read" class="nav-link" data-scroll-target="#how-to-read">How to read</a></li>
-  <li><a href="#provenance" id="toc-provenance" class="nav-link" data-scroll-target="#provenance">Provenance</a></li>
-  <li><a href="#living-notes" id="toc-living-notes" class="nav-link" data-scroll-target="#living-notes">Living notes</a></li>
+  <li><a href="#editorial-policy" id="toc-editorial-policy" class="nav-link" data-scroll-target="#editorial-policy">Editorial policy</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -449,9 +465,14 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">S7 Design Notes</h1>
-<p class="subtitle lead">Doctrine, Field Guide, and Playbooks for Functional OOP in R</p>
+<p class="subtitle lead">Meaningful Values, Explicit Contracts, and Composable Operations in R</p>
 </div>
 
+<div>
+  <div class="description">
+    A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -466,7 +487,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 16, 2026</p>
+      <p class="date">September 23, 2026</p>
     </div>
   </div>
   
@@ -480,30 +501,31 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="preface" class="level1 unnumbered">
 <h1 class="unnumbered">Preface</h1>
-<p>These are working notes on designing object systems with S7 in R, and on the broader programming-theory ideas that make such designs good or bad: types, values, validation, dispatch, composition, documents, schemas, and the craft of deciding among them. They began as private research — a deliberate “wisdom extraction” pass over the S7 ecosystem and the software-design literature — and are published in that spirit: opinionated, technically grounded, and alive, rather than neutral, complete, or final.</p>
-<p>A note on register, so the imperative prose is read as intended. These notes braid several strengths of claim, from strongest to weakest:</p>
-<ul>
-<li><strong>Documented mechanism</strong> — guaranteed by the official S7 documentation: validation timing, dispatch rules, <code>set_props()</code> semantics, the <code>valid_eventually()</code> / <code>valid_implicitly()</code> escape hatches.</li>
-<li><strong>Verified mechanic</strong> — additionally checked empirically against S7 0.2.2 on R 4.6.1: validator run counts per construction and replacement, copy behavior under <code>@&lt;-</code>, transactional <code>set_props()</code>, the code in the playbooks and middlegame chapters, and the serialization skew recorded in the open-questions appendix. These are facts about a version; the appendix’s watch list says which could move.</li>
-<li><strong>Convergent pattern</strong> — a design move observed independently in several ecosystem packages. Recurrence is evidence of utility, not proof of correctness.</li>
-<li><strong>Demonstrated pattern</strong> — observed in exactly one identified package, tracked in the open-questions appendix as a hypothesis awaiting a second sighting.</li>
-<li><strong>Derived recommendation</strong> — reasoned from mechanics plus examples; the default register of the doctrine chapter, written in the imperative on purpose. “Always” and “never” mean “strong default you may overrule for stated reasons,” not laws.</li>
-<li><strong>Authorial preference</strong> — taste, flagged as such where it appears.</li>
-</ul>
+<p>These are working notes on designing object systems with S7 in R and on the larger programming ideas that determine whether such systems clarify a domain or merely add ceremony. They ask one recurring question:</p>
+<blockquote class="blockquote">
+<p>What knowledge can the model carry so that the rest of the program no longer has to rediscover it?</p>
+</blockquote>
+<p>The answer is a style of design, not an S7 API catalog. Define what a meaningful thing is, establish the contracts that can be established at its boundary, and then build the program from those things and operations that preserve or deliberately transform their meaning. The contrast is practical: without a domain model, each consumer receives loose data and must rediscover whether a string is an identifier, whether two endpoints are ordered, whether an omitted field differs from <code>null</code>, and whether a failure should stop or accumulate. With a good model, those decisions have names and homes.</p>
+<p>S7 contributes nominal classes, properties, validation, and generic dispatch, but the larger subject is how to make domain concepts, admissible states, relationships, and operations explicit. The notes therefore move repeatedly between mechanics and consequences: not only what S7 permits, but what a choice lets downstream code stop doing.</p>
+<p>The intended outcome is practical. A reader should be able to identify concepts worth naming, place each rule at the boundary that can enforce it, choose between a reusable property and an independent class, distinguish an editable value from a <button class="glossary"><span class="def">A value representing a fact at a point in time, often with a public policy that forbids revision.</span>read-only snapshot</button> or a <button class="glossary"><span class="def">An object with shared identity or a live lifecycle whose aliases must observe the same evolving state.</span>reference owner</button>, design nouns and verbs together, and show which checks and branches disappear from downstream code. The goal is not maximum typing. It is a representation whose extra structure pays for itself in simpler consumers.</p>
+<section id="evidence-and-register" class="level2">
+<h2 class="anchored" data-anchor-id="evidence-and-register">Evidence and register</h2>
+<p>The prose moves among four kinds of claim. A <strong>documented mechanism</strong> is behavior promised by official documentation. A <strong>version-verified mechanic</strong> has also been exercised against the stated R and package versions; it is a fact about those versions and should be rechecked after relevant upgrades. A <strong>published example</strong> is a design observed in public package source, documentation, or tests. Recurrence across independent packages strengthens the example, but neither recurrence nor popularity turns a pattern into a law. A <strong>recommendation</strong> is the editorial conclusion drawn from mechanisms, examples, and trade-offs. Imperative language states a strong default that may be overruled for a stated reason, not an exceptionless command.</p>
+<p>This distinction matters because the chapters intentionally braid API facts, empirical observations, and design judgment. A validator running after replacement is a mechanic; choosing a class validator as the home of a particular relationship is a design decision. Readers should be able to tell which kind of claim they are being asked to trust.</p>
+<p>The <a href="./open-questions.html">inquiry ledger</a> records version-sensitive claims, unresolved tensions, and the evidence that would change a recommendation. Public sources are collected in the <a href="./sources.html">sources appendix</a>. Examples and provenance in the published notes are limited to public source, documentation, tests, specifications, talks, and literature. Private code, local notes, and chat transcripts are not evidence here.</p>
+</section>
 <section id="how-to-read" class="level2">
 <h2 class="anchored" data-anchor-id="how-to-read">How to read</h2>
-<p>The chapters build on one another, but each is self-contained enough to read alone. The <a href="./00-overview.html">overview</a> states the whole argument in ten theses. The three parts that follow supply the reasoning: foundations (what kind of OOP S7 is, how value semantics shape design, what semantic types are), laws and composition (where every check belongs, how sum types and dispatch fit together, how to model documents and schemas), and evidence (what real S7 packages teach, package by package). The practice part compresses everything back into usable form: the <a href="./08-doctrine.html">doctrine</a> for design reviews, the <a href="./09-playbooks.html">playbooks</a> for a project’s opening moves, and the <a href="./10-middlegame.html">middlegame</a> for how decisions interact at real scale, including one fully annotated design derivation.</p>
-<p>If you read only two chapters, read the overview and the doctrine. If you are starting an actual project, start with the playbooks instead.</p>
-<p>Two appendices keep the notes honest: an <a href="./open-questions.html">inquiry ledger</a> of what remains unresolved — hypotheses resting on single packages, version-anchored facts, unresolved tensions, and the evidence that would change a recommendation — and the <a href="./sources.html">sources</a>.</p>
+<p>The chapters form an argument, but they can also be entered by problem. The <a href="./00-overview.html">overview</a> states the whole position in miniature. The first three chapters establish the foundation. <a href="./01-object-systems.html">Object Systems</a> explains why R’s message-passing and generic-function traditions lead to different designs and why S7 asks for a vocabulary of verbs as well as nouns. <a href="./02-values-and-state.html">Values and State</a> separates editable values, <button class="glossary"><span class="def">A value representing a fact at a point in time, often with a public policy that forbids revision.</span>read-only snapshots</button>, and <button class="glossary"><span class="def">An object with shared identity or a live lifecycle whose aliases must observe the same evolving state.</span>reference owners</button>, then follows the consequences into aliasing, process boundaries, MVU, and grouped replacement. <a href="./03-types-and-meaning.html">Types and Meaning</a> is the conceptual center: it connects <button class="glossary"><span class="def">The class, shape, cardinality, presence policy, default behavior, and intrinsic constraints attached to one property position.</span>property contracts</button>, <button class="glossary"><span class="def">A nominal class that preserves a domain concept independently so it can travel through the program or participate in dispatch.</span>semantic classes</button>, presence and defaults, wire representations, and the co-design of domain nouns and verbs.</p>
+<p>The next three chapters ask where laws and variation belong. <a href="./04-parse-dont-validate.html">Parse, Don’t Validate</a> places checks at the smallest boundary with enough information and explains what construction can and cannot certify. <a href="./05-composition-and-dispatch.html">Composition and Dispatch</a> separates unions, variant families, inheritance, interfaces, and failure protocols. <a href="./06-documents-schemas-dsls.html">Documents, Schemas, and Languages</a> treats documents as compiler input: representations that must preserve, normalize, and sometimes defer to external authority.</p>
+<p>The <a href="./07-ecosystem-field-guide.html">ecosystem field guide</a> then tests these ideas against public packages. The <a href="./08-doctrine.html">doctrine</a> compresses the argument into reviewable defaults, the <a href="./09-playbooks.html">playbooks</a> organize common opening situations, and the <a href="./10-middlegame.html">middlegame</a> compares plausible representations once real constraints begin to interact. The <a href="./glossary.html">glossary</a> collects the recurring design vocabulary, while the inquiry ledger keeps unsettled or version-sensitive claims visible rather than smoothing them into doctrine.</p>
+<p>If you read only two chapters, read the overview and Types and Meaning. If you are beginning a design, use the playbooks alongside them. If you are debugging a modeling decision, begin with the chapter whose boundary is in question: lifecycle, contract placement, alternatives, or wire projection.</p>
 </section>
-<section id="provenance" class="level2">
-<h2 class="anchored" data-anchor-id="provenance">Provenance</h2>
-<p>The ecosystem survey covers ellmer, ragnar, stacbuildr, S7schema, s7contract, quickr, sqlr and its dialect packages, s7x, the R-ArcGIS packages, resultr, datarr/reflect, rtemis, tooey, rapid, typedjson, objectstore, optimizers7 and parameters7, and structr as a deliberate non-S7 contrast — each checked against its current documentation or source in September 2026 rather than recalled from memory. The programming-theory lineage (parse-don’t-validate, boolean blindness, functional core / imperative shell, the expression problem, design by contract, aggregates, and more) is cited in the sources appendix. Mechanics that matter were verified in a live R session rather than trusted from documentation.</p>
-</section>
-<section id="living-notes" class="level2">
-<h2 class="anchored" data-anchor-id="living-notes">Living notes</h2>
-<p>This is a living collection, and it stays honest by a few maintenance rules: counterexamples get recorded in the ledger before doctrine is amended, never silently; single-source patterns are promoted only on a second independent sighting; verified mechanics are re-run against new S7 releases per the watch list; new playbooks are added only when a genuinely new <em>situation</em> appears, not a new package; and doctrine changes when the balance of evidence changes, with the tripwires for that written down in the ledger’s final section.</p>
-<p>Corrections, counterexamples, and second sightings are welcome — the <a href="https://github.com/jimbrig/s7-design-notes/issues">issue tracker</a> is the front door.</p>
+<section id="editorial-policy" class="level2">
+<h2 class="anchored" data-anchor-id="editorial-policy">Editorial policy</h2>
+<p>These notes are deliberately opinionated, but they are also revisable. A counterexample belongs in the inquiry ledger before it silently weakens a recommendation. A pattern seen once remains an example; repeated independent public sightings can strengthen it. Version-verified mechanics remain tied to their version until rerun. New playbooks should correspond to genuinely new design situations, not merely new packages wearing familiar shapes.</p>
+<p>Most importantly, corrections are additive when the evidence allows it. A qualification should narrow an overclaim without erasing the useful reasoning that made the claim memorable. “S7 objects are immutable,” for example, is too strong; the better account distinguishes replacement-based editable values, read-only API policy, and reference-valued payloads while retaining the local reasoning that value-oriented design buys. The same standard governs the book: preserve the mechanism, restore the argument, and state the boundary.</p>
+<p>Corrections and counterexamples are welcome through the <a href="https://github.com/jimbrig/s7-design-notes/issues">issue tracker</a>.</p>
 
 
 </section>
@@ -610,11 +632,6 @@ ul.task-list li input[type="checkbox"] {
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -932,8 +949,8 @@ ul.task-list li input[type="checkbox"] {
   <div class="nav-page nav-page-previous">
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./00-overview.html" class="pagination-link" aria-label="Overview: The Whole Argument in Miniature">
-        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./00-overview.html" class="pagination-link" aria-label="Overview">
+        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

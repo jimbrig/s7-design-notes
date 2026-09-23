@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
-<title>5&nbsp; Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions – S7 Design Notes</title>
+<title>5&nbsp; Parse, Don’t Validate: Boundaries and Retained Knowledge – S7 Design Notes</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,7 +27,61 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -38,6 +93,7 @@ ul.task-list li input[type="checkbox"] {
 <meta name="quarto:offset" content="./">
 <link href="./05-composition-and-dispatch.html" rel="next">
 <link href="./03-types-and-meaning.html" rel="prev">
+<link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -49,9 +105,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1f846c7865d629590e2cadd4f479fcb7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-c13f21f511963f2a6363cc37617da2fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -79,8 +135,18 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
 
+<meta property="og:title" content="5&nbsp; Parse, Don’t Validate: Boundaries and Retained Knowledge – S7 Design Notes">
+<meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta property="og:site_name" content="S7 Design Notes">
+<meta name="twitter:title" content="5&nbsp; Parse, Don’t Validate: Boundaries and Retained Knowledge – S7 Design Notes">
+<meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/04-parse-dont-validate.html">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -254,7 +320,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -292,7 +358,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -307,19 +373,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span></a>
   </div>
 </li>
       </ul>
@@ -336,19 +402,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span></a>
   </div>
 </li>
       </ul>
@@ -365,7 +431,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span></a>
   </div>
 </li>
       </ul>
@@ -382,19 +448,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></span></a>
   </div>
 </li>
       </ul>
@@ -411,13 +477,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./sources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
   </div>
 </li>
       </ul>
@@ -432,16 +504,15 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#the-thesis-precisely" id="toc-the-thesis-precisely" class="nav-link active" data-scroll-target="#the-thesis-precisely"><span class="header-section-number">5.1</span> The thesis, precisely</a></li>
-  <li><a href="#the-translation-to-a-dynamic-language" id="toc-the-translation-to-a-dynamic-language" class="nav-link" data-scroll-target="#the-translation-to-a-dynamic-language"><span class="header-section-number">5.2</span> The translation to a dynamic language</a></li>
-  <li><a href="#constructors-parse-validators-verify" id="toc-constructors-parse-validators-verify" class="nav-link" data-scroll-target="#constructors-parse-validators-verify"><span class="header-section-number">5.3</span> Constructors parse; validators verify</a></li>
-  <li><a href="#the-checking-ladder" id="toc-the-checking-ladder" class="nav-link" data-scroll-target="#the-checking-ladder"><span class="header-section-number">5.4</span> The checking ladder</a></li>
-  <li><a href="#the-cost-model" id="toc-the-cost-model" class="nav-link" data-scroll-target="#the-cost-model"><span class="header-section-number">5.5</span> The cost model</a></li>
-  <li><a href="#the-time-axis-as-early-as-possible-as-late-as-necessary" id="toc-the-time-axis-as-early-as-possible-as-late-as-necessary" class="nav-link" data-scroll-target="#the-time-axis-as-early-as-possible-as-late-as-necessary"><span class="header-section-number">5.6</span> The time axis: as early as possible, as late as necessary</a></li>
-  <li><a href="#errors-as-values-the-second-channel" id="toc-errors-as-values-the-second-channel" class="nav-link" data-scroll-target="#errors-as-values-the-second-channel"><span class="header-section-number">5.7</span> Errors as values: the second channel</a></li>
-  <li><a href="#conditions-errors-as-a-designed-surface" id="toc-conditions-errors-as-a-designed-surface" class="nav-link" data-scroll-target="#conditions-errors-as-a-designed-surface"><span class="header-section-number">5.8</span> Conditions: errors as a designed surface</a></li>
-  <li><a href="#design-by-contract-and-making-it-testable" id="toc-design-by-contract-and-making-it-testable" class="nav-link" data-scroll-target="#design-by-contract-and-making-it-testable"><span class="header-section-number">5.9</span> Design by contract, and making it testable</a></li>
-  <li><a href="#the-payoff-restated" id="toc-the-payoff-restated" class="nav-link" data-scroll-target="#the-payoff-restated"><span class="header-section-number">5.10</span> The payoff, restated</a></li>
+  <li><a href="#keep-the-result-of-checking" id="toc-keep-the-result-of-checking" class="nav-link active" data-scroll-target="#keep-the-result-of-checking"><span class="header-section-number">5.1</span> Keep the result of checking</a></li>
+  <li><a href="#the-same-boundary-move-in-several-ecosystems" id="toc-the-same-boundary-move-in-several-ecosystems" class="nav-link" data-scroll-target="#the-same-boundary-move-in-several-ecosystems"><span class="header-section-number">5.2</span> The same boundary move in several ecosystems</a></li>
+  <li><a href="#three-different-boundary-decisions" id="toc-three-different-boundary-decisions" class="nav-link" data-scroll-target="#three-different-boundary-decisions"><span class="header-section-number">5.3</span> Three different boundary decisions</a></li>
+  <li><a href="#constructors-normalize-validators-verify" id="toc-constructors-normalize-validators-verify" class="nav-link" data-scroll-target="#constructors-normalize-validators-verify"><span class="header-section-number">5.4</span> Constructors normalize; validators verify</a></li>
+  <li><a href="#one-authoritative-definition-several-uses" id="toc-one-authoritative-definition-several-uses" class="nav-link" data-scroll-target="#one-authoritative-definition-several-uses"><span class="header-section-number">5.5</span> One authoritative definition, several uses</a></li>
+  <li><a href="#contextual-preparation" id="toc-contextual-preparation" class="nav-link" data-scroll-target="#contextual-preparation"><span class="header-section-number">5.6</span> Contextual preparation</a></li>
+  <li><a href="#supported-transformations-and-cost" id="toc-supported-transformations-and-cost" class="nav-link" data-scroll-target="#supported-transformations-and-cost"><span class="header-section-number">5.7</span> Supported transformations and cost</a></li>
+  <li><a href="#conditions-diagnostics-and-outcomes" id="toc-conditions-diagnostics-and-outcomes" class="nav-link" data-scroll-target="#conditions-diagnostics-and-outcomes"><span class="header-section-number">5.8</span> Conditions, diagnostics, and outcomes</a></li>
+  <li><a href="#make-the-retained-knowledge-testable" id="toc-make-the-retained-knowledge-testable" class="nav-link" data-scroll-target="#make-the-retained-knowledge-testable"><span class="header-section-number">5.9</span> Make the retained knowledge testable</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/04-parse-dont-validate.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -449,9 +520,9 @@ ul.task-list li input[type="checkbox"] {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html">Laws and Composition</a></li><li class="breadcrumb-item"><a href="./04-parse-dont-validate.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></h1>
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries and Retained Knowledge</span></h1>
 </div>
 
 
@@ -468,80 +539,243 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="the-thesis-precisely" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="the-thesis-precisely"><span class="header-section-number">5.1</span> The thesis, precisely</h2>
-<p>Alexis King’s 2019 essay <a href="https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/">“Parse, don’t validate”</a> is often reduced to “check inputs early,” which misses its actual content. The distinction is about <strong>what happens to the knowledge a check produces</strong>.</p>
-<p>A <em>validator</em> in her sense is a function like <code>validateNonEmpty :: [a] -&gt; ()</code>: it inspects, throws on failure, and returns nothing. The knowledge that the list was non-empty exists for one instant and is discarded; every later consumer either trusts blindly or checks again. A <em>parser</em> is <code>parseNonEmpty :: [a] -&gt; NonEmpty a</code>: the same inspection, but the result is recorded <strong>in the type of the output</strong>. Downstream code that receives a <code>NonEmpty a</code> cannot even ask whether it is empty — the question has been settled, permanently, by construction.</p>
-<p>Two named pathologies follow from doing it the other way. <strong>Shotgun parsing</strong> (a term from the language-theoretic security literature) is the anti-pattern of scattering input checks throughout processing code, interleaved with the processing itself — the program acts on input before fully deciding the input is well-formed, and rejection paths can fire after side effects have already happened. <strong>Boolean blindness</strong> (Robert Harper’s coinage) is the information loss of reducing a rich check to a <code>TRUE</code>/<code>FALSE</code>: the boolean remembers <em>that</em> something was true but not <em>what</em> or <em>why</em>, so the evidence must be reconstructed downstream — usually by checking again.</p>
-</section>
-<section id="the-translation-to-a-dynamic-language" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="the-translation-to-a-dynamic-language"><span class="header-section-number">5.2</span> The translation to a dynamic language</h2>
-<p>R has no compile-time types, so the slogan cannot mean “let the type checker carry proofs.” The translation is nonetheless faithful:</p>
-<p><strong>A parser is a boundary function that returns a domain object or fails loudly. Possession of the object is the proof.</strong></p>
-<p>Concretely, with S7: construction runs property class checks, property validators, and the class validator; every property replacement re-runs them. Therefore <em>an S7 object of class <code>Color</code> that exists</em> is evidence that its laws held at construction and after every legitimate modification since. A function receiving a <code>Color</code> needs no defensive re-checking of channel ranges — demanding the class (via dispatch or a property’s declared class) <em>is</em> the check. This is what “make illegal states unconstructable” buys: the object functions as a certificate.</p>
-<p>Honesty requires noting the seams in a dynamic language. R will not stop someone from calling <code>attr()</code> surgery on the object’s internals, and S7 itself ships named escape hatches: <code>S7::valid_eventually()</code> suspends validation while a function runs and validates once at the end, while <code>S7::valid_implicitly()</code> suspends it and performs <em>no</em> final check — verified directly against S7 0.2.2: it will hand back an object that violates its own class validator. A getter can likewise return output that violates its declared class (getter output is not auto-validated). The guarantee is therefore conventional, and the precise phrasing matters: <strong>construction through the supported API is the runtime certificate</strong>, and it certifies only the laws actually encoded. Mutate through the front door — constructors, <code>@&lt;-</code>, <code>S7::set_props()</code>, exported mutator functions — and the certificate holds. Package design reinforces the convention by exporting only the front door, and treats <code>valid_implicitly()</code> as what it is: an internal performance tool whose caller assumes the burden of proof.</p>
-</section>
-<section id="constructors-parse-validators-verify" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="constructors-parse-validators-verify"><span class="header-section-number">5.3</span> Constructors parse; validators verify</h2>
-<p>The clean division of labor inside an S7 class:</p>
-<p><strong>Constructors (and boundary functions) normalize.</strong> They accept the messy input the outside world actually produces — a hex string or a channel array; a double <code>8</code> where an integer is meant; a bare scalar where a list is expected — and either produce canonical property values or abort with a user-facing error that names the argument (this is where <code>cli::cli_abort()</code> with <code>rlang::caller_arg()</code> context belongs). Coercion, canonicalization, and version gating are all <em>parsing</em> and all happen here, once.</p>
-<p><strong>Validators verify canonical values.</strong> By the time a validator runs, its input should already be in the one true representation; the validator’s job is to <em>reject unlawful values</em>, not to accommodate alternative shapes. A property validator that tolerates five input forms “for convenience” is a parser wearing a validator’s clothes — and since validators run on every construction <em>and every property replacement</em>, it re-runs its accommodation logic forever, on values that were already clean.</p>
-<p>This is also Postel’s law put in its correct place: be liberal in what you accept <strong>at the boundary parser</strong>, and conservative everywhere else. The core of a well-built system is strict precisely because the boundary was generous.</p>
-</section>
-<section id="the-checking-ladder" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="the-checking-ladder"><span class="header-section-number">5.4</span> The checking ladder</h2>
-<p>Every check in a system has exactly one correct home. The rungs, from the outside world inward:</p>
-<p><strong>Rung 0 — external conformance validators.</strong> Full wire-format conformance — JSON Schema via AJV, an official specification validator, a database’s own constraint engine — belongs to the authority that owns the specification. Re-implementing an external spec’s full semantics inside property validators is expensive, drift-prone duplication. Published S7 packages are consistent on this: S7schema delegates YAML/JSON conformance to AJV; stacbuildr validates catalogs against the published STAC schemas; a style-document package should shell out to the official style validator for whole-document conformance. These run <strong>once, at the wire</strong>, not on every property write.</p>
-<p><strong>Rung 1 — boundary parsers.</strong> <code>from_json()</code>, <code>read_as_markdown()</code>, <code>color_hex()</code>: loose input in, domain objects out, <code>cli</code>-formatted errors with caller context on failure. All coercion lives here.</p>
-<p><strong>Rung 2 — property class.</strong> The declared class (possibly a union with <code>NULL</code>) is the base type check. S7 runs it before the property validator, so validators may assume the type.</p>
-<p><strong>Rung 3 — property validator.</strong> Local laws of one value: scalar-ness, length, range, set membership, pattern. Pure, cheap, no knowledge of any other property. Returns <code>NULL</code> or one message (without the property name — S7 prepends it, which is what makes property definitions reusable).</p>
-<p><strong>Rung 4 — setters.</strong> Normalization-on-write for meaning-preserving cleanup only. Used sparingly; a setter making semantic decisions is doing rung 1’s or rung 5’s job invisibly.</p>
-<p><strong>Rung 5 — class validator.</strong> Laws relating several properties of one object: ordering (<code>start &lt;= end</code>), mutual exclusion, conditional requiredness. Receives <code>self</code>, returns <code>NULL</code> or a character vector of problems, refers to properties as <code>@name</code>. Must not repeat rungs 2–3.</p>
-<p><strong>Rung 6 — aggregate validator.</strong> Laws relating <em>several objects</em> in a containing structure: unique ids across a collection, references that must resolve, pairings between siblings. These belong to the <strong>lowest class that can see everything the law mentions</strong> — usually a root document object. This is Eric Evans’s <em>aggregate</em> from domain-driven design: the consistency boundary, whose root is the only thing outsiders hold and through which all modification flows. An invariant placed <em>below</em> its visibility horizon cannot be checked; placed <em>above</em> it, it runs too often and knows too much.</p>
-<p><strong>Rung 7 — operation preconditions.</strong> Some states are lawful to <em>be in</em> but unlawful to <em>reach by a particular operation</em>: adding a source whose id already exists, removing a source that layers still reference. These are workflow rules, not document laws — the document containing the source was always valid — so they live in the mutator functions (<code>add_source()</code>, <code>remove_source()</code>), erroring with <code>cli::cli_abort()</code> before any modification.</p>
-<p><strong>Rung 8 — internal assertions.</strong> Developer-facing checks for states the maintainer believes impossible, kept while refactoring, never part of the user contract.</p>
-<p>Each rung <strong>assumes all rungs below it and duplicates none of them.</strong> The most common failure of validation architecture is not a missing check but the same law encoded on three rungs, which triples the maintenance surface and guarantees the encodings eventually disagree. When you find a law with two homes, delete one — or, more precisely, designate one home as <em>authoritative</em>. A deliberately retained cheap duplicate (a boundary check restating an inner law to produce a faster, better-localized error message) is a legitimate trade, provided it is documented as a duplicate and the authoritative rung is named. What the rule forbids is accidental multiplicity, where nobody knows which encoding governs.</p>
-</section>
-<section id="the-cost-model" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="the-cost-model"><span class="header-section-number">5.5</span> The cost model</h2>
-<p>Validators are not free, and their cost profile is part of the design. Property and class validators run at every construction and every property replacement — they are the <em>hot path</em> of the object system. Hence:</p>
+<section id="keep-the-result-of-checking" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="keep-the-result-of-checking"><span class="header-section-number">5.1</span> Keep the result of checking</h2>
+<p>Alexis King’s “Parse, don’t validate” is not merely advice to check early <span class="citation" data-cites="king2019">(<a href="sources.html#ref-king2019" role="doc-biblioref">King 2019</a>)</span>. It asks what representation remains after the check. A predicate can report that a value is acceptable and then discard the reason. A parser returns a value whose representation records what was established.</p>
+<p>King’s contrast is usefully concrete. A function with the shape <code>validateNonEmpty :: [a] -&gt; ()</code> inspects a list, fails when it is empty, and returns no evidence when it succeeds. A later consumer receives the same <code>[a]</code> and must trust a convention or ask the same question again. <code>parseNonEmpty :: [a] -&gt; NonEmpty a</code> performs the same inspection but returns a representation that retains the result. The important difference is not whether a check ran; it is whether the program kept what the check learned.</p>
+<p>Two common pathologies follow when it does not. <strong>Shotgun parsing</strong> scatters recognition and rejection across the processing pipeline, so code begins acting on input before deciding what the input means and may discover a problem only after side effects or expensive work. <strong>Boolean blindness</strong> compresses a richer fact into <code>TRUE</code> or <code>FALSE</code>: the bit records that some predicate succeeded but carries neither the established structure nor the reason it matters. Both pathologies force downstream code to reconstruct knowledge the boundary already possessed.</p>
+<p>In R, this is a runtime discipline rather than a compile-time proof:</p>
+<blockquote class="blockquote">
+<p>A boundary accepts uncertain input and returns a value with a narrower, documented meaning, or it reports why no such value can be produced.</p>
+</blockquote>
+<p>An S7 object can therefore act as a <strong>construction certificate</strong>, but only within a stated boundary. It certifies:</p>
 <ul>
-<li>Validators must be <strong>pure</strong> (no I/O, no network, no reads of global state) and <strong>fast</strong> (no quadratic scans where avoidable).</li>
-<li>Expensive conformance — full-document schema validation, cross-document consistency, anything touching disk — belongs on rungs 0–1, which run once per boundary crossing.</li>
-<li>If an aggregate’s rung-6 validator becomes genuinely expensive (huge collections revalidated on every append), that is a signal to provide bulk constructors and batch mutators (build the whole collection, validate once) rather than to weaken the validator. S7 supplies the sanctioned mechanism: <code>S7::valid_eventually(x, fun)</code> suspends validation for the duration of <code>fun</code> and validates once at the end — a transaction in the literal sense, verified to pass through transient-invalid intermediate states and still reject an unlawful final state.</li>
+<li>the property and class invariants visible when it was constructed;</li>
+<li>the aggregate invariants visible to the aggregate root, if construction passed through that root;</li>
+<li>continued validity under the update paths the API promises to support.</li>
 </ul>
-<p>There is also a subtle <em>transactionality</em> consequence: because validation fires per replacement, invariants spanning multiple properties require atomic multi-property updates (<code>S7::set_props()</code>), or legitimate transitions will be rejected mid-flight. This was developed in <a href="./02-values-and-state.html">02-values-and-state.qmd</a>.</p>
+<p>It does not certify facts that require unavailable context, laws never encoded, or the future contents of reference-valued payloads. Low-level mutation, unchecked validation escape hatches, and a mutable environment stored inside an otherwise valid object can all invalidate stronger claims. A getter’s result also needs its own contract; a declared property class does not by itself prove arbitrary computed output.</p>
+<p>The useful claim is consequently precise: consumers may rely on the invariants established by the supported construction and transformation paths. Package authors make that claim credible by keeping those paths small, documented, and tested.</p>
+<p>The progression from a primitive to a domain value makes the claim tangible. A character string <code>"#336699"</code> is only text; a successful <code>parse_color()</code> can return a <code>Color</code> whose channels are canonical finite integers in the declared range. Code that accepts <code>Color</code> need not repeatedly parse the hex spelling or re-check those channel laws. The object acts as a certificate for exactly those bounded facts. It is not a proof that an arbitrary getter is correct, that reference-valued internals never changed, or that every target renderer supports the color. Those stronger claims belong to other boundaries.</p>
+<p>S7’s deferred-validation escape hatches make the boundary especially worth stating precisely. The detailed behavior of <code>S7::valid_eventually()</code> and <code>S7::valid_implicitly()</code>, including the difference between final validation and no final validation, is developed in <a href="./02-values-and-state.html">Chapter 2</a>. Here the architectural conclusion is enough: supported construction and update paths preserve the advertised certificate; unchecked internal paths transfer the proof obligation to their caller.</p>
 </section>
-<section id="the-time-axis-as-early-as-possible-as-late-as-necessary" class="level2" data-number="5.6">
-<h2 data-number="5.6" class="anchored" data-anchor-id="the-time-axis-as-early-as-possible-as-late-as-necessary"><span class="header-section-number">5.6</span> The time axis: as early as possible, as late as necessary</h2>
-<p>The ladder places checks in <em>space</em> — which layer owns which law. Checks also have a placement in <em>time</em>, and the rule has two halves.</p>
-<p><strong>Shift left when the check needs nothing you don’t already have.</strong> The rtemis framework demonstrates both extremes of this. At the earliest possible moment: its property factories validate the <em>declaration itself</em> — a declared default outside its own declared bounds, or a double default on an integer property, “fails at factory time — i.e.&nbsp;at package load — rather than at first instantiation.” The author’s mistake surfaces before any user exists. At the last moment before expense: its <code>setup_*()</code> functions construct fully validated configuration objects <em>before</em> a training run that may fit thousands of models, so a typo in a hyperparameter costs milliseconds instead of hours. Both are the same principle: the value of a check is proportional to the cost of the work it gates, and it should run as far before that work as its inputs allow. A validated configuration object is itself a parse-don’t-validate move — the certificate is minted at setup time and trusted at run time.</p>
-<p><strong>Defer when the law mentions context that does not exist yet.</strong> Some constraints cannot be checked at construction because they relate the value to something external: rtemis’s <code>data_bound</code> properties declare that a hyperparameter is constrained by a <em>training-data dimension</em> (<code>mtry</code> bounded by the number of features; per-case weights matching the number of rows; feature selections that must be a subset of the column names). These are declared as data on the property and resolved in one pass, against the data, immediately before training begins — not smuggled into a validator that would have to guess, and not silently skipped. The general form: when a law spans the object and its eventual context, <em>declare</em> it at construction time and <em>check</em> it at the first moment the context is in hand, in one named place.</p>
+<section id="the-same-boundary-move-in-several-ecosystems" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="the-same-boundary-move-in-several-ecosystems"><span class="header-section-number">5.2</span> The same boundary move in several ecosystems</h2>
+<p>The representation move is broader than any one object system. These small examples all replace an unchecked number with a named positive budget, but their guarantees are not identical. Haskell and Rust can make the unchecked representation unavailable to statically typed consumers; Zod combines a runtime parser with a TypeScript brand; S7 gives R a nominal runtime value whose constructor and supported replacement paths enforce the contract <span class="citation" data-cites="ghc-newtype rust-tryfrom zod-brand">(<a href="sources.html#ref-ghc-newtype" role="doc-biblioref">Glasgow Haskell Compiler contributors 2026</a>; <a href="sources.html#ref-rust-tryfrom" role="doc-biblioref">Rust Project Developers 2026</a>; <a href="sources.html#ref-zod-brand" role="doc-biblioref">McDonnell 2026</a>)</span>.</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="" aria-current="page">R and S7</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">Haskell</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false" href="">Rust</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false" href="">TypeScript and Zod</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>PositiveBudget <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"PositiveBudget"</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">properties =</span> <span class="fu">list</span>(<span class="at">value =</span> S7<span class="sc">::</span>class_double),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">validator =</span> <span class="cf">function</span>(self) {</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    value <span class="ot">&lt;-</span> self<span class="sc">@</span>value</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(value) <span class="sc">!=</span> <span class="dv">1</span>L <span class="sc">||</span> <span class="sc">!</span><span class="fu">is.finite</span>(value) <span class="sc">||</span> value <span class="sc">&lt;=</span> <span class="dv">0</span>) {</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="st">"`value` must be one finite positive number"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NULL</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>parse_budget <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">PositiveBudget</span>(<span class="at">value =</span> <span class="fu">as.double</span>(x))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode haskell code-with-copy"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">newtype</span> <span class="dt">PositiveBudget</span> <span class="ot">=</span> <span class="dt">PositiveBudget</span> <span class="dt">Double</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ot">mkPositiveBudget ::</span> <span class="dt">Double</span> <span class="ot">-&gt;</span> <span class="dt">Either</span> <span class="dt">String</span> <span class="dt">PositiveBudget</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>mkPositiveBudget x</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="fu">isNaN</span> x <span class="op">||</span> <span class="fu">isInfinite</span> x <span class="op">||</span> x <span class="op">&lt;=</span> <span class="dv">0</span> <span class="ot">=</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">Left</span> <span class="st">"budget must be finite and positive"</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="fu">otherwise</span> <span class="ot">=</span> <span class="dt">Right</span> (<span class="dt">PositiveBudget</span> x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> PositiveBudget(<span class="dt">f64</span>)<span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> <span class="bu">TryFrom</span><span class="op">&lt;</span><span class="dt">f64</span><span class="op">&gt;</span> <span class="cf">for</span> PositiveBudget <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">type</span> Error <span class="op">=</span> <span class="op">&amp;</span><span class="ot">'static</span> <span class="dt">str</span><span class="op">;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> try_from(value<span class="op">:</span> <span class="dt">f64</span>) <span class="op">-&gt;</span> <span class="dt">Result</span><span class="op">&lt;</span><span class="dt">Self</span><span class="op">,</span> <span class="dt">Self</span><span class="pp">::</span><span class="bu">Error</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> value<span class="op">.</span>is_finite() <span class="op">&amp;&amp;</span> value <span class="op">&gt;</span> <span class="dv">0.0</span> <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="cn">Ok</span>(<span class="dt">Self</span>(value))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>            <span class="cn">Err</span>(<span class="st">"budget must be finite and positive"</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-4-tab">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode typescript code-with-copy"><code class="sourceCode typescript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { z } <span class="im">from</span> <span class="st">"zod"</span><span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PositiveBudget <span class="op">=</span> z</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">number</span>()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">finite</span>()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">positive</span>()</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">brand</span><span class="op">&lt;</span><span class="st">"PositiveBudget"</span><span class="op">&gt;</span>()<span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> PositiveBudget <span class="op">=</span> z<span class="op">.</span><span class="at">infer</span><span class="op">&lt;</span><span class="kw">typeof</span> PositiveBudget<span class="op">&gt;;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> parseBudget <span class="op">=</span> (input<span class="op">:</span> <span class="dt">unknown</span>)<span class="op">:</span> PositiveBudget <span class="kw">=&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  PositiveBudget<span class="op">.</span><span class="fu">parse</span>(input)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<p>The transferable lesson is not that S7 turns R into one of these languages. It is that a successful boundary should leave behind a representation that retains the distinction it just established.</p>
 </section>
-<section id="errors-as-values-the-second-channel" class="level2" data-number="5.7">
-<h2 data-number="5.7" class="anchored" data-anchor-id="errors-as-values-the-second-channel"><span class="header-section-number">5.7</span> Errors as values: the second channel</h2>
-<p>R’s condition system is a control-flow channel: an error unwinds the stack until something catches it. There is a second, complementary discipline in which failure travels through the <em>data</em> flow instead — the <code>Result</code>/<code>Option</code> family from Rust and the ML lineage — and the <a href="https://github.com/TransGirlCodes/resultr">resultr</a> package shows it is a natural fit for S7. <code>Result</code> is an abstract class existing purely for dispatch; <code>Success</code> and <code>Failure</code> are one-property variants; the combinator vocabulary (<code>unwrap()</code>, <code>unwrap_or_else()</code>, <code>and_then()</code>, <code>expect()</code>) is a set of generics with per-variant methods. The <code>Failure</code> method for <code>and_then()</code> just returns itself — which is the entire “railway-oriented programming” pattern in one line: once a pipeline is on the failure track, every subsequent step passes the failure through untouched, and the caller inspects the outcome once, at the end.</p>
-<p>The architectural point is not “use Result everywhere”; conditions remain the right channel for <em>bugs and contract violations</em> (a validator rejecting an unlawful value should absolutely throw). Values are the right channel when <strong>failure is an expected outcome the caller will branch on as data</strong> — a batch of items where some fail and the survivors matter; a fallible lookup feeding a pipeline that should complete. What resultr gets exactly right is the conversion discipline: its <code>wrap_in_result()</code> generic converts conditions into values at <em>one designed point</em> (methods on <code>class_error</code> and <code>class_warning</code> wrap into <code>Failure</code>; everything else into <code>Success</code>; a <code>Result</code> passes through), inside a single <code>rlang::try_fetch()</code>. Two channels, one explicit adapter between them — never ad hoc <code>tryCatch</code> scattered through the middle of the system. It also enforces its certificates: the <code>@value</code> and <code>@error</code> properties use write-once setters that error on reassignment, making the outcome tamper-evident.</p>
+<section id="three-different-boundary-decisions" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="three-different-boundary-decisions"><span class="header-section-number">5.3</span> Three different boundary decisions</h2>
+<p>Strict construction, tolerant parsing, and compilation answer different questions.</p>
+<p><strong>Strict construction</strong> creates a known domain value. <code>RunSpecification()</code> may require a bounded positive budget, a supported method, a valid candidate set, and a coherent relationship between its properties. Failure means no <code>RunSpecification</code> exists.</p>
+<p><strong>Tolerant parsing</strong> admits foreign or versioned input. It need not pretend that every input is known:</p>
+<ul>
+<li>recognized and complete input becomes a known variant;</li>
+<li>useful but unsupported input becomes an explicit <code>UnknownSpecification</code>;</li>
+<li>incomplete input becomes a <code>PartialSpecification</code> carrying diagnostics;</li>
+<li>input with no useful recoverable structure causes a condition.</li>
+</ul>
+<p>Tolerance preserves knowledge only when uncertainty is represented. Returning a known class after silently dropping unknown fields is not tolerant parsing; it is lossy translation.</p>
+<p><strong>Compilation</strong> applies a target policy. A parser may preserve an unknown variant so that a document can be inspected or round-tripped, while <code>compile_run()</code> rejects it because the execution engine cannot assign it meaning. Parsing asks what can be represented; compilation asks what this target can execute.</p>
+<p>This separation avoids two bad extremes: making every reader reject future content, and letting unknown content reach an executor as though it were understood.</p>
+<p>The three decisions can form one continuous pipeline rather than three competing APIs. A tolerant reader first preserves what it can know. A strict constructor mints a <code>RunSpecification</code> only for a recognized, intrinsically lawful request. <code>prepare()</code> combines that specification with data and target context to produce <code>PreparedRun</code>, and <code>execute()</code> accepts only the prepared form. Unknown or partial parse variants remain inspectable and round-trippable, but <code>compile_run()</code> refuses them unless its target policy defines a lowering. Each arrow strengthens or preserves knowledge; none silently claims more than its inputs justify.</p>
 </section>
-<section id="conditions-errors-as-a-designed-surface" class="level2" data-number="5.8">
-<h2 data-number="5.8" class="anchored" data-anchor-id="conditions-errors-as-a-designed-surface"><span class="header-section-number">5.8</span> Conditions: errors as a designed surface</h2>
-<p>R’s condition system is unusually rich — conditions are classed, structured, signalable, catchable by class, and chainable — and a domain package should treat its error behavior as designed API, not incidental output. A workable stratification, aligned with the ladder:</p>
-<p><strong>User errors</strong> (rungs 1 and 7): the caller did something fixable. These deserve the full treatment — <code>cli::cli_abort()</code> with a message naming the argument (<code>rlang::caller_arg()</code>), attributed to the calling frame (<code>rlang::caller_env()</code>) so the error points at the user’s code rather than package internals, with a <code>parent =</code> chain when wrapping a lower-level failure. Message content should say what was expected, what arrived, and when possible what to do.</p>
-<p><strong>Invariant violations</strong> (rungs 3, 5, 6): terse declarative strings returned from validators — “must be between 0 and 255” — which S7 assembles into its own error, prefixing property names. These are not the place for <code>cli</code> markup or call-site attribution; they are law statements.</p>
-<p><strong>Warnings</strong>: recoverable degradation the caller should know about but need not stop for — a deprecated field mapped forward, a lossy normalization applied. Never use a warning where the result is unusable.</p>
-<p><strong>Progress and information</strong>: <code>cli</code> messaging in the shell, never in the core. A constructor that chatters is a constructor that cannot be used in a pipeline.</p>
-<p>Classed conditions earn their keep the moment any caller needs to <em>handle</em> one failure differently from another: give programmatically distinguishable failures their own condition classes rather than making callers grep message text.</p>
+<section id="constructors-normalize-validators-verify" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="constructors-normalize-validators-verify"><span class="header-section-number">5.4</span> Constructors normalize; validators verify</h2>
+<p>Boundary functions may accept several input spellings, normalize names, coerce values under an explicit policy, and attach diagnostics. Constructors for known classes then receive canonical property values.</p>
+<p>Validators should verify those canonical values, not repeatedly parse them. A property validator handles local laws such as length, range, membership, or a pattern. It returns <code>NULL</code> on success or a character vector containing one or more problems. A class validator handles relationships among the properties it can see and likewise may return multiple problems.</p>
+<p>That cardinality matters. Reporting several independent violations in one construction attempt can be useful, and S7 validators are not limited to one message.</p>
 </section>
-<section id="design-by-contract-and-making-it-testable" class="level2" data-number="5.9">
-<h2 data-number="5.9" class="anchored" data-anchor-id="design-by-contract-and-making-it-testable"><span class="header-section-number">5.9</span> Design by contract, and making it testable</h2>
-<p>Bertrand Meyer’s design-by-contract vocabulary maps cleanly onto this architecture and is worth using in design discussions. <strong>Preconditions</strong> are rungs 1 and 7 — what must be true for the operation to proceed, the caller’s responsibility. <strong>Invariants</strong> are rungs 3, 5, 6 — what is always true of a lawful object, the class’s responsibility. <strong>Postconditions</strong> are the guarantees of the return value — largely carried by the returned <em>type</em> (parse-don’t-validate again: the strongest postcondition is “returns a <code>Color</code>”), plus documented promises like “the result’s getter outputs conform to their declared classes,” which S7 leaves on the author’s honor.</p>
-<p>The contracts become <em>testable</em> in two complementary ways. Ordinary example tests exercise each rung: construction succeeds on lawful input, each unlawful input is rejected <em>by the right rung</em> with the right message, mutation through the front door revalidates, round-trips are identities. And <strong>law-based (property-based) testing</strong> generalizes them: state algebraic laws the domain must satisfy — serialization round-trips, order-insensitivity of collection construction, idempotence of normalization — and test them against generated inputs. The s7contract package packages exactly this for S7: explicit interface declarations (required generics), traits with registered implementations, optional runtime argument/return checking, and generative laws with shrinking. Whether or not one adopts the package, the mindset — an interface is a set of generics <em>plus laws</em>, and laws are executable — is the mature endpoint of validation thinking.</p>
+<section id="one-authoritative-definition-several-uses" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="one-authoritative-definition-several-uses"><span class="header-section-number">5.5</span> One authoritative definition, several uses</h2>
+<p>A rule may be enforced or exposed in several places without having several independent meanings. A declared bound might drive:</p>
+<ul>
+<li>an S7 validator;</li>
+<li>a JSON Schema projection;</li>
+<li>input-widget limits;</li>
+<li>reference documentation;</li>
+<li>a fast boundary check with a more local error.</li>
+</ul>
+<p>The goal is <strong>one authoritative definition</strong>, not one execution. Projections and duplicated enforcement can drift or contain bugs, so agreement is a test obligation rather than an automatic guarantee. When a rule cannot be projected faithfully, name the authoritative form and document the weaker projection.</p>
+<p>This changes how to use a checking ladder. The ladder identifies the smallest boundary with enough information to state a rule coherently:</p>
+<ol type="1">
+<li>an external conformance authority for a foreign wire contract;</li>
+<li>a parser for coercion, version handling, and unknown input;</li>
+<li>a property class and validator for one canonical property;</li>
+<li>a class validator for relationships within one object;</li>
+<li>an aggregate root for references and relationships among contained objects;</li>
+<li>an operation for contextual requirements and legal transitions;</li>
+<li>an internal assertion for states believed to be impossible.</li>
+</ol>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div id="fig-checking-ladder" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-checking-ladder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<pre class="mermaid mermaid-js" data-label="fig-checking-ladder">flowchart TB
+  Wire["External conformance"] --&gt; Parse["Parsing and normalization"]
+  Parse --&gt; Property["Property class and local law"]
+  Property --&gt; Entity["Relationships within one object"]
+  Entity --&gt; Aggregate["References across an aggregate"]
+  Aggregate --&gt; Context["Contextual preparation or transition"]
+  Context --&gt; Assertion["Internal assertion"]
+</pre>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-checking-ladder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.1: Place each rule at the first boundary with enough information to state it coherently.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The ladder in <a href="#fig-checking-ladder" class="quarto-xref">Figure&nbsp;<span>5.1</span></a> is about information visibility, not merely nesting. A child cannot certify a sibling relationship it cannot see. A root should not absorb a requirement that also needs a dataset, host policy, database catalog, or other external authority.</p>
+<p>It is also a defense against shotgun parsing. The request enters through one parser, local laws become properties of <code>RunSpecification</code>, aggregate laws are checked where the complete request is visible, and contextual laws are resolved by <code>prepare()</code>. By the time execution begins, each question has one named home and a representation records its answer.</p>
 </section>
-<section id="the-payoff-restated" class="level2" data-number="5.10">
-<h2 data-number="5.10" class="anchored" data-anchor-id="the-payoff-restated"><span class="header-section-number">5.10</span> The payoff, restated</h2>
-<p>When the ladder is respected, a characteristic calm settles over the middle of the codebase. Core functions take domain objects and return domain objects; they contain no <code>if (!is.character(x))</code> boilerplate, because rungs below them already settled it; their tests test logic, not plumbing. All the suspicion concentrates at the edges, where it belongs, in a small number of parsers with excellent error messages. The system’s trust structure becomes legible: you can point at any function and say exactly what it is entitled to assume and which rung guarantees it.</p>
+<section id="contextual-preparation" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="contextual-preparation"><span class="header-section-number">5.6</span> Contextual preparation</h2>
+<p>Consider a computation request:</p>
+<pre class="text"><code>loose input
+    -&gt; RunSpecification
+    -&gt; prepare(specification, dataset)
+    -&gt; PreparedRun
+    -&gt; execute()</code></pre>
+<p><code>RunSpecification</code> can establish intrinsic facts:</p>
+<ul>
+<li><code>budget</code> is a positive scalar within the package limit;</li>
+<li><code>method</code> is a supported value;</li>
+<li>candidate values are represented explicitly rather than inferred from vector length;</li>
+<li>local properties obey a cross-property rule.</li>
+</ul>
+<p>It cannot establish that selected columns exist in a later dataset, that a candidate count fits the number of available features, or that case weights match the row count. Those requirements become checkable only when both the specification and dataset are present.</p>
+<p><code>prepare()</code> is therefore not a second constructor that repeats validation. It is a contextual operation that combines already-established intrinsic facts with dataset facts and returns a stronger value. <code>PreparedRun</code> can carry the resolved columns, normalized candidate plan, data fingerprint, and any diagnostics or provenance needed by execution.</p>
+<p>This is the temporal rule demonstrated particularly clearly by the public design of rtemis: check <strong>as early as possible, as late as necessary</strong>. Declaration errors whose inputs are already available can fail when a property specification is created. Configuration errors can fail before an expensive training run. Data-bound requirements—candidate counts relative to features, selected names relative to columns, or weights relative to rows—must wait until the data exists, but should run immediately then. Deferral is not omission. The future requirement is declared early and discharged at the first boundary with enough information.</p>
+<p>The downstream payoff is observable. <code>execute()</code> no longer:</p>
+<ul>
+<li>rechecks scalar shape and local ranges;</li>
+<li>guesses whether a vector denotes one value or several candidates;</li>
+<li>repeatedly looks up or validates column names;</li>
+<li>discovers an impossible request after expensive work has begun.</li>
+</ul>
+<p>The representation records that preparation occurred. If the dataset can change, the contract must say whether <code>PreparedRun</code> owns a snapshot, records an identity/version to check, or must be rebuilt. Construction cannot certify an external resource forever.</p>
+</section>
+<section id="supported-transformations-and-cost" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="supported-transformations-and-cost"><span class="header-section-number">5.7</span> Supported transformations and cost</h2>
+<p>Property and class validators are hot-path code because supported property replacement revalidates. Keep them pure and inexpensive. Multi-property invariants require grouped replacement, such as <code>S7::set_props()</code>, so valid transitions are not rejected at an invalid intermediate state.</p>
+<p>Bulk operations may defer validation and validate the final value once, but an unchecked path transfers the proof obligation to its caller. Such paths are implementation techniques, not public evidence of validity.</p>
+<p>Every exported transformation should state its postcondition:</p>
+<ul>
+<li>does it return another intrinsically valid <code>RunSpecification</code>?</li>
+<li>does changing a context-sensitive field invalidate preparation?</li>
+<li>does it preserve unknown foreign content?</li>
+<li>can reference-valued contents change behind the object’s back?</li>
+</ul>
+<p>Construction certificates remain useful only when their supported update paths preserve the advertised meaning.</p>
+</section>
+<section id="conditions-diagnostics-and-outcomes" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="conditions-diagnostics-and-outcomes"><span class="header-section-number">5.8</span> Conditions, diagnostics, and outcomes</h2>
+<p>Conditions and values serve different control-flow contracts.</p>
+<ul>
+<li>Use classed conditions for contract violations, impossible requests, and failures that should unwind unless handled.</li>
+<li>Store diagnostics on unknown or partial parse variants when callers need to inspect and preserve them as data.</li>
+<li>Use an outcome family when success, rejection, cancellation, or failure is an expected result of a domain operation.</li>
+</ul>
+<p>The conversion point should be explicit. A batch runner might catch selected conditions around one task and produce a <code>TaskFailed</code> outcome, while programmer errors continue to propagate. Chapter 5 defines the composition policy for those outcomes; merely defining variant classes does not decide whether failures short-circuit or accumulate.</p>
+<p>The distinction is easiest to understand narratively. If a caller asks for a negative budget, no lawful request exists: the boundary signals a classed condition and unwinds. If a remote job was accepted but later timed out, <code>TaskFailed</code> may be an ordinary result that a batch report must retain beside completed tasks. A warning can describe a recoverable normalization, while a diagnostic attached to <code>PartialSpecification</code> explains preserved uncertainty. The same words—error, warning, failure—are not interchangeable channels. Choose according to the control-flow promise callers need, then provide one deliberate adapter where a selected condition becomes an outcome value.</p>
+<p>For caller-facing conditions, <code>cli::cli_abort()</code> can provide structured, classed errors while <code>rlang::caller_arg()</code> and <code>rlang::caller_env()</code> preserve the user’s argument name and call context. Validator messages should remain short statements of violated laws.</p>
+</section>
+<section id="make-the-retained-knowledge-testable" class="level2" data-number="5.9">
+<h2 data-number="5.9" class="anchored" data-anchor-id="make-the-retained-knowledge-testable"><span class="header-section-number">5.9</span> Make the retained knowledge testable</h2>
+<p>Tests should establish both rejection and simplification:</p>
+<ul>
+<li>unlawful known values fail at the boundary with useful diagnostics;</li>
+<li>tolerant parsing returns the correct known, unknown, or partial variant;</li>
+<li>compilation rejects variants unsupported by its target policy;</li>
+<li>supported updates preserve intrinsic invariants;</li>
+<li>preparation rejects contextually impossible requests before execution;</li>
+<li>execution accepts <code>PreparedRun</code> without repeating earlier checks;</li>
+<li>projections of an authoritative rule agree on representative and boundary cases.</li>
+</ul>
+<p>Example tests establish named cases, but generated and property-based tests exercise the laws across a much larger input space. Generate lawful <code>RunSpecification</code> values and check that supported updates preserve validity; generate loose inputs and check that parse/render normalization is idempotent; generate model values and check round-trip equivalence under the relation the API actually promises. Shrinking is especially valuable because it reduces a failed law to a small counterexample rather than a large random fixture.</p>
+<p>The public s7contract package develops this direction explicitly: interfaces name required generics, traits register implementations, and generative laws test the behavioral part of a contract that a dispatch table cannot see. Using that package is optional; writing executable laws is not. An interface is never only a list of method names.</p>
+<p>The central success criterion is not the number of validators. It is how much less uncertainty downstream code must reconstruct. When the boundaries are doing their jobs, a calm middle emerges: core functions accept domain values, perform domain work, and return domain values. They do not contain a haze of <code>is.character()</code> checks, repeated parsing, and defensive branches. Suspicion is concentrated at the edges, where errors can be local and informative, and the middle is free to express the actual computation.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-ghc-newtype" class="csl-entry" role="listitem">
+Glasgow Haskell Compiler contributors. 2026. <span>“The Newtype Declaration.”</span> <a href="https://downloads.haskell.org/ghc/latest/docs/users_guide/exts/newtype.html">https://downloads.haskell.org/ghc/latest/docs/users_guide/exts/newtype.html</a>.
+</div>
+<div id="ref-king2019" class="csl-entry" role="listitem">
+King, Alexis. 2019. <span>“Parse, Don’t Validate.”</span> November 5. <a href="https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/">https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/</a>.
+</div>
+<div id="ref-zod-brand" class="csl-entry" role="listitem">
+McDonnell, Colin. 2026. <span>“Zod: Branded Types.”</span> <a href="https://zod.dev/api?id=branded-types">https://zod.dev/api?id=branded-types</a>.
+</div>
+<div id="ref-rust-tryfrom" class="csl-entry" role="listitem">
+Rust Project Developers. 2026. <span>“Trait Std::convert::TryFrom.”</span> <a href="https://doc.rust-lang.org/std/convert/trait.TryFrom.html">https://doc.rust-lang.org/std/convert/trait.TryFrom.html</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->
@@ -645,11 +879,6 @@ ul.task-list li input[type="checkbox"] {
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -965,13 +1194,13 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./03-types-and-meaning.html" class="pagination-link" aria-label="Types and Meaning: Semantic Types, Structure, and Type-Driven Design">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span>
+      <a href="./03-types-and-meaning.html" class="pagination-link" aria-label="Types and Meaning">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./05-composition-and-dispatch.html" class="pagination-link" aria-label="Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./05-composition-and-dispatch.html" class="pagination-link" aria-label="Composition and Dispatch">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
 <title>4&nbsp; Types and Meaning: Semantic Types, Structure, and Type-Driven Design – S7 Design Notes</title>
 <style>
@@ -73,6 +74,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./04-parse-dont-validate.html" rel="next">
 <link href="./02-values-and-state.html" rel="prev">
+<link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -84,9 +86,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1f846c7865d629590e2cadd4f479fcb7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-c13f21f511963f2a6363cc37617da2fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -114,8 +116,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
 
+<meta property="og:title" content="4&nbsp; Types and Meaning: Semantic Types, Structure, and Type-Driven Design – S7 Design Notes">
+<meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta property="og:site_name" content="S7 Design Notes">
+<meta name="twitter:title" content="4&nbsp; Types and Meaning: Semantic Types, Structure, and Type-Driven Design – S7 Design Notes">
+<meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/03-types-and-meaning.html">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -289,7 +301,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./03-types-and-meaning.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./03-types-and-meaning.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -327,7 +339,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -342,19 +354,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span></a>
   </div>
 </li>
       </ul>
@@ -371,19 +383,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span></a>
   </div>
 </li>
       </ul>
@@ -400,7 +412,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span></a>
   </div>
 </li>
       </ul>
@@ -417,19 +429,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></span></a>
   </div>
 </li>
       </ul>
@@ -446,13 +458,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./sources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
   </div>
 </li>
       </ul>
@@ -470,13 +488,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#three-lenses-on-what-a-type-is" id="toc-three-lenses-on-what-a-type-is" class="nav-link active" data-scroll-target="#three-lenses-on-what-a-type-is"><span class="header-section-number">4.1</span> Three lenses on what a type is</a></li>
   <li><a href="#structural-versus-nominal-and-where-semantics-enters" id="toc-structural-versus-nominal-and-where-semantics-enters" class="nav-link" data-scroll-target="#structural-versus-nominal-and-where-semantics-enters"><span class="header-section-number">4.2</span> Structural versus nominal — and where semantics enters</a></li>
   <li><a href="#semantic-contracts-and-loose-coupling" id="toc-semantic-contracts-and-loose-coupling" class="nav-link" data-scroll-target="#semantic-contracts-and-loose-coupling"><span class="header-section-number">4.3</span> Semantic contracts and loose coupling</a></li>
-  <li><a href="#three-carriers-of-semantics-in-s7" id="toc-three-carriers-of-semantics-in-s7" class="nav-link" data-scroll-target="#three-carriers-of-semantics-in-s7"><span class="header-section-number">4.4</span> Three carriers of semantics in S7</a></li>
-  <li><a href="#type-driven-design-in-a-dynamic-language" id="toc-type-driven-design-in-a-dynamic-language" class="nav-link" data-scroll-target="#type-driven-design-in-a-dynamic-language"><span class="header-section-number">4.5</span> Type-driven design in a dynamic language</a></li>
-  <li><a href="#data-driven-design-in-two-senses" id="toc-data-driven-design-in-two-senses" class="nav-link" data-scroll-target="#data-driven-design-in-two-senses"><span class="header-section-number">4.6</span> Data-driven design, in two senses</a></li>
-  <li><a href="#the-wire-universe-versus-the-domain-universe" id="toc-the-wire-universe-versus-the-domain-universe" class="nav-link" data-scroll-target="#the-wire-universe-versus-the-domain-universe"><span class="header-section-number">4.7</span> The wire universe versus the domain universe</a></li>
-  <li><a href="#presence-is-a-four-way-decision-not-a-boolean" id="toc-presence-is-a-four-way-decision-not-a-boolean" class="nav-link" data-scroll-target="#presence-is-a-four-way-decision-not-a-boolean"><span class="header-section-number">4.8</span> Presence is a four-way decision, not a boolean</a></li>
-  <li><a href="#literals-enums-and-identity" id="toc-literals-enums-and-identity" class="nav-link" data-scroll-target="#literals-enums-and-identity"><span class="header-section-number">4.9</span> Literals, enums, and identity</a></li>
-  <li><a href="#refinements-for-the-statically-minded" id="toc-refinements-for-the-statically-minded" class="nav-link" data-scroll-target="#refinements-for-the-statically-minded"><span class="header-section-number">4.10</span> Refinements, for the statically minded</a></li>
+  <li><a href="#a-running-concept-color-in-a-style-document" id="toc-a-running-concept-color-in-a-style-document" class="nav-link" data-scroll-target="#a-running-concept-color-in-a-style-document"><span class="header-section-number">4.4</span> A running concept: color in a style document</a></li>
+  <li><a href="#a-practical-property-and-contract-inventory" id="toc-a-practical-property-and-contract-inventory" class="nav-link" data-scroll-target="#a-practical-property-and-contract-inventory"><span class="header-section-number">4.5</span> A practical property and contract inventory</a></li>
+  <li><a href="#three-carriers-of-semantics-in-s7" id="toc-three-carriers-of-semantics-in-s7" class="nav-link" data-scroll-target="#three-carriers-of-semantics-in-s7"><span class="header-section-number">4.6</span> Three carriers of semantics in S7</a></li>
+  <li><a href="#type-driven-design-in-a-dynamic-language" id="toc-type-driven-design-in-a-dynamic-language" class="nav-link" data-scroll-target="#type-driven-design-in-a-dynamic-language"><span class="header-section-number">4.7</span> Type-driven design in a dynamic language</a></li>
+  <li><a href="#data-driven-design-in-two-senses" id="toc-data-driven-design-in-two-senses" class="nav-link" data-scroll-target="#data-driven-design-in-two-senses"><span class="header-section-number">4.8</span> Data-driven design, in two senses</a></li>
+  <li><a href="#the-wire-universe-versus-the-domain-universe" id="toc-the-wire-universe-versus-the-domain-universe" class="nav-link" data-scroll-target="#the-wire-universe-versus-the-domain-universe"><span class="header-section-number">4.9</span> The wire universe versus the domain universe</a></li>
+  <li><a href="#presence-and-default-ownership" id="toc-presence-and-default-ownership" class="nav-link" data-scroll-target="#presence-and-default-ownership"><span class="header-section-number">4.10</span> Presence and default ownership</a></li>
+  <li><a href="#literals-enums-and-identity" id="toc-literals-enums-and-identity" class="nav-link" data-scroll-target="#literals-enums-and-identity"><span class="header-section-number">4.11</span> Literals, enums, and identity</a></li>
+  <li><a href="#refinements-for-the-statically-minded" id="toc-refinements-for-the-statically-minded" class="nav-link" data-scroll-target="#refinements-for-the-statically-minded"><span class="header-section-number">4.12</span> Refinements, for the statically minded</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/03-types-and-meaning.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -484,7 +504,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./03-types-and-meaning.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./03-types-and-meaning.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></h1>
 </div>
@@ -509,88 +529,151 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>A type is a set of values.</strong> <code>integer between 0 and 255</code> names a set; <code>nonempty string</code> names a set. Under this lens, subtyping is subset-hood, a union type is a set union, and a validator is a membership predicate.</p>
 <p><strong>A type is a contract on operations.</strong> Knowing <code>x</code> is a <code>Color</code> tells you what you may <em>do</em>: read channels, convert to hex, blend. Under this lens, interfaces and generics define types as much as data layouts do — a “thing that can be serialized” is a type in the behavioral sense even if no class hierarchy says so.</p>
 <p><strong>A type is a name for meaning.</strong> <code>EmailAddress</code> and <code>CustomerId</code> may both be strings-as-sets, and support the same operations-as-contracts, yet naming them separately encodes knowledge: these are different <em>kinds</em> of thing, and substituting one for the other is a bug even when no operation would fail.</p>
-<p>Static languages let a compiler exploit all three lenses. In R, a dynamic language, the sets are enforced at runtime (validators), the contracts by dispatch and convention, and the meanings by the class graph you choose to build. The absence of a compiler does not make type thinking pointless — it makes it a <em>design discipline</em> rather than a checked artifact. Your constructor set is your type system; your validators are its proof obligations; your generics are its interfaces.</p>
+<p>Static languages let a compiler exploit all three lenses. R distributes the work across constructors, property and class validation, generic dispatch, schemas, boundary checks, and tests. These mechanisms enforce different things, but they share a design move: make meaning explicit enough that consumers can rely on it.</p>
 </section>
 <section id="structural-versus-nominal-and-where-semantics-enters" class="level2" data-number="4.2">
 <h2 data-number="4.2" class="anchored" data-anchor-id="structural-versus-nominal-and-where-semantics-enters"><span class="header-section-number">4.2</span> Structural versus nominal — and where semantics enters</h2>
-<p>Type systems differ in what makes two types “the same.” <strong>Structural</strong> typing (TypeScript, Go interfaces) says: same shape, same type — any object with the right fields satisfies the interface. <strong>Nominal</strong> typing (Java, Haskell’s newtypes) says: same <em>name</em>, same type — identical shapes with different declarations are different types.</p>
-<p>R at runtime is loosely structural: code that reaches into <code>x$field</code> works on anything with that field. S7 layers nominal identity on top: dispatch and property-class checks consult the declared class, not the shape. And a property’s declared class is itself a structural constraint on that slot. So an S7 design mixes the two deliberately: <strong>nominal identity where meaning must not be confused, structural constraints where shape is what matters.</strong></p>
+<p>Type systems differ in what makes two types “the same,” and most languages mix several mechanisms. TypeScript object types and Go interfaces are prominent <strong>structural</strong> examples: compatibility can follow from the required shape without an explicit declaration. Java class identity and Haskell <code>newtype</code> declarations are prominent <strong>nominal</strong> examples: distinct declarations remain distinct despite similar representations. Those languages also contain exceptions and additional mechanisms, so the contrast is a design lens rather than a complete taxonomy.</p>
+<p>R code can be written in a structurally permissive style: a function that reaches into <code>x$field</code> may work on anything exposing that component. That does not make S7 structurally typed. S7 dispatch and property-class checks use declared class identity and inheritance. Shape requirements such as scalar length, names, or required components are additional runtime contracts, usually expressed by properties and validators rather than inferred from structure. An S7 design can therefore combine nominal identity with explicit shape constraints without confusing the two.</p>
 <p>The third notion — <strong>semantic</strong> typing — is the design payoff of nominal identity. The classic statically typed device is the <em>newtype</em>: wrap a primitive in a distinct type (<code>CustomerId</code> wrapping <code>string</code>) so that the compiler stops you from passing a customer id where an order id is expected. The wrapper adds no structure; it adds <em>meaning</em> and prevents an entire class of “stringly typed” defects where everything is a character vector and nothing stops the wrong one from arriving.</p>
 </section>
 <section id="semantic-contracts-and-loose-coupling" class="level2" data-number="4.3">
 <h2 data-number="4.3" class="anchored" data-anchor-id="semantic-contracts-and-loose-coupling"><span class="header-section-number">4.3</span> Semantic contracts and loose coupling</h2>
 <p>There is a systems-integration corollary that elevates semantic types from a convenience to an architectural principle. When two systems integrate by sharing <strong>structure</strong> — an agreed record layout — every structural change in one forces coordination with the other; the coupling is total. When they integrate by sharing <strong>semantics</strong> — agreed atomic meanings like <code>CustomerId</code>, <code>EmailAddress</code>, <code>FloodZoneClass</code> — each system arranges those atoms in whatever local structure suits it, and a mapping layer mediates. Structures then evolve independently while data remains meaningfully exchangeable, because the <em>meanings</em> are the stable contract.</p>
-<p>(This idea is developed explicitly in data-integration languages like Taxi, where <code>type CustomerId inherits String</code> declarations are shared across systems precisely so models do not have to be. The design notes in <code>s7-thoughts-and-notes.md</code> arrive at the same conclusion independently.)</p>
-<p>The general lesson for any multi-dialect domain — several external schemas describing overlapping concepts — is to build the <strong>semantic layer first</strong> (the atoms shared across dialects) and let each dialect’s document structure be a separate, local composition of those atoms. The alternative, modeling one dialect’s structure and treating others as deviations from it, couples you to the dialect you happened to start with.</p>
+<p>(This idea is developed explicitly in data-integration languages like Taxi, where <code>type CustomerId inherits String</code> declarations are shared across systems precisely so models do not have to be.)</p>
+<p>The general lesson for a multi-dialect domain is to seek stable shared meanings without assuming they are known in advance. Sketch representative documents and operations for more than one dialect, then extract the semantic concepts that survive the comparison. Modeling one dialect as universal couples every other dialect to its incidental structure; designing an “uber-schema” before seeing real consumers is the opposite error.</p>
 </section>
-<section id="three-carriers-of-semantics-in-s7" class="level2" data-number="4.4">
-<h2 data-number="4.4" class="anchored" data-anchor-id="three-carriers-of-semantics-in-s7"><span class="header-section-number">4.4</span> Three carriers of semantics in S7</h2>
-<p>S7 gives three mechanisms for making meaning first-class, in ascending order of weight.</p>
+<section id="a-running-concept-color-in-a-style-document" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="a-running-concept-color-in-a-style-document"><span class="header-section-number">4.4</span> A running concept: color in a style document</h2>
+<p>To keep the rest of the chapter concrete, consider a <code>Color</code> used by a style document. At first it appears to be “four numbers”: red, green, and blue channels in <code>[0, 255]</code>, plus alpha in <code>[0, 1]</code>. That description already hides several decisions. Are channels integers or merely integerish numerics? Is alpha stored when omitted, and who chooses its default? Can a color travel independently of the style? Must callers blend colors, render them as hex, or preserve the exact spelling read from a wire document?</p>
+<p>Those questions are not implementation trivia. They determine whether color is a repeated property recipe, a nominal value, or an incidental wire shape; which rules are local and which relate several channels; and whether serialization is a projection of the domain value or the source of truth for it. The sections that follow revisit the same concept as each design layer comes into view.</p>
+</section>
+<section id="a-practical-property-and-contract-inventory" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="a-practical-property-and-contract-inventory"><span class="header-section-number">4.5</span> A practical property and contract inventory</h2>
+<p>Before choosing a class graph, inventory the questions each concept raises. This is a design worksheet, not a requirement to build a property framework first. For the running color, it turns “four numbers” into the actual decisions a representation must retain:</p>
+<ul>
+<li><strong>Representation:</strong> What R class and shape are canonical? Is the value a scalar, vector, record, alternative, or collection? A color could be a length-four numeric vector or a record with named channels; the choice affects readability and projection.</li>
+<li><strong>Cardinality:</strong> What lengths are lawful? Are names, order, or uniqueness significant? An unnamed vector makes channel order load-bearing, while named properties make the association explicit.</li>
+<li><strong>Membership and bounds:</strong> Is the value drawn from an enum, literal set, interval, pattern, or other locally decidable set? Each RGB channel has a local integer and range law; alpha has a different range.</li>
+<li><strong>Presence:</strong> Must the resulting object contain it? Must the caller supply it? May the stored value be <code>NULL</code> or <code>NA</code>? Are zero-length and empty values meaningful? A style may require a color while allowing callers to omit alpha.</li>
+<li><strong>Default ownership:</strong> Does omission mean an R-owned domain default, a value supplied by an external authority, or a caller request to materialize a default later? If opaque is the domain default, R can store <code>alpha = 1</code>; if an external renderer chooses opacity, materializing <code>1</code> would invent knowledge the model does not own.</li>
+<li><strong>Relationships:</strong> Which rules mention several properties of one object, several contained objects, or external context?</li>
+<li><strong>Lifecycle:</strong> Is this an editable value, a read-only snapshot, or part of a reference owner?</li>
+<li><strong>Operations:</strong> Which verbs consume or produce it, what do they preserve, and how do they fail? <code>blend()</code>, <code>as_hex()</code>, and contrast calculations may justify color as an independent dispatchable concept.</li>
+<li><strong>Projection:</strong> How does it serialize, and which distinctions among omission, <code>null</code>, unknown, and empty must survive? A wire format may accept a hex string, an array, or an object even if the domain stores one canonical form.</li>
+</ul>
+<p>The inventory determines rule placement. Intrinsic shape, cardinality, membership, bounds, and local presence policy belong in property contracts. Relationships among one object’s properties belong in its class validator. Cross-object references belong at an aggregate boundary. Rules needing data, metadata, resources, or authority belong in a named contextual operation. When one slot accepts alternatives, an S7 union may name primitive classes, domain classes, or both; a union describes accepted values, not a closed variant family. For <code>Color</code>, channel bounds are property contracts, the relationship among channels belongs to the <code>Color</code> class if one exists, and whether a foreground color meets an accessibility threshold is contextual to its background and belongs in an operation with both values.</p>
+</section>
+<section id="three-carriers-of-semantics-in-s7" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="three-carriers-of-semantics-in-s7"><span class="header-section-number">4.6</span> Three carriers of semantics in S7</h2>
+<p>S7 gives three mechanisms for making meaning first-class, in ascending order of weight. The running color can stop at any tier, depending on how far its meaning must travel.</p>
 <p><strong>1. A reused property definition.</strong> A property object is a value; define it once, use it in many classes:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>prop_email <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_property</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">class =</span> S7<span class="sc">::</span>class_character,</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">validator =</span> <span class="cf">function</span>(value) {</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(value) <span class="sc">!=</span> <span class="dv">1</span>L) <span class="fu">return</span>(<span class="st">"must be a single string"</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"^[^@</span><span class="sc">\\</span><span class="st">s]+@[^@</span><span class="sc">\\</span><span class="st">s]+$"</span>, value)) <span class="fu">return</span>(<span class="st">"must be an email address"</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NULL</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"^[^@[:space:]]+@[^@[:space:]]+$"</span>, value)) {</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(<span class="st">"must be an email address"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NULL</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Two classes using <code>prop_email</code> share the <em>law</em> and, by convention, the <em>meaning</em>. There is no new nominal type — a plain string still flows in and out — so nothing prevents cross-wiring two different string-valued properties. This is the cheap tier: shared validation, meaning by convention. Note the S7 convention that property validators do not mention the property’s name; S7 prepends it, which is exactly what makes one definition reusable across many properties.</p>
+<p>The corresponding color design is a reused <code>prop_rgb_channel</code> plus a separate <code>prop_alpha</code>. This is enough when channels matter only in their containing style class and no consumer receives a color as a unit. It shares the local laws without claiming that an extracted integer is itself a color.</p>
 <p><strong>2. A class inheriting from a base type.</strong> <code>S7::new_class("MarkdownText", parent = S7::class_character)</code> creates a nominal type whose instances <em>are still character vectors</em> — the underlying data is reachable via <code>S7::S7_data()</code>, and with an S3 bridge the value can keep behaving like a string where that is wanted. Now dispatch can distinguish it, property classes can demand it, and accidental substitution fails loudly. ragnar’s <code>MarkdownDocument</code> is a published example: a length-one string with an <code>@origin</code> property, inheriting from character because a markdown document genuinely <em>is</em> text — the inheritance is honest, not decorative. This is the newtype tier: nominal identity at modest cost. Its limit is structure: the moment the concept has <em>parts</em>, packing them into a subclassed primitive with a heroic validator is fighting the system.</p>
 <p><strong>3. A composite class.</strong> When the concept has internal structure — a color with four channels, a range with two endpoints, an extent with bounds — it gets a class with properties, each carrying its own local law, plus a class validator for laws that relate them. This is the full tier: identity, structure, invariants, and a dispatch anchor.</p>
 <p>Choosing the tier is a judgment about the concept, not the code: does it have parts? Does behavior dispatch on it? Must it be impossible to confuse with its underlying primitive? Escalate only when a “yes” appears.</p>
+<p>The decisive distinction is whether meaning must travel independently. Reused channel properties can enforce that red, green, and blue are scalar bounded integers and alpha is a bounded scalar. A <code>Color</code> class is warranted when the four channels must remain related after extraction, when operations such as <code>blend()</code> or <code>as_hex()</code> dispatch on the concept, or when a color must not be confused with an arbitrary numeric vector. The property shares a contract in a containing position; the class gives the concept nominal identity and an independent life. This is not “more type safety” in the abstract. It is a direct answer to whether consumers manipulate channels or colors.</p>
 </section>
-<section id="type-driven-design-in-a-dynamic-language" class="level2" data-number="4.5">
-<h2 data-number="4.5" class="anchored" data-anchor-id="type-driven-design-in-a-dynamic-language"><span class="header-section-number">4.5</span> Type-driven design in a dynamic language</h2>
-<p>The type-driven design slogan — <strong>make illegal states unrepresentable</strong> (Yaron Minsky) — translates to dynamic R as <strong>make illegal states unconstructable</strong>. You cannot stop the interpreter from holding a bad list, but you can arrange that no bad <em>object of your class</em> ever exists: the constructor parses, the validators enforce, and every mutation path revalidates. Possession of the object then certifies its laws, which is the bridge to <a href="./04-parse-dont-validate.html">04-parse-dont-validate.qmd</a>.</p>
-<p>The practical workflow, adapted from the typed-functional world (Scott Wlaschin’s <em>Domain Modeling Made Functional</em> is the best book-length treatment):</p>
+<section id="type-driven-design-in-a-dynamic-language" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="type-driven-design-in-a-dynamic-language"><span class="header-section-number">4.7</span> Type-driven design in a dynamic language</h2>
+<p>Type-driven design means making domain concepts, admissible states, relationships, and operations explicit in the values and contracts from which the program is composed. Its goal is not to imitate a static typechecker. Its test is whether the representation retains knowledge and makes consumers simpler.</p>
+<p>Use an iterative workflow:</p>
 <ol type="1">
-<li><strong>Enumerate the vocabulary.</strong> List the domain’s nouns and the sets of values each can take, before writing any class. Distinguish atoms (indivisible meanings) from composites (arrangements of atoms).</li>
-<li><strong>Write the laws next to the nouns.</strong> “Alpha is a proportion.” “A zoom level lies in [0, 24].” “Every layer references an existing source.” Each law will land on a specific rung of the validation ladder.</li>
-<li><strong>Represent alternatives as alternatives.</strong> Where the domain says “either X or Y,” reach for a sum-type encoding (<a href="./05-composition-and-dispatch.html">05-composition-and-dispatch.qmd</a>) rather than optional fields with implicit exclusivity.</li>
-<li><strong>Let the verbs emerge.</strong> Once the nouns are stable, the generic vocabulary — construct, combine, serialize, render, convert — tends to write itself, and methods slot in per class.</li>
+<li><strong>Start from domain and consumers.</strong> Identify the decisions the program must make and the outputs, side effects, or external authorities involved.</li>
+<li><strong>Sketch representative nouns and verbs.</strong> Model a few important values, variants, containment relationships, and operations directly.</li>
+<li><strong>Inventory contracts.</strong> Record shape, cardinality, membership, presence, defaults, local constraints, and contextual requirements encountered in those sketches.</li>
+<li><strong>Place each rule.</strong> Use properties, classes, aggregates, or contextual operations according to information visibility.</li>
+<li><strong>Exercise the operations.</strong> Let methods expose missing distinctions, awkward variants, and laws the representation should preserve.</li>
+<li><strong>Extract repeated recipes.</strong> Generalize property or validator machinery only after real repetition, then revisit both nouns and verbs.</li>
 </ol>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div id="fig-modeling-loop" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-modeling-loop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<pre class="mermaid mermaid-js" data-label="fig-modeling-loop">flowchart LR
+  Domain["Domain pressures"] --&gt; Sketch["Representative nouns and verbs"]
+  Sketch --&gt; Inventory["Property and contract inventory"]
+  Inventory --&gt; Placement["Place rules by information boundary"]
+  Placement --&gt; Operations["Exercise operations and laws"]
+  Operations --&gt; Refine["Refine distinctions and representations"]
+  Refine --&gt; Sketch
+  Operations --&gt; Extract["Extract repeated machinery"]
+</pre>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-modeling-loop-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.1: Type-driven design is an iterative loop between domain meaning, representation, and operations.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-modeling-loop" class="quarto-xref">Figure&nbsp;<span>4.1</span></a> emphasizes that the model and its operations mature together; neither is a one-way derivation from the other.</p>
+<p>The color example shows why the loop matters. Starting from the noun alone might produce a four-field class. Exercising <code>as_hex(color)</code> then forces a decision about rounding, alpha inclusion, and canonical case. Exercising <code>blend(foreground, background)</code> reveals that alpha is semantically different from the RGB channels and that the result should again satisfy the <code>Color</code> contract. Asking for faithful round trips may reveal a second concern—the original wire spelling—that should not be confused with domain equality. Each verb either confirms the representation or exposes knowledge it failed to retain.</p>
+<p>Construction can then act as evidence for the invariants visible at that boundary. It is not a universal certificate: unsupported mutation, shared reference payloads, and external facts outside the validator’s view require their own contracts.</p>
 </section>
-<section id="data-driven-design-in-two-senses" class="level2" data-number="4.6">
-<h2 data-number="4.6" class="anchored" data-anchor-id="data-driven-design-in-two-senses"><span class="header-section-number">4.6</span> Data-driven design, in two senses</h2>
+<section id="data-driven-design-in-two-senses" class="level2" data-number="4.8">
+<h2 data-number="4.8" class="anchored" data-anchor-id="data-driven-design-in-two-senses"><span class="header-section-number">4.8</span> Data-driven design, in two senses</h2>
 <p>“Data-driven” names two distinct and equally useful ideas, and conflating them causes confusion.</p>
-<p><strong>Design driven by data about the domain.</strong> Before abstracting, census the actual corpus: which shapes recur across a specification, which fields are required in practice, which enum values actually occur. Abstractions are then <em>earned</em> by observed repetition rather than speculated. A property-factory layer, for instance, should contain exactly the factories the census justifies — the shapes that occur dozens of times — and nothing “for completeness.” This is the rule of three operating at design scale, and it is the discipline that keeps foundation layers small and honest.</p>
-<p><strong>Behavior represented as data.</strong> Tables and specifications that <em>drive</em> computation: a classification table that generates both a style expression and a legend; a schedule that drives a state machine; quoted expressions composed into generated validator functions. This is the older Lisp/Unix sense — programs manipulating programs-as-data — and it reappears in <a href="./06-documents-schemas-dsls.html">06-documents-schemas-dsls.qmd</a> as the foundation of DSL and codegen work. Its cardinal rule: the data is the single source of truth, and <em>all</em> downstream artifacts are projections from it, never hand-maintained in parallel.</p>
+<p><strong>Design driven by data about the domain.</strong> Before abstracting, census the actual corpus: which shapes recur across a specification, which fields are required in practice, which enum values actually occur. Generalized machinery is then <em>earned</em> by observed repetition rather than speculation. A property-factory layer should contain the recipes real models reuse, not entries added “for completeness.” This restraint applies to infrastructure, not to naming an important concept that appears only once.</p>
+<p><strong>Behavior represented as data.</strong> Tables and specifications that <em>drive</em> computation: a classification table that generates both a style expression and a legend; a schedule that drives a state machine; quoted expressions composed into generated validator functions. This is the older Lisp/Unix sense — programs manipulating programs-as-data — and it reappears in <a href="./06-documents-schemas-dsls.html">Documents, Schemas, and Languages</a> as the foundation of DSL and codegen work. When the specification is owned and semantic, validators, defaults, schemas, documentation, and interfaces can be deliberate projections from it. This removes independent definitions and makes agreement testable; it does not make generators infallible.</p>
+<p>Candidate values show why retaining intent matters. A numeric vector alone does not say whether its elements are observations, bounds, or values to try during tuning. A <code>CandidateValues</code> concept can establish non-emptiness, element constraints, ordering or uniqueness policy, and the fact that the vector expresses a search choice. Once constructed, preparation and execution code no longer infer intent from length or naming conventions. Whether this concept is a validated property or a nominal class depends on whether it must travel independently or participate in dispatch.</p>
 </section>
-<section id="the-wire-universe-versus-the-domain-universe" class="level2" data-number="4.7">
-<h2 data-number="4.7" class="anchored" data-anchor-id="the-wire-universe-versus-the-domain-universe"><span class="header-section-number">4.7</span> The wire universe versus the domain universe</h2>
+<section id="the-wire-universe-versus-the-domain-universe" class="level2" data-number="4.9">
+<h2 data-number="4.9" class="anchored" data-anchor-id="the-wire-universe-versus-the-domain-universe"><span class="header-section-number">4.9</span> The wire universe versus the domain universe</h2>
 <p>Documents live in an impoverished type universe. JSON has exactly six kinds: null, boolean, number, string, array, object. R’s universe is richer and messier: <code>NULL</code> and <code>NA</code> (distinct!), integer versus double, length-one vectors standing in for scalars, named lists versus unnamed lists, attributes. Designing a document model means designing the mapping between universes, and most of the notorious bugs live in four mismatches:</p>
 <ul>
-<li><strong>Number:</strong> JSON does not distinguish <code>8</code> from <code>8L</code>. If a property demands <code>class_integer</code>, wire input and casual users will supply doubles. Either accept <code>class_numeric</code> plus an integerish validator, or coerce in the constructor — but decide once, globally.</li>
+<li><strong>Number:</strong> JSON does not distinguish <code>8</code> from <code>8L</code>. If a property demands <code>S7::class_integer</code>, wire input and casual users will supply doubles. Either accept <code>S7::class_numeric</code> plus an integerish validator, or coerce in the admission function — but decide once for that boundary.</li>
 <li><strong>Scalar:</strong> JSON has scalars; R has length-one vectors. Every “string” property needs a length-1 law somewhere, which is why scalar-ness is usually the first check in any property-validator foundation.</li>
 <li><strong>Nothing:</strong> JSON can <em>omit</em> a key, or set it to <code>null</code>; R has <code>NULL</code> and also <code>NA</code>. These are up to four distinct meanings (“never mentioned,” “explicitly cleared,” “unknown,” “not applicable”) flowing through two representations. Tony Hoare called null references his billion-dollar mistake; R doubled the budget. The only defense is an explicit, per-property <strong>presence policy</strong>.</li>
 <li><strong>Empty:</strong> an empty array, an empty object, and an absent key serialize differently and often mean different things (<code>"layers": []</code> versus no <code>layers</code> key). Serializers need a stated omit-empty policy per field.</li>
 </ul>
+<p>For the running example, the domain may store a canonical <code>Color(red, green, blue, alpha)</code> while one wire format accepts <code>"#336699"</code>, another accepts <code>c(51, 102, 153, 1)</code>, and a third emits named fields. Admission functions can normalize all three into the domain value, and serializers can project it back into the chosen dialect. If exact lexical round-tripping matters—such as preserving <code>"#369"</code> rather than emitting <code>"#336699"</code>—the original spelling is additional provenance that must be stored explicitly. It cannot be recovered from the normalized color.</p>
 </section>
-<section id="presence-is-a-four-way-decision-not-a-boolean" class="level2" data-number="4.8">
-<h2 data-number="4.8" class="anchored" data-anchor-id="presence-is-a-four-way-decision-not-a-boolean"><span class="header-section-number">4.8</span> Presence is a four-way decision, not a boolean</h2>
-<p>“Optional” conflates independent axes that a property model should separate:</p>
+<section id="presence-and-default-ownership" class="level2" data-number="4.10">
+<h2 data-number="4.10" class="anchored" data-anchor-id="presence-and-default-ownership"><span class="header-section-number">4.10</span> Presence and default ownership</h2>
+<p>“Optional” conflates questions a property model should answer separately:</p>
 <ul>
-<li><strong>Required at construction?</strong> May an object exist without a caller-supplied value? (Enforced by a quoted stop-default or constructor check.)</li>
-<li><strong>Nullable in the model?</strong> Is <code>NULL</code> a <em>lawful stored value</em>, typically meaning “omitted on the wire”? (Enforced by a <code>NULL</code> union member — and note the S7 subtlety that a union’s default prototype comes from its first member, so union order is load-bearing.)</li>
-<li><strong>Defaulted?</strong> Is there a domain-meaningful value when the caller is silent? (A real default is domain knowledge — <code>alpha = 1</code> — not a placeholder.)</li>
-<li><strong>Omitted on serialization?</strong> Does an unset value vanish from the wire, or serialize as null/empty?</li>
+<li>Must the resulting object contain the property?</li>
+<li>Must the caller explicitly provide it?</li>
+<li>May the stored value be <code>NULL</code> or <code>NA</code>?</li>
+<li>Are a zero-length vector, empty string, list, or bag meaningful?</li>
+<li>Does omission invoke a default?</li>
+<li>Does serialization omit the field, emit <code>null</code>, or emit an empty value?</li>
+<li>Who owns the default: R construction, an external authority, or a caller requesting later materialization?</li>
 </ul>
-<p>Every combination occurs in real specifications. Collapsing them into one <code>optional = TRUE</code> flag is how models end up unable to distinguish “user explicitly cleared this” from “user never touched this” — a distinction that matters enormously in patch/merge semantics and in round-tripping foreign documents.</p>
+<p>A default should encode domain knowledge, not merely make construction stop complaining. Empty strings, zeroes, and sentinel values are not harmless when they mean “the model does not know”; they erase the distinction between omission and a meaningful value. If no lawful value follows from the domain, require the caller to supply one or represent absence explicitly.</p>
+<p><code>Color</code> makes default ownership visible. If the style language defines omitted alpha as fully opaque, <code>alpha = 1</code> is domain knowledge and an R-owned default can record it immediately. If omission means “let the rendering engine choose,” storing <code>1</code> destroys a distinction the wire and runtime may care about. The model should then preserve omission—perhaps with <code>NULL</code> or a distinct deferred-default state—and materialize the value only when the authoritative engine or metadata is available. A convenient default is correct only when the model owns the choice.</p>
+<p>The compact example is a document version restricted to <code>8</code>. The document may require the field and always emit it, while the R constructor permits omission because it owns the default. The stored value may be non-null and restricted to one literal. Those statements are compatible: “required in the resulting document” does not imply “the caller must type it.” If wire input may contain <code>8</code>, <code>8L</code>, or another tolerated spelling, coercion belongs in the admission function; the literal property contract should judge only the canonical stored representation.</p>
+<p>Collapsing these choices into <code>optional = TRUE</code> loses distinctions needed for patching, merging, and faithful round trips.</p>
+<p>One S7 mechanic makes this especially concrete. In S7 0.2.2, a property with no explicit default receives the prototype of its declared class; for a union, that prototype comes from the union’s first member. Reordering a union can therefore change constructed values even though the set of accepted classes is unchanged. Treat member order as behavior when relying on the implicit default, or specify the default explicitly so order does not silently choose one.</p>
 </section>
-<section id="literals-enums-and-identity" class="level2" data-number="4.9">
-<h2 data-number="4.9" class="anchored" data-anchor-id="literals-enums-and-identity"><span class="header-section-number">4.9</span> Literals, enums, and identity</h2>
+<section id="literals-enums-and-identity" class="level2" data-number="4.11">
+<h2 data-number="4.11" class="anchored" data-anchor-id="literals-enums-and-identity"><span class="header-section-number">4.11</span> Literals, enums, and identity</h2>
 <p>A recurring puzzle when modeling specifications: a field whose value is fixed (<code>"version": 8</code>, <code>"type": "geojson"</code>). JSON Schema calls it <code>const</code>; TypeScript calls it a literal type. Three modeling options exist, and the choice is a genuine design decision, not a technicality:</p>
 <ul>
 <li><strong>Class identity.</strong> The field is not state at all; it is <em>what the class is</em>. Model it as a computed (getter-only) property or inject it at serialization. Two instances of the class can never differ on it, and it is not a constructor argument.</li>
 <li><strong>Stored with a default and a closed validator.</strong> The field is state that happens to have one lawful value <em>today</em> — the spec may add values, or round-tripping must preserve exactly what the wire said.</li>
-<li><strong>Constructor-normalized.</strong> Accept lenient input (<code>8</code>, <code>8L</code>, even <code>"8"</code>) at the boundary and store the canonical form.</li>
+<li><strong>Boundary-normalized.</strong> Accept lenient input (<code>8</code>, <code>8L</code>, even <code>"8"</code>) at the admission boundary and store the canonical form.</li>
 </ul>
-<p>The two questions that decide it: <strong>can two instances of this class ever differ on this value?</strong> (If no, it is identity, not state.) And <strong>must a round-trip preserve the user’s supplied value verbatim?</strong> (If yes, it must be stored.) Type discriminators in tagged unions (“this is a geojson source”) are almost always class identity — the class <em>is</em> the tag — while version fields are judgment calls that depend on whether one class will represent multiple spec versions.</p>
+<p>The two questions that decide it: <strong>can two instances of this class ever differ on this value?</strong> (If no, it is identity, not state.) And <strong>must a round-trip preserve the user’s supplied value verbatim?</strong> (If yes, it must be stored.) Type discriminators in tagged unions (“this is a geojson source”) are often class identity — the class <em>is</em> the tag — while version fields are judgment calls that depend on whether one class will represent multiple spec versions.</p>
 </section>
-<section id="refinements-for-the-statically-minded" class="level2" data-number="4.10">
-<h2 data-number="4.10" class="anchored" data-anchor-id="refinements-for-the-statically-minded"><span class="header-section-number">4.10</span> Refinements, for the statically minded</h2>
-<p>If you come from typed languages, the property validator is best understood as a <strong>runtime refinement type</strong>: <code>{ x : numeric | 0 &lt;= x &amp;&amp; x &lt;= 255 }</code>. The class system checks the base type; the refinement predicate narrows it. This framing explains the layering rule in <a href="./04-parse-dont-validate.html">04-parse-dont-validate.qmd</a> — base type and refinement are checked in that order, and S7 formalizes it by validating <code>class</code> before calling the property validator — and it explains why refinements should be <em>pure and cheap</em>: they run at every construction and replacement, like a type check would.</p>
+<section id="refinements-for-the-statically-minded" class="level2" data-number="4.12">
+<h2 data-number="4.12" class="anchored" data-anchor-id="refinements-for-the-statically-minded"><span class="header-section-number">4.12</span> Refinements, for the statically minded</h2>
+<p>If you come from typed languages, the property validator is best understood as a <strong>runtime refinement type</strong>: <code>{ x : numeric | 0 &lt;= x &amp;&amp; x &lt;= 255 }</code>. The class system checks the base type; the refinement predicate narrows it. This framing explains the layering rule in <a href="./04-parse-dont-validate.html">Parse, Don’t Validate</a> — base type and refinement are checked in that order, and S7 formalizes it by validating <code>class</code> before calling the property validator — and it explains why refinements should be <em>pure and cheap</em>: they run at every construction and replacement, like a type check would.</p>
 
 
 </section>
@@ -696,11 +779,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -1016,13 +1094,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./02-values-and-state.html" class="pagination-link" aria-label="Values and State: Reference Semantics, Immutability, and Where Change Lives">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span>
+      <a href="./02-values-and-state.html" class="pagination-link" aria-label="Values and State">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./04-parse-dont-validate.html" class="pagination-link" aria-label="Parse, Don't Validate: Boundaries, the Checking Ladder, and Conditions">
-        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./04-parse-dont-validate.html" class="pagination-link" aria-label="Parse, Don't Validate">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

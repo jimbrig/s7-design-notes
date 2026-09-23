@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
-<title>3&nbsp; Values and State: Reference Semantics, Immutability, and Where Change Lives – S7 Design Notes</title>
+<title>3&nbsp; Values and State: Editing, Snapshots, and Reference Owners – S7 Design Notes</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -61,7 +62,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -73,6 +93,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./03-types-and-meaning.html" rel="next">
 <link href="./01-object-systems.html" rel="prev">
+<link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -84,9 +105,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1f846c7865d629590e2cadd4f479fcb7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-c13f21f511963f2a6363cc37617da2fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -116,6 +137,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 }</script>
 
 
+<meta property="og:title" content="3&nbsp; Values and State: Editing, Snapshots, and Reference Owners – S7 Design Notes">
+<meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta property="og:site_name" content="S7 Design Notes">
+<meta name="twitter:title" content="3&nbsp; Values and State: Editing, Snapshots, and Reference Owners – S7 Design Notes">
+<meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/02-values-and-state.html">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -289,7 +317,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./02-values-and-state.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./02-values-and-state.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -327,7 +355,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -342,19 +370,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span></a>
   </div>
 </li>
       </ul>
@@ -371,19 +399,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span></a>
   </div>
 </li>
       </ul>
@@ -400,7 +428,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span></a>
   </div>
 </li>
       </ul>
@@ -417,19 +445,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></span></a>
   </div>
 </li>
       </ul>
@@ -446,13 +474,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./sources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
   </div>
 </li>
       </ul>
@@ -469,12 +503,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#rs-physics-copy-on-modify" id="toc-rs-physics-copy-on-modify" class="nav-link active" data-scroll-target="#rs-physics-copy-on-modify"><span class="header-section-number">3.1</span> R’s physics: copy-on-modify</a></li>
   <li><a href="#why-value-semantics-are-a-superpower-for-domain-modeling" id="toc-why-value-semantics-are-a-superpower-for-domain-modeling" class="nav-link" data-scroll-target="#why-value-semantics-are-a-superpower-for-domain-modeling"><span class="header-section-number">3.2</span> Why value semantics are a superpower for domain modeling</a></li>
-  <li><a href="#where-reference-semantics-genuinely-belong" id="toc-where-reference-semantics-genuinely-belong" class="nav-link" data-scroll-target="#where-reference-semantics-genuinely-belong"><span class="header-section-number">3.3</span> Where reference semantics genuinely belong</a></li>
-  <li><a href="#functional-core-imperative-shell" id="toc-functional-core-imperative-shell" class="nav-link" data-scroll-target="#functional-core-imperative-shell"><span class="header-section-number">3.4</span> Functional core, imperative shell</a></li>
-  <li><a href="#a-taxonomy-of-state" id="toc-a-taxonomy-of-state" class="nav-link" data-scroll-target="#a-taxonomy-of-state"><span class="header-section-number">3.5</span> A taxonomy of state</a></li>
-  <li><a href="#atomic-updates-and-the-transaction-analogy" id="toc-atomic-updates-and-the-transaction-analogy" class="nav-link" data-scroll-target="#atomic-updates-and-the-transaction-analogy"><span class="header-section-number">3.6</span> Atomic updates and the transaction analogy</a></li>
-  <li><a href="#getters-setters-and-the-discipline-of-cheap-access" id="toc-getters-setters-and-the-discipline-of-cheap-access" class="nav-link" data-scroll-target="#getters-setters-and-the-discipline-of-cheap-access"><span class="header-section-number">3.7</span> Getters, setters, and the discipline of cheap access</a></li>
-  <li><a href="#identity-equality-and-testing" id="toc-identity-equality-and-testing" class="nav-link" data-scroll-target="#identity-equality-and-testing"><span class="header-section-number">3.8</span> Identity, equality, and testing</a></li>
+  <li><a href="#three-lifecycle-policies" id="toc-three-lifecycle-policies" class="nav-link" data-scroll-target="#three-lifecycle-policies"><span class="header-section-number">3.3</span> Three lifecycle policies</a></li>
+  <li><a href="#where-reference-semantics-genuinely-belong" id="toc-where-reference-semantics-genuinely-belong" class="nav-link" data-scroll-target="#where-reference-semantics-genuinely-belong"><span class="header-section-number">3.4</span> Where reference semantics genuinely belong</a></li>
+  <li><a href="#process-boundaries-are-serialization-boundaries" id="toc-process-boundaries-are-serialization-boundaries" class="nav-link" data-scroll-target="#process-boundaries-are-serialization-boundaries"><span class="header-section-number">3.5</span> Process boundaries are serialization boundaries</a></li>
+  <li><a href="#functional-core-imperative-shell" id="toc-functional-core-imperative-shell" class="nav-link" data-scroll-target="#functional-core-imperative-shell"><span class="header-section-number">3.6</span> Functional core, imperative shell</a></li>
+  <li><a href="#a-taxonomy-of-state" id="toc-a-taxonomy-of-state" class="nav-link" data-scroll-target="#a-taxonomy-of-state"><span class="header-section-number">3.7</span> A taxonomy of state</a></li>
+  <li><a href="#grouped-replacements-preserve-relationships" id="toc-grouped-replacements-preserve-relationships" class="nav-link" data-scroll-target="#grouped-replacements-preserve-relationships"><span class="header-section-number">3.8</span> Grouped replacements preserve relationships</a></li>
+  <li><a href="#getters-setters-and-the-discipline-of-cheap-access" id="toc-getters-setters-and-the-discipline-of-cheap-access" class="nav-link" data-scroll-target="#getters-setters-and-the-discipline-of-cheap-access"><span class="header-section-number">3.9</span> Getters, setters, and the discipline of cheap access</a></li>
+  <li><a href="#identity-equality-and-testing" id="toc-identity-equality-and-testing" class="nav-link" data-scroll-target="#identity-equality-and-testing"><span class="header-section-number">3.10</span> Identity, equality, and testing</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/02-values-and-state.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -482,9 +518,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./02-values-and-state.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01-object-systems.html">Foundations</a></li><li class="breadcrumb-item"><a href="./02-values-and-state.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></h1>
+<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Editing, Snapshots, and Reference Owners</span></h1>
 </div>
 
 
@@ -503,23 +539,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="rs-physics-copy-on-modify" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="rs-physics-copy-on-modify"><span class="header-section-number">3.1</span> R’s physics: copy-on-modify</h2>
-<p>R is, at bottom, a language of values. Bindings point at immutable-in-spirit objects, and what looks like mutation — <code>x[1] &lt;- 5</code>, <code>df$col &lt;- z</code>, <code>style@zoom &lt;- 10</code> — is actually <em>replace and rebind</em>: a modified copy is produced and the name is pointed at it. The <code>@&lt;-</code> form is syntactic sugar for a replacement function call followed by reassignment. Two consequences follow immediately for S7 design.</p>
-<p>First, <strong>S7 objects are values</strong>. If a function receives an S7 object and “modifies” it, the caller’s copy is untouched. There is no spooky action at a distance, no need for defensive copies, no aliasing bugs. An object you hold is yours.</p>
-<p>Second, <strong>validation hooks into replacement</strong>. Because property “mutation” is really the construction of a new object, S7 can (and does) run validators on every property replacement. Validity becomes an invariant of <em>existing at all</em>, not a state you hope the object is in. This is the mechanical foundation for the parse-don’t-validate discipline in <a href="./04-parse-dont-validate.html">04-parse-dont-validate.qmd</a>.</p>
+<p>R usually presents a value-oriented interface. What looks like mutation — <code>x[1] &lt;- 5</code>, <code>df$col &lt;- z</code>, <code>style@zoom &lt;- 10</code> — is replacement followed by rebinding. The <code>@&lt;-</code> form is replacement syntax as well. R may reuse or copy memory internally, and those implementation details are not a public promise of structural sharing.</p>
+<p>For ordinary value-like payloads, revising an S7 object through replacement produces a new value for the receiving binding; another binding ordinarily continues to denote the prior value. This is <strong>editable value semantics</strong>, not field immutability. A package can additionally expose a value as a <strong>read-only snapshot</strong> by withholding public update operations, but that is an API policy rather than a consequence of S7.</p>
+<p>Validation hooks into supported replacement paths. S7 runs validation after property replacement, so exported transformation functions can preserve the class contract. The guarantee is bounded: a validator certifies only rules it can see, and mutation inside a reference-valued property does not invoke the outer object’s validator. This is the mechanical foundation for the parse-don’t-validate discipline in <a href="./04-parse-dont-validate.html">Parse, Don’t Validate</a>.</p>
 </section>
 <section id="why-value-semantics-are-a-superpower-for-domain-modeling" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="why-value-semantics-are-a-superpower-for-domain-modeling"><span class="header-section-number">3.2</span> Why value semantics are a superpower for domain modeling</h2>
-<p>Rich Hickey’s “value of values” argument is worth internalizing beyond its Clojure origins. A value — an immutable piece of data — can be shared without coordination, cached without invalidation protocols, compared by content, snapshotted for free, and reasoned about locally: what you see at the call site is what the function gets, forever. For <em>domain modeling</em> specifically, values buy you:</p>
+<p>Rich Hickey’s “value of values” argument is useful beyond its Clojure origins <span class="citation" data-cites="hickey2012">(<a href="sources.html#ref-hickey2012" role="doc-biblioref">Hickey 2012</a>)</span>. A representation whose observable domain content changes only through replacement supports local reasoning. For domain modeling, values buy:</p>
 <ul>
-<li><strong>Honest testing.</strong> A value-in, value-out function is a fact you can check with <code>identical()</code> and snapshot tests. No setup/teardown of hidden state.</li>
-<li><strong>Free history.</strong> Keeping the old version of a document is just… keeping it. Undo, diffing, and audit trails fall out of the semantics.</li>
+<li><strong>Focused testing.</strong> Value-in, value-out functions support assertions about domain equality and serialized form without hidden lifecycle setup.</li>
+<li><strong>Explicit history.</strong> Keeping an earlier binding preserves a prior logical version. Storage cost depends on R’s implementation and payload; history is not universally free.</li>
 <li><strong>Branching.</strong> Two candidate variants of a configuration are two values. Nothing needs cloning ceremonies; ellmer’s R6 <code>Chat</code> needs an explicit <code>$clone()</code> to fork a conversation precisely because it <em>opted out</em> of value semantics.</li>
-<li><strong>Equational reasoning.</strong> Transformations compose as functions. A pipeline <code>style |&gt; add_layer(l) |&gt; set_zoom(10)</code> reads as algebra because it is.</li>
+<li><strong>Compositional reasoning.</strong> Transformations compose as functions. A pipeline <code>style |&gt; add_layer(l) |&gt; set_zoom(10)</code> makes each revision explicit.</li>
 </ul>
 <p>The temptation to resist is making domain objects mutable “because updating is annoying.” The annoyance is real (deep updates in value-land involve rebuilding paths through the structure) but it is the <em>cost side</em> of every guarantee listed above, and R’s replacement-function machinery plus well-designed mutator generics (<code>add_layer(style, layer)</code> returning a new style) absorbs most of it.</p>
 </section>
-<section id="where-reference-semantics-genuinely-belong" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="where-reference-semantics-genuinely-belong"><span class="header-section-number">3.3</span> Where reference semantics genuinely belong</h2>
+<section id="three-lifecycle-policies" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="three-lifecycle-policies"><span class="header-section-number">3.3</span> Three lifecycle policies</h2>
+<p>The easiest way to see the lifecycle choices is to follow one concept through time. Imagine a style being assembled in an editor. While it is a <strong>draft</strong>, adding a layer or changing a zoom range is lawful, but each operation can return a revised value. The caller can keep the prior draft, compare two candidates, or abandon one branch without coordinating aliases. This is an <strong>editable value</strong>: editable because the API supplies transformations, a value because those transformations use replacement rather than shared mutation.</p>
+<p>When the style is published, the package may expose it as a <strong>read-only snapshot</strong>. Nothing about R’s copy mechanics has changed. The difference is policy: a completed fact has no public revision operation. If correction is needed, the program can create a new draft from the snapshot and eventually publish another snapshot, preserving which fact was current at each point.</p>
+<p>The editor that coordinates drafts and publication is different again. It may own a live connection, autosave timer, undo cursor, and subscriptions that must all refer to the same ongoing session. That object is a <strong>reference owner</strong>. Its aliases are expected to observe the same evolving lifecycle, so an environment or R6 object expresses the concept more honestly than repeated value replacement.</p>
+<p>The progression—draft to snapshot under the control of an owner—shows why “mutable or immutable?” is too blunt. Ask instead: what changes are lawful, who owns them, should an earlier fact remain available, and must other observers see a change immediately? Configuration, documents under construction, and query descriptions often begin as editable values; completed turns, measurements, and published documents often become snapshots; sessions, connections, and editors are reference owners.</p>
+</section>
+<section id="where-reference-semantics-genuinely-belong" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="where-reference-semantics-genuinely-belong"><span class="header-section-number">3.4</span> Where reference semantics genuinely belong</h2>
 <p>Value semantics are the wrong answer for a specific, identifiable class of things: those with <strong>identity and a lifetime</strong> — where the whole point is that observers share <em>the same</em> evolving thing.</p>
 <ul>
 <li>A <strong>conversation</strong> being appended to, turn by turn.</li>
@@ -528,52 +571,108 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>A <strong>registry</strong> that accumulates plugins or handlers at load time.</li>
 <li><strong>UI state</strong> observed by a reactive framework.</li>
 </ul>
-<p>R expresses these with environments, R6, or external pointers. The design failure mode is not using reference semantics — it is using them for things that are actually facts. A turn that has been said, a measurement that was taken, a style that was published: these are records, and records are values. The heuristic: <strong>nouns that are ongoing processes get references; nouns that are records of fact get values.</strong></p>
-<p>One qualification deserves stating as a law of its own, because it bounds every claim above: <strong>value semantics is only as deep as the payload.</strong> An S7 object behaves dependably as a value only when everything reachable through its properties is itself value-like. A property holding an environment, an R6 object, an external pointer, or a connection is a reference <em>inside</em> a value: copying the object copies the pointer, not the contents, and every “copy” observes mutations of the shared payload. This is directly demonstrable — assign into an environment held as a property through one binding, and the change is visible through the other binding, even after the two objects have otherwise diverged. The wrapper does not immunize its contents. The design consequences: if a class must hold a reference, say so in its documentation, exclude the reference from equality and serialization expectations (two equal-by-content objects sharing a cache environment are not <code>identical()</code> and should not claim to be), or snapshot the referenced state into plain data at the boundary so the object really is a value.</p>
+<p>R expresses these with environments, R6, or external pointers. The design failure mode is not using reference semantics — it is using them where shared identity is not part of the concept. A completed turn, measurement, or published style can be a read-only snapshot. A draft style can be an editable value. The conversation or editor coordinating those values may be a reference owner.</p>
+<p>One qualification deserves stating as a law of its own, because it bounds every claim above: <strong>value semantics is only as deep as the payload.</strong> An S7 object behaves dependably as a value only when everything reachable through its properties is itself value-like. A property holding an environment, an R6 object, an external pointer, or a connection is a reference <em>inside</em> a value: copying the object copies the pointer, not the contents, and every “copy” observes mutations of the shared payload. This is directly demonstrable — assign into an environment held as a property through one binding, and the change is visible through the other binding, even after the two objects have otherwise diverged. The wrapper does not immunize its contents, and changing the shared payload does not re-run the wrapper’s validator. If a class must hold a reference, document the aliasing and lifecycle contract, define whether the reference participates in domain equality or serialization, or snapshot the referenced state into plain data at the boundary.</p>
 </section>
-<section id="functional-core-imperative-shell" class="level2" data-number="3.4">
-<h2 data-number="3.4" class="anchored" data-anchor-id="functional-core-imperative-shell"><span class="header-section-number">3.4</span> Functional core, imperative shell</h2>
-<p>Gary Bernhardt’s “Boundaries” talk gave the canonical name to the architecture these observations imply: a <strong>functional core</strong> of pure functions over immutable values, wrapped in a thin <strong>imperative shell</strong> that talks to the world. The shell fetches, reads, writes, streams, and mutates session state; the core decides, transforms, constructs, and validates. Values cross the boundary; decisions concentrate in the core where they are trivially testable; side effects concentrate in the shell where they are at least localized.</p>
+<section id="process-boundaries-are-serialization-boundaries" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="process-boundaries-are-serialization-boundaries"><span class="header-section-number">3.5</span> Process boundaries are serialization boundaries</h2>
+<p>Parallel workers do not turn reference-valued properties into shared state <span class="citation" data-cites="future-package-dev future-nonexportable">(<a href="sources.html#ref-future-package-dev" role="doc-biblioref">Bengtsson 2026a</a>, <a href="sources.html#ref-future-nonexportable" role="doc-biblioref">2026b</a>)</span>. PSOCK and future-style workers receive serialized copies of exported values; an environment copied to another process is a different environment, while a connection or external pointer may not be usable there at all. Forked workers inherit another set of hazards around live connections and foreign resources.</p>
+<p>Pass portable S7 values across process boundaries when their payload is serializable, ensure the defining package and method registrations are available on the worker, and reconstruct live resources inside the worker from declarative specifications. During development, reference scanning such as <code>options(future.globals.onReference = "error")</code> can expose accidental external pointers. The architecture is the same as at a service boundary: send meaning as data; bind capabilities and resources where they will run.</p>
+</section>
+<section id="functional-core-imperative-shell" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="functional-core-imperative-shell"><span class="header-section-number">3.6</span> Functional core, imperative shell</h2>
+<p>Gary Bernhardt’s “Boundaries” talk <span class="citation" data-cites="bernhardt2012">(<a href="sources.html#ref-bernhardt2012" role="doc-biblioref">Bernhardt 2012</a>)</span> gave the canonical name to the architecture these observations imply: a <strong>functional core</strong> of pure functions over values, wrapped in a thin <strong>imperative shell</strong> that talks to the world. The shell fetches, reads, writes, streams, and mutates session state; the core decides, transforms, constructs, and validates. Values cross the boundary; decisions concentrate in the core where they are trivially testable; side effects concentrate in the shell where they are at least localized.</p>
 <p>In R terms:</p>
 <ul>
 <li><strong>Core:</strong> S7 constructors and validators; pure transformations from object to object; serialization to and from plain lists; generation of documents, queries, expressions.</li>
 <li><strong>Shell:</strong> httr2 requests, file I/O, database and GDAL calls, Shiny reactivity, LLM streaming, R6 orchestrators.</li>
 </ul>
 <p>ellmer is the cleanest published illustration. The R6 <code>Chat</code> object is the shell: it owns the HTTP lifecycle, the streaming, the tool-invocation loop, and the accumulating list of turns — a state machine with identity. Everything that flows <em>through</em> it is S7 values: <code>Turn</code> objects containing <code>Content</code> objects, a <code>Model</code> configuration, a <code>Provider</code> description. The values are what you inspect, test, serialize, and reprocess; the R6 object is how the process is driven. Neither system is asked to do the other’s job.</p>
-<p>The architecture has a fully formalized variant worth knowing by name: the <strong>Model–View–Update</strong> (Elm) architecture, which the <a href="https://github.com/devOpifex/tooey">tooey</a> terminal-UI framework brings to R. An application is three pure functions — <code>update(model, msg)</code> maps the current state and an incoming message to a new state plus <em>commands</em>, and <code>view(model, buf)</code> renders state into a screen buffer — while the framework’s runtime owns the terminal, the clock, and keyboard input, delivering them as plain data messages and executing the returned command values. Everything the programmer writes is functional core; the imperative shell is supplied by the framework and cannot be reached from application code. Beyond UI, MVU is the answer to a question value-oriented designs eventually face — <em>where do events go?</em> — and the answer is: events are values too, dispatched over like any other variant family, folded into state by one pure function.</p>
+<p>The architecture has a fully formalized variant worth knowing by name: the <strong>Model–View–Update</strong> (Elm) architecture, which the <a href="https://github.com/devOpifex/tooey">tooey</a> terminal-UI framework brings to R. An application is organized around three callbacks: <code>init()</code> creates its initial state, <code>update(model, msg)</code> maps the current state and an incoming message to new state plus <em>commands</em>, and <code>view(model, buf)</code> renders state into a screen buffer. The framework runtime owns the terminal, clock, and keyboard input, delivers them as plain-data messages, and executes returned commands.</p>
+<p>That architecture encourages a functional core, but ordinary R callbacks can still read global state or perform I/O; the framework cannot enforce purity. Purity is therefore an application discipline: keep effects in declared commands and runtime adapters so <code>init()</code>, <code>update()</code>, and <code>view()</code> remain deterministic and independently testable. Beyond UI, MVU answers a question value-oriented designs eventually face — <em>where do events go?</em> Events are values too: represent them explicitly and fold them into state through the update operation.</p>
 <p>The test for whether you have the boundary right: could you reconstruct the entire domain state from the values alone, replaying or discarding the shell? If domain knowledge exists <em>only</em> as mutable state inside a reference object, the boundary has leaked.</p>
 </section>
-<section id="a-taxonomy-of-state" class="level2" data-number="3.5">
-<h2 data-number="3.5" class="anchored" data-anchor-id="a-taxonomy-of-state"><span class="header-section-number">3.5</span> A taxonomy of state</h2>
+<section id="a-taxonomy-of-state" class="level2" data-number="3.7">
+<h2 data-number="3.7" class="anchored" data-anchor-id="a-taxonomy-of-state"><span class="header-section-number">3.7</span> A taxonomy of state</h2>
 <p>“State” is not one thing. Separating its kinds prevents both over-engineering (R6 everywhere) and under-engineering (globals in disguise).</p>
 <p><strong>Document state</strong> — the current value of the domain object itself. Lives in S7 values; changes by replacement through constructors and mutator generics.</p>
-<p><strong>Derived state</strong> — anything computable from document state: an index from layer id to layer, a count, a rendered preview. The default is to <em>not store it</em>: compute on read, possibly via a getter-backed dynamic property. If computation is expensive, memoize <em>outside</em> the object (an environment keyed by content hash), because caching inside a value corrupts its value-ness — two objects with equal domain content should be equal.</p>
-<p><strong>Collection state</strong> — registries of named things inside a document (sources by id, items by key). These are just properties (named lists) of an aggregate object; their invariants (unique ids, valid references) belong to that aggregate’s validator, as developed in <a href="./04-parse-dont-validate.html">04-parse-dont-validate.qmd</a>.</p>
+<p><strong>Derived state</strong> — anything computable from document state: an index from layer id to layer, a count, a rendered preview. The default is to <em>not store it</em>: compute on read, possibly via a getter-backed dynamic property. If computation is expensive, memoize <em>outside</em> the object (an environment keyed by a canonical domain representation). A cache inside the object introduces reference semantics and must be reflected in its aliasing, equality, and serialization contracts.</p>
+<p><strong>Collection state</strong> — registries of named things inside a document (sources by id, items by key). These are just properties (named lists) of an aggregate object; their invariants (unique ids, valid references) belong to that aggregate’s validator, as developed in <a href="./04-parse-dont-validate.html">Parse, Don’t Validate</a>.</p>
 <p><strong>Session state</strong> — the live process: connections, conversations, event loops. R6 or environments, in the shell.</p>
 <p><strong>Configuration state</strong> — options, environment variables, credentials. Read at the boundary and passed <em>in</em> as values; a core function that consults <code>options()</code> mid-computation has smuggled in a hidden input.</p>
 </section>
-<section id="atomic-updates-and-the-transaction-analogy" class="level2" data-number="3.6">
-<h2 data-number="3.6" class="anchored" data-anchor-id="atomic-updates-and-the-transaction-analogy"><span class="header-section-number">3.6</span> Atomic updates and the transaction analogy</h2>
-<p>S7 validates after <em>each</em> property replacement. When an invariant spans several properties, sequential single-property updates can pass through transiently invalid intermediate states — and the validator will correctly reject the intermediate, even though the final state would have been fine. Suppose a class requires <code>start &lt;= end</code> and both must move forward:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fails if new start exceeds old end, despite a valid final state</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x<span class="sc">@</span>start <span class="ot">&lt;-</span> <span class="dv">15</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>x<span class="sc">@</span>end <span class="ot">&lt;-</span> <span class="dv">20</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># atomic: validate once, after both replacements</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>S7<span class="sc">::</span><span class="fu">set_props</span>(x, <span class="at">start =</span> <span class="dv">15</span>, <span class="at">end =</span> <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This is exactly a database transaction in miniature: constraints are checked at commit, not per statement. The design rule that follows: <strong>any invariant spanning multiple properties implies that every code path updating those properties must go through an atomic multi-property update</strong> — usually wrapped in a mutator function so callers cannot get it wrong.</p>
+<section id="grouped-replacements-preserve-relationships" class="level2" data-number="3.8">
+<h2 data-number="3.8" class="anchored" data-anchor-id="grouped-replacements-preserve-relationships"><span class="header-section-number">3.8</span> Grouped replacements preserve relationships</h2>
+<p>S7 validates after <em>each</em> property replacement. When an invariant spans several properties, sequential single-property updates can pass through transiently invalid intermediate states — and the validator will correctly reject the intermediate, even though the final state would have been fine. Suppose a class requires <code>start &lt;= end</code> and both must move forward. This looks like an ordinary pair of edits:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>x<span class="sc">@</span>start <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x<span class="sc">@</span>end <span class="ot">&lt;-</span> <span class="dv">20</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>If <code>x</code> currently spans <code>1</code> to <code>3</code>, the first line proposes the interval <code>15</code> to <code>3</code>. The class validator cannot know that another statement is coming; it sees a complete proposed object that violates <code>start &lt;= end</code>, so it rejects the replacement. Reversing the statements happens to work for this direction of movement, but fails symmetrically when both endpoints move backward. The problem is not statement order. Two values that must change together are being presented as two independent transitions.</p>
+<p>The operation should instead construct one proposed state and validate the relationship once. <code>S7::set_props()</code> does that. The following executable example also keeps an alias to make the value behavior visible:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Interval <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">new_class</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Interval"</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">properties =</span> <span class="fu">list</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">start =</span> S7<span class="sc">::</span>class_double,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">end =</span> S7<span class="sc">::</span>class_double</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">validator =</span> <span class="cf">function</span>(self) {</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (self<span class="sc">@</span>start <span class="sc">&gt;</span> self<span class="sc">@</span>end) {</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">"@start must not exceed @end"</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>original <span class="ot">&lt;-</span> <span class="fu">Interval</span>(<span class="at">start =</span> <span class="dv">1</span>, <span class="at">end =</span> <span class="dv">3</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>alias <span class="ot">&lt;-</span> original</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>revised <span class="ot">&lt;-</span> S7<span class="sc">::</span><span class="fu">set_props</span>(original, <span class="at">start =</span> <span class="dv">15</span>, <span class="at">end =</span> <span class="dv">20</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">binding =</span> <span class="fu">c</span>(<span class="st">"alias"</span>, <span class="st">"revised"</span>),</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">start =</span> <span class="fu">c</span>(alias<span class="sc">@</span>start, revised<span class="sc">@</span>start),</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">end =</span> <span class="fu">c</span>(alias<span class="sc">@</span>end, revised<span class="sc">@</span>end)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  binding start end
+1   alias     1   3
+2 revised    15  20</code></pre>
+</div>
+</div>
+<p>The result demonstrates two independent facts. <code>alias</code> still records the original interval, because revising the receiving binding did not mutate every alias. <code>revised</code> contains the jointly updated endpoints, because validation saw <code>15</code> and <code>20</code> together. The operation is transaction-like: related replacements are checked as one proposed value rather than exposed as invalid intermediate values.</p>
+<p>The design rule that follows is: <strong>any invariant spanning multiple properties implies that every supported code path updating those properties should use one grouped replacement</strong>—usually wrapped in a domain transformation such as <code>move_interval(x, start, end)</code>. The wrapper names the transition and prevents callers from having to remember which fields form a validation unit.</p>
+<p>S7 also provides <a href="https://rconsortium.github.io/S7/reference/validate.html"><code>S7::valid_eventually()</code></a> for a transformation that must perform several ordinary replacements before the object becomes valid again. It suppresses intermediate validation and validates the returned object once at the end. Prefer <code>S7::set_props()</code> when the change is only a grouped assignment; <code>valid_eventually()</code> is for a genuinely multi-step transformation. Its lower-level companion, <code>S7::valid_implicitly()</code>, skips even the final validation. That transfers the entire proof obligation to the caller and belongs only in measured, performance-critical internals whose validity argument is explicit and tested.</p>
 </section>
-<section id="getters-setters-and-the-discipline-of-cheap-access" class="level2" data-number="3.7">
-<h2 data-number="3.7" class="anchored" data-anchor-id="getters-setters-and-the-discipline-of-cheap-access"><span class="header-section-number">3.7</span> Getters, setters, and the discipline of cheap access</h2>
+<section id="getters-setters-and-the-discipline-of-cheap-access" class="level2" data-number="3.9">
+<h2 data-number="3.9" class="anchored" data-anchor-id="getters-setters-and-the-discipline-of-cheap-access"><span class="header-section-number">3.9</span> Getters, setters, and the discipline of cheap access</h2>
 <p>S7 properties may carry a <code>getter</code> (making the property computed and, without a setter, read-only — and excluded from the default constructor, since it is not stored state) and a <code>setter</code> (which receives <code>self</code> and <code>value</code> and returns the modified <code>self</code>, enabling normalization on write).</p>
 <p>Two contracts deserve emphasis because S7 does not enforce them for you. First, <strong>a getter’s return value is not validated</strong> against the declared class; you are on your honor. Second, and more important as a design matter: <strong>property access must be cheap and pure.</strong> The entire mental model of an S7 object is “structured data.” A getter that performs I/O, network calls, or expensive computation silently converts data access into action-at-a-distance and destroys the reader’s ability to reason about cost or effects. Computed properties are for derivations (a duration from start and end, a full name from parts, a constant discriminator), not for laziness tricks.</p>
 <p>Setters, symmetrically, are for <em>normalization that preserves meaning</em> — trimming whitespace, sorting a tag set, upgrading a bare scalar to a length-one vector. The moment a setter starts making semantic decisions or enforcing cross-property rules, it is doing a constructor’s or validator’s job in a place readers will not look.</p>
 </section>
-<section id="identity-equality-and-testing" class="level2" data-number="3.8">
-<h2 data-number="3.8" class="anchored" data-anchor-id="identity-equality-and-testing"><span class="header-section-number">3.8</span> Identity, equality, and testing</h2>
-<p>Value objects compare by content: <code>identical(a, b)</code> answers “are these the same fact?” Reference objects compare by identity: two R6 handles are “equal” only if they are the same object. This distinction propagates into testing strategy. Value-centric designs test with input/output assertions and snapshots of serialized form; reference-centric designs need lifecycle tests (construct, mutate, observe) and are correspondingly more expensive to cover. A design that keeps the domain in values and confines references to the shell inherits the cheap testing profile for everything that matters most.</p>
+<section id="identity-equality-and-testing" class="level2" data-number="3.10">
+<h2 data-number="3.10" class="anchored" data-anchor-id="identity-equality-and-testing"><span class="header-section-number">3.10</span> Identity, equality, and testing</h2>
+<p>Equality is a domain decision, not a synonym for <code>identical()</code>.</p>
+<ul>
+<li><strong>Domain equality</strong> asks whether two values mean the same thing.</li>
+<li><strong>Canonical equality</strong> asks whether their normalized representations agree.</li>
+<li><strong><code>identical()</code></strong> asks whether two R objects have the same exact representation, including types and relevant attributes.</li>
+<li><strong>Reference identity</strong> asks whether two handles designate the same live owner.</li>
+</ul>
+<p>These relations can disagree: <code>8</code> and <code>8L</code> may be domain-equal but are not <code>identical()</code>, and two independently created values may render the same document despite incidental representational differences. Tests should name the relation they intend. Value transformations favor input/output laws and canonical projections; reference owners additionally need lifecycle and alias-observation tests.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-future-package-dev" class="csl-entry" role="listitem">
+Bengtsson, Henrik. 2026a. <span>“A Future for r: Best Practices for Package Developers.”</span> <a href="https://cran.r-project.org/web/packages/future/vignettes/future-7-for-package-developers.html">https://cran.r-project.org/web/packages/future/vignettes/future-7-for-package-developers.html</a>.
+</div>
+<div id="ref-future-nonexportable" class="csl-entry" role="listitem">
+Bengtsson, Henrik. 2026b. <span>“A Future for r: Non-Exportable Objects.”</span> <a href="https://cran.r-project.org/web/packages/future/vignettes/future-4-non-exportable-objects.html">https://cran.r-project.org/web/packages/future/vignettes/future-4-non-exportable-objects.html</a>.
+</div>
+<div id="ref-bernhardt2012" class="csl-entry" role="listitem">
+Bernhardt, Gary. 2012. <span>“Boundaries.”</span> <a href="https://www.destroyallsoftware.com/talks/boundaries">https://www.destroyallsoftware.com/talks/boundaries</a>.
+</div>
+<div id="ref-hickey2012" class="csl-entry" role="listitem">
+Hickey, Rich. 2012. <span>“The Value of Values.”</span> <a href="https://www.infoq.com/presentations/Value-Values/">https://www.infoq.com/presentations/Value-Values/</a>.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->
@@ -677,11 +776,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -997,13 +1091,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./01-object-systems.html" class="pagination-link" aria-label="Object Systems: What Kind of OOP S7 Is">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span>
+      <a href="./01-object-systems.html" class="pagination-link" aria-label="Object Systems">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./03-types-and-meaning.html" class="pagination-link" aria-label="Types and Meaning: Semantic Types, Structure, and Type-Driven Design">
-        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./03-types-and-meaning.html" class="pagination-link" aria-label="Types and Meaning">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

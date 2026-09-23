@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
-<title>Appendix B — Sources – S7 Design Notes</title>
+<title>Appendix C — Sources – S7 Design Notes</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,7 +27,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -36,7 +56,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./open-questions.html" rel="prev">
+<link href="./glossary.html" rel="prev">
+<link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -48,9 +69,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1f846c7865d629590e2cadd4f479fcb7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-c13f21f511963f2a6363cc37617da2fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -80,6 +101,13 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
+<meta property="og:title" content="Appendix C — Sources – S7 Design Notes">
+<meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta property="og:site_name" content="S7 Design Notes">
+<meta name="twitter:title" content="Appendix C — Sources – S7 Design Notes">
+<meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/sources.html">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -253,7 +281,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./open-questions.html">Appendices</a></li><li class="breadcrumb-item"><a href="./sources.html"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./open-questions.html">Appendices</a></li><li class="breadcrumb-item"><a href="./sources.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -291,7 +319,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-overview.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -306,19 +334,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span></a>
   </div>
 </li>
       </ul>
@@ -335,19 +363,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span></a>
   </div>
 </li>
       </ul>
@@ -364,7 +392,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span></a>
   </div>
 </li>
       </ul>
@@ -381,19 +409,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></span></a>
   </div>
 </li>
       </ul>
@@ -410,13 +438,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./sources.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
   </div>
 </li>
       </ul>
@@ -431,11 +465,30 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#s7-itself" id="toc-s7-itself" class="nav-link active" data-scroll-target="#s7-itself"><span class="header-section-number">B.1</span> S7 itself</a></li>
-  <li><a href="#ecosystem-packages-surveyed" id="toc-ecosystem-packages-surveyed" class="nav-link" data-scroll-target="#ecosystem-packages-surveyed"><span class="header-section-number">B.2</span> Ecosystem packages surveyed</a></li>
-  <li><a href="#programming-theory" id="toc-programming-theory" class="nav-link" data-scroll-target="#programming-theory"><span class="header-section-number">B.3</span> Programming theory</a></li>
-  <li><a href="#craft-references-the-playbooks-document" id="toc-craft-references-the-playbooks-document" class="nav-link" data-scroll-target="#craft-references-the-playbooks-document"><span class="header-section-number">B.4</span> Craft references (the playbooks document)</a></li>
-  <li><a href="#local-artifacts-evidence-not-subject-matter" id="toc-local-artifacts-evidence-not-subject-matter" class="nav-link" data-scroll-target="#local-artifacts-evidence-not-subject-matter"><span class="header-section-number">B.5</span> Local artifacts (evidence, not subject matter)</a></li>
+  <li><a href="#s7-mechanism-documentation" id="toc-s7-mechanism-documentation" class="nav-link active" data-scroll-target="#s7-mechanism-documentation"><span class="header-section-number">C.1</span> S7 mechanism documentation</a></li>
+  <li><a href="#principal-public-exhibits" id="toc-principal-public-exhibits" class="nav-link" data-scroll-target="#principal-public-exhibits"><span class="header-section-number">C.2</span> Principal public exhibits</a>
+  <ul class="collapse">
+  <li><a href="#rtemis" id="toc-rtemis" class="nav-link" data-scroll-target="#rtemis"><span class="header-section-number">C.2.1</span> rtemis</a></li>
+  <li><a href="#deputy" id="toc-deputy" class="nav-link" data-scroll-target="#deputy"><span class="header-section-number">C.2.2</span> deputy</a></li>
+  <li><a href="#sqlr" id="toc-sqlr" class="nav-link" data-scroll-target="#sqlr"><span class="header-section-number">C.2.3</span> sqlr</a></li>
+  </ul></li>
+  <li><a href="#focused-contrasts" id="toc-focused-contrasts" class="nav-link" data-scroll-target="#focused-contrasts"><span class="header-section-number">C.3</span> Focused contrasts</a>
+  <ul class="collapse">
+  <li><a href="#s7schema" id="toc-s7schema" class="nav-link" data-scroll-target="#s7schema"><span class="header-section-number">C.3.1</span> S7schema</a></li>
+  <li><a href="#resultr" id="toc-resultr" class="nav-link" data-scroll-target="#resultr"><span class="header-section-number">C.3.2</span> resultr</a></li>
+  <li><a href="#stacbuildr" id="toc-stacbuildr" class="nav-link" data-scroll-target="#stacbuildr"><span class="header-section-number">C.3.3</span> stacbuildr</a></li>
+  </ul></li>
+  <li><a href="#additional-exhibits-used-in-prose" id="toc-additional-exhibits-used-in-prose" class="nav-link" data-scroll-target="#additional-exhibits-used-in-prose"><span class="header-section-number">C.4</span> Additional exhibits used in prose</a>
+  <ul class="collapse">
+  <li><a href="#quickr" id="toc-quickr" class="nav-link" data-scroll-target="#quickr"><span class="header-section-number">C.4.1</span> quickr</a></li>
+  <li><a href="#typedjson" id="toc-typedjson" class="nav-link" data-scroll-target="#typedjson"><span class="header-section-number">C.4.2</span> typedjson</a></li>
+  <li><a href="#s7contract" id="toc-s7contract" class="nav-link" data-scroll-target="#s7contract"><span class="header-section-number">C.4.3</span> s7contract</a></li>
+  <li><a href="#optimizers7-and-parameters7" id="toc-optimizers7-and-parameters7" class="nav-link" data-scroll-target="#optimizers7-and-parameters7"><span class="header-section-number">C.4.4</span> optimizers7 and parameters7</a></li>
+  </ul></li>
+  <li><a href="#other-public-package-references" id="toc-other-public-package-references" class="nav-link" data-scroll-target="#other-public-package-references"><span class="header-section-number">C.5</span> Other public package references</a></li>
+  <li><a href="#public-theory-and-engineering-references" id="toc-public-theory-and-engineering-references" class="nav-link" data-scroll-target="#public-theory-and-engineering-references"><span class="header-section-number">C.6</span> Public theory and engineering references</a></li>
+  <li><a href="#evidence-labels" id="toc-evidence-labels" class="nav-link" data-scroll-target="#evidence-labels"><span class="header-section-number">C.7</span> Evidence labels</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography"><span class="header-section-number">C.8</span> Bibliography</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/sources.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -443,9 +496,9 @@ ul.task-list li input[type="checkbox"] {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./open-questions.html">Appendices</a></li><li class="breadcrumb-item"><a href="./sources.html"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./open-questions.html">Appendices</a></li><li class="breadcrumb-item"><a href="./sources.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Appendix B — Sources</h1>
+<h1 class="title">Appendix C — Sources</h1>
 </div>
 
 
@@ -462,80 +515,215 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>All external sources were checked in September 2026 rather than recalled from memory. Local artifacts are listed with their roles.</p>
-<section id="s7-itself" class="level2" data-number="B.1">
-<h2 data-number="B.1" class="anchored" data-anchor-id="s7-itself"><span class="header-section-number">B.1</span> S7 itself</h2>
+<p>This appendix contains only public, reader-verifiable references. Claims should distinguish official mechanism documentation, public package documentation, public source observations, public test assertions, and editorial proposals.</p>
+<section id="s7-mechanism-documentation" class="level2" data-number="C.1">
+<h2 data-number="C.1" class="anchored" data-anchor-id="s7-mechanism-documentation"><span class="header-section-number">C.1</span> S7 mechanism documentation</h2>
 <ul>
-<li>S7 package site and vignettes — https://rconsortium.github.io/S7/
-<ul>
-<li>Classes and objects (validators, properties, defaults, computed and dynamic properties, custom constructors) — https://rconsortium.github.io/S7/articles/classes-objects.html</li>
-<li>Generics and methods (generic-method compatibility, dots discipline, customizing generic bodies, <code>super()</code>, multiple dispatch, <code>class_any</code>, <code>class_missing</code>) — https://rconsortium.github.io/S7/articles/generics-methods.html</li>
-<li><code>new_property()</code> reference (getter/setter/validator/default contracts; getter output not auto-validated; validator messages exclude the property name) — https://rconsortium.github.io/S7/reference/new_property.html</li>
-</ul></li>
-<li>GitHub repository and README (OOP Working Group provenance: R-Core, Bioconductor, tidyverse/Posit, wider community; “functional OOP” framing) — https://github.com/RConsortium/S7</li>
-<li>S4 compatibility detail (S4 classes as property types via <code>methods::getClass()</code>) — https://github.com/RConsortium/S7/issues/587</li>
+<li><a href="https://rconsortium.github.io/S7/">S7 package site and vignettes</a></li>
+<li><a href="https://rconsortium.github.io/S7/articles/classes-objects.html">Classes and objects</a></li>
+<li><a href="https://rconsortium.github.io/S7/articles/generics-methods.html">Generics and methods</a></li>
+<li><a href="https://rconsortium.github.io/S7/reference/new_property.html"><code>S7::new_property()</code> reference</a></li>
+<li><a href="https://github.com/RConsortium/S7">S7 repository and public tests</a></li>
+<li><a href="https://github.com/RConsortium/S7/issues/587">Public S4 property-type discussion</a></li>
 </ul>
+<p>Official documentation is the authority for supported mechanisms. Version-sensitive runtime claims should also identify released R and S7 versions used by a reproducible probe.</p>
 </section>
-<section id="ecosystem-packages-surveyed" class="level2" data-number="B.2">
-<h2 data-number="B.2" class="anchored" data-anchor-id="ecosystem-packages-surveyed"><span class="header-section-number">B.2</span> Ecosystem packages surveyed</h2>
+<section id="principal-public-exhibits" class="level2" data-number="C.2">
+<h2 data-number="C.2" class="anchored" data-anchor-id="principal-public-exhibits"><span class="header-section-number">C.2</span> Principal public exhibits</h2>
+<section id="rtemis" class="level3" data-number="C.2.1">
+<h3 data-number="C.2.1" class="anchored" data-anchor-id="rtemis"><span class="header-section-number">C.2.1</span> rtemis</h3>
 <ul>
-<li><strong>ellmer</strong> (R6 <code>Chat</code> + S7 <code>Turn</code>/<code>Content</code>/<code>Model</code>/<code>Provider</code>; mutability rationale in the programming vignette) — https://ellmer.tidyverse.org/ ; https://ellmer.tidyverse.org/reference/Chat.html ; https://ellmer.tidyverse.org/reference/Turn.html ; https://ellmer.tidyverse.org/reference/Model.html</li>
-<li><strong>ragnar</strong> (<code>MarkdownDocument</code> inherits character with normalizing constructor; <code>MarkdownDocumentChunks</code> inherits tibble with <code>@document</code> property) — https://ragnar.tidyverse.org/reference/MarkdownDocument.html ; https://ragnar.tidyverse.org/reference/markdown_chunk.html</li>
-<li><strong>stacbuildr</strong> (STAC 1.1.0 as S7 classes; JSON Schema validation; <code>item_from_terra()</code> / sf / lidR boundary constructors) — https://stevenpawley.r-universe.dev/stacbuildr</li>
-<li><strong>S7schema</strong> (YAML config; AJV via V8; S7 + list inheritance) — https://cran.r-project.org/package=S7schema</li>
-<li><strong>s7contract</strong> (structural interfaces, traits, runtime contract checks, generative laws with shrinking and tinytest) — https://cran.r-project.org/package=s7contract</li>
-<li><strong>quickr</strong> (R-to-Fortran compiler; <code>declare(type())</code> annotation DSL; S7 in Imports; typed S7 IR such as <code>FortranSubroutine</code> visible in source) — https://github.com/t-kalinowski/quickr ; https://rdrr.io/cran/quickr/src/R/quick.R</li>
-<li><strong>sqlr</strong> (nbenn/sqlr; schema as first-class value between DDL string and connection; dialect packages sqlr.postgres / sqlr.sqlite; deliberate absence of an “ANSI” fallback dialect; <code>sqlr_reflect()</code> round trip as test oracle; structural <code>sqlr_equal()</code> / <code>sqlr_diff()</code>; dependency-ordered rendering with cycle-breaking <code>ALTER TABLE</code>; <code>render_sql</code> multiple dispatch on object and dialect) — https://github.com/nbenn/sqlr ; https://rdrr.io/github/nbenn/sqlr/src/R/generics.R</li>
-<li><strong>s7x</strong> (Enum class, scalar and range properties, property unions and intersections) — http://s7x.josiah.rs/ ; Enum design rationale: https://josiah.rs/posts/enums-in-r/</li>
-<li><strong>R-ArcGIS stack</strong> (arcgisutils, arcgisviz consuming s7x at scale: <code>s7x::new_enum</code>, <code>s7x::property_union</code>, <code>class_float</code>) — public source on GitHub, verified via code search.</li>
-<li><strong>resultr</strong> (Rust-style <code>Result</code>/<code>Option</code> as an S7 subclass family; abstract parent for dispatch; write-once property setters; <code>wrap_in_result()</code> generic converting conditions to values at one boundary; <code>and_then()</code> short-circuiting on <code>Failure</code>) — https://github.com/TransGirlCodes/resultr ; source: https://github.com/TransGirlCodes/resultr/blob/main/R/Result.R</li>
-<li><strong>datarr / reflect</strong> (runtime reflection for base R and S7; descriptor objects for properties, methods, callables; <code>reflect_properties()</code> walking <code>class@properties</code> and constructor formals; <code>method_explain()</code> dispatch traces; <code>reflect_validate()</code> with chained classed conditions; <code>reflect_check_project()</code> conventions-as-checks) — https://github.com/SanD94/datarr ; source: https://github.com/SanD94/datarr/blob/main/R/s7.R ; https://github.com/SanD94/datarr/blob/main/R/check-project.R</li>
-<li><strong>rtemis</strong> (full S7 rewrite of an ML framework; <code>PropertySpec</code> constraints-as-data driving validator, default, JSON Schema, and TUI form from one declaration; factory-time/load-time declaration validation; <code>setup_*()</code> eager configuration validation before expensive runs; <code>data_bound</code> deferred context-dependent checks; container taxonomy; <code>tunable</code>/<code>broadcast</code>/<code>tune_on_null</code>/<code>applies_when</code> axes; <code>agent_writable</code> authorship policy kept out of published schemas) — https://github.com/rtemis-org/rtemis ; source: https://github.com/rtemis-org/rtemis/blob/main/R/010_Props.R</li>
-<li><strong>tooey</strong> (Model-View-Update / Elm architecture terminal UI framework: pure <code>init</code>/<code>update</code>/<code>view</code>, messages and commands as data, runtime-owned imperative shell) — https://github.com/devOpifex/tooey</li>
-<li><strong>rapid</strong> (OpenAPI descriptions parsed into a strict, opinionated S7 class as substrate for downstream code generation) — https://github.com/api2r/rapid</li>
-<li><strong>typedjson</strong> (faithful and terse JSON round trip for R values; annotates only what JSON cannot express: integer/double, typed NA, non-finite, attributes, S3/S4/S7 objects) — https://github.com/nbenn/typedjson</li>
-<li><strong>objectstore</strong> (embryonic object-store interface in S7; interface-first design bet) — https://github.com/Bisaloo/objectstore</li>
-<li><strong>optimizers7 / parameters7</strong> (statmodels7 family: optimizers as reusable S7 objects with composable stopping-rule objects; constrained matrix parameters as objects with inverses and derivatives to fourth order; deliberate narrowness of layer knowledge) — https://github.com/statmodels7/optimizers7 ; https://github.com/statmodels7/parameters7</li>
-<li><strong>structr</strong> (contrast case, not S7: Rust-backed strict JSON schema compilation and bidirectional parse/serialize; strict-by-default presence via <code>s_optional()</code>) — https://github.com/ixpantia/structr</li>
-<li><strong>provider</strong> (adjacent case: tidyverse-style httr2 healthcare API client without an S7 layer; the “before” state of these patterns) — https://github.com/andrewallenbruce/provider</li>
+<li><a href="https://github.com/rtemis-org/rtemis">Repository and source</a></li>
+<li><a href="https://github.com/rtemis-org/rtemis/blob/main/R/010_Props.R"><code>PropertySpec</code> and property declarations</a></li>
+<li><a href="https://github.com/rtemis-org/rtemis/blob/f60ac02b32f58373a2ba7f965b9c1c450dd2200a/R/010_Props.R">Immutable <code>PropertySpec</code> source at revision <code>f60ac02</code></a></li>
 </ul>
+<p><strong>Public source observation.</strong> The linked implementation supports the chapter’s claims about constraints as data, separate tuning intent, defaults, conditional applicability, contextual data bounds, and multiple consumers. Whether every generated projection remains aligned is an obligation proposed by the chapter, not a fact inferred from one implementation.</p>
 </section>
-<section id="programming-theory" class="level2" data-number="B.3">
-<h2 data-number="B.3" class="anchored" data-anchor-id="programming-theory"><span class="header-section-number">B.3</span> Programming theory</h2>
+<section id="deputy" class="level3" data-number="C.2.2">
+<h3 data-number="C.2.2" class="anchored" data-anchor-id="deputy"><span class="header-section-number">C.2.2</span> deputy</h3>
 <ul>
-<li>Alexis King, “Parse, don’t validate” (2019) — https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/</li>
-<li>Robert Harper, “Boolean blindness” — https://existentialtype.wordpress.com/2011/03/15/boolean-blindness/</li>
-<li>Gary Bernhardt, “Boundaries” (functional core, imperative shell) — https://www.destroyallsoftware.com/talks/boundaries</li>
-<li>Yaron Minsky, “Effective ML” (make illegal states unrepresentable) — https://blog.janestreet.com/effective-ml-revisited/</li>
-<li>Philip Wadler, “The expression problem” (1998 mailing-list note) — https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt</li>
-<li>Bertrand Meyer, <em>Object-Oriented Software Construction</em> (design by contract: preconditions, postconditions, invariants).</li>
-<li>Eric Evans, <em>Domain-Driven Design</em> (aggregates, aggregate roots as consistency boundaries).</li>
-<li>Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides, <em>Design Patterns</em> (“favor object composition over class inheritance”).</li>
-<li>Rich Hickey, “The Value of Values” (2012) — talk; https://www.infoq.com/presentations/Value-Values/</li>
-<li>Scott Wlaschin, <em>Domain Modeling Made Functional</em> (type-driven domain design workflow).</li>
-<li>David Parnas, “On the Criteria To Be Used in Decomposing Systems into Modules” (1972) — information hiding as design-decision hiding.</li>
-<li>LANGSEC (language-theoretic security) literature on shotgun parsing — http://langsec.org/</li>
-<li>David Wheeler’s indirection aphorism and its corollary — folklore, attributed via Butler Lampson.</li>
-<li>Tony Hoare, “Null References: The Billion Dollar Mistake” (2009 QCon talk).</li>
+<li><a href="https://github.com/JamesHWade/deputy">Repository and README</a></li>
+<li><a href="https://jameshwade.github.io/deputy/">Package site</a></li>
+<li><a href="https://jameshwade.github.io/deputy/articles/getting-started.html">Getting started</a></li>
+<li><a href="https://jameshwade.github.io/deputy/articles/permissions.html">Permissions</a></li>
+<li><a href="https://jameshwade.github.io/deputy/articles/runtime-integration.html">Runtime integration</a></li>
+<li><a href="https://github.com/JamesHWade/deputy/tree/2a4bda56ae6a6aa35a2f04da208850998ee3ddcb">Immutable repository snapshot at revision <code>2a4bda5</code></a></li>
 </ul>
+<p><strong>Public package documentation and source observation.</strong> These sources support the distinction among declarative tools and policies, host-enforced permissions, live agent execution, streaming, and completed run results. The chapter’s ownership vocabulary is an editorial interpretation of those public mechanisms.</p>
 </section>
-<section id="craft-references-the-playbooks-document" class="level2" data-number="B.4">
-<h2 data-number="B.4" class="anchored" data-anchor-id="craft-references-the-playbooks-document"><span class="header-section-number">B.4</span> Craft references (the playbooks document)</h2>
+<section id="sqlr" class="level3" data-number="C.2.3">
+<h3 data-number="C.2.3" class="anchored" data-anchor-id="sqlr"><span class="header-section-number">C.2.3</span> sqlr</h3>
 <ul>
-<li>Hadley Wickham, <em>Advanced R</em> (2nd ed.), “Translating R code” — the genre model for worked DSL campaigns (HTML and LaTeX case studies) — https://adv-r.hadley.nz/translation.html ; first-edition DSL chapter — http://adv-r.had.co.nz/dsl.html</li>
-<li>Hadley Wickham, <em>Tidy design principles</em> — function and argument design as patterns and principles in tension (enumerate options, required args without defaults, prefer an enum over booleans, extract strategies into objects) — https://design.tidyverse.org/</li>
+<li><a href="https://github.com/nbenn/sqlr">Repository and README</a></li>
+<li><a href="https://github.com/nbenn/sqlr/blob/8325581ad859b408408738dcc289bcad05360d58/README.md">Immutable README at revision <code>8325581</code></a></li>
+<li><a href="https://github.com/nbenn/sqlr/blob/8325581ad859b408408738dcc289bcad05360d58/R/generics.R">Public generic definitions at revision <code>8325581</code></a></li>
 </ul>
+<p><strong>Public documentation and source observation.</strong> The README and generic definitions support the claims about a semantic schema representation shared by rendering, reflection, equality, and diffing; dialect objects; refusal of a generic fallback; dependency-aware rendering; and bounded reflection. Calling this an “earned IR” is the chapter’s editorial evaluation.</p>
 </section>
-<section id="local-artifacts-evidence-not-subject-matter" class="level2" data-number="B.5">
-<h2 data-number="B.5" class="anchored" data-anchor-id="local-artifacts-evidence-not-subject-matter"><span class="header-section-number">B.5</span> Local artifacts (evidence, not subject matter)</h2>
-<p>These are non-public working notes and experiments on the author’s machine, listed for provenance and honesty about where the observations came from — they are not part of this published collection.</p>
+</section>
+<section id="focused-contrasts" class="level2" data-number="C.3">
+<h2 data-number="C.3" class="anchored" data-anchor-id="focused-contrasts"><span class="header-section-number">C.3</span> Focused contrasts</h2>
+<section id="s7schema" class="level3" data-number="C.3.1">
+<h3 data-number="C.3.1" class="anchored" data-anchor-id="s7schema"><span class="header-section-number">C.3.1</span> S7schema</h3>
 <ul>
-<li><code>d:\jimbrig\mapstyles\dev\docs\s7-thoughts-and-notes.md</code> — semantic versus structural contracts (Taxi-inspired), property-first design thinking, missing/empty value taxonomy.</li>
-<li><code>d:\jimbrig\mapstyles\dev\R\</code> — a probe-driven property-factory foundation (checks-as-quoted-data, presence model, <code>prop_const</code> identity properties, aggregate-root validator); one data point for the convergent-evolution observation.</li>
-<li><code>d:\sandbox\maplibre.s7\R\</code> — a complete document-object-model experiment (abstract roots, source/layer variant families, <code>as_spec</code> projection, mutators with operation preconditions).</li>
-<li><code>d:\jimbrig\mapstyles\dev\docs\context\ChatGPT-Design ArcGIS Architecture-20260916-1627.md</code> — extended first-principles discussion of literal/enum/identity modeling and external-type translation.</li>
-<li>Prior agent transcripts (paths under <code>C:\Users\jimmy\.cursor\projects\d\agent-transcripts\</code>): <code>e5c395e8-71cd-49a5-a649-fbbf7c6f76af</code> (evidence → classification spec → generated projections pipeline architecture) and <code>33aeb89f-8549-46d7-9a98-6e096fccbcf0</code> (foundation-first porting decision; the version-field identity debate).</li>
+<li><a href="https://cran.r-project.org/package=S7schema">CRAN package page and manual</a></li>
 </ul>
+<p><strong>Official package documentation.</strong> The package page and manual support the claims that YAML content is validated against JSON Schema through AJV/V8 and that S7 supplies surrounding configuration and extension machinery. The authority comparison with stacbuildr is editorial synthesis.</p>
+</section>
+<section id="resultr" class="level3" data-number="C.3.2">
+<h3 data-number="C.3.2" class="anchored" data-anchor-id="resultr"><span class="header-section-number">C.3.2</span> resultr</h3>
+<ul>
+<li><a href="https://github.com/TransGirlCodes/resultr">Repository</a></li>
+<li><a href="https://github.com/TransGirlCodes/resultr/blob/main/R/Result.R">Result implementation</a></li>
+<li><a href="https://github.com/TransGirlCodes/resultr/blob/0f53d4ee03138cc93a3feef4900746f672d12fe8/R/Result.R">Immutable <code>Result</code> implementation at revision <code>0f53d4e</code></a></li>
+</ul>
+<p><strong>Public source observation.</strong> The implementation supports the claims about <code>Success</code> and <code>Failure</code>, short-circuiting <code>and_then()</code>, and the <code>wrap_in_result()</code> adapter between conditions and values. The recommendation to choose one deliberate boundary is editorial.</p>
+</section>
+<section id="stacbuildr" class="level3" data-number="C.3.3">
+<h3 data-number="C.3.3" class="anchored" data-anchor-id="stacbuildr"><span class="header-section-number">C.3.3</span> stacbuildr</h3>
+<ul>
+<li><a href="https://stevenpawley.r-universe.dev/stacbuildr">Public package site</a></li>
+<li><a href="https://github.com/stevenpawley/stacbuildr">Repository</a></li>
+<li><a href="https://github.com/stevenpawley/stacbuildr/tree/5706144faf29071e7158f4b645512d01638d76a2">Immutable repository snapshot at revision <code>5706144</code></a></li>
+</ul>
+<p><strong>Public package documentation and source observation.</strong> These sources support the claims about STAC document classes, validation against published schemas, native geospatial boundary constructors, and tabular or spatial projections. The claim that the native layer and external schema have different authority is editorial synthesis.</p>
+</section>
+</section>
+<section id="additional-exhibits-used-in-prose" class="level2" data-number="C.4">
+<h2 data-number="C.4" class="anchored" data-anchor-id="additional-exhibits-used-in-prose"><span class="header-section-number">C.4</span> Additional exhibits used in prose</h2>
+<section id="quickr" class="level3" data-number="C.4.1">
+<h3 data-number="C.4.1" class="anchored" data-anchor-id="quickr"><span class="header-section-number">C.4.1</span> quickr</h3>
+<ul>
+<li><a href="https://github.com/t-kalinowski/quickr">Repository</a></li>
+<li><a href="https://rdrr.io/cran/quickr/src/R/quick.R">Published source mirror</a></li>
+<li><a href="https://github.com/t-kalinowski/quickr/blob/edd403766e612ef4867ad817ead3dc366dc15d77/R/quick.R">Immutable <code>quick.R</code> source at revision <code>edd4037</code></a></li>
+<li><a href="https://github.com/t-kalinowski/quickr/tree/edd403766e612ef4867ad817ead3dc366dc15d77">Immutable repository snapshot at revision <code>edd4037</code></a></li>
+</ul>
+<p><strong>Public source observation.</strong> The source supports the bounded claim that quickr compiles R toward Fortran and passes structured, typed artifacts such as <code>FortranSubroutine</code> through compilation. The broader lesson that a typed IR must be earned by analysis and translation is editorial.</p>
+</section>
+<section id="typedjson" class="level3" data-number="C.4.2">
+<h3 data-number="C.4.2" class="anchored" data-anchor-id="typedjson"><span class="header-section-number">C.4.2</span> typedjson</h3>
+<ul>
+<li><a href="https://github.com/nbenn/typedjson">Repository</a></li>
+<li><a href="https://github.com/nbenn/typedjson/blob/7160c060e260bec3d284c39e51a9a5331779aa14/README.md">Immutable README at revision <code>7160c06</code></a></li>
+</ul>
+<p><strong>Public package documentation.</strong> The README supports the claims that ordinary values remain readable JSON, annotations are introduced for distinctions JSON cannot preserve, and the intended law is an R-value round trip. “Minimum metadata” is the chapter’s summary of that documented design.</p>
+</section>
+<section id="s7contract" class="level3" data-number="C.4.3">
+<h3 data-number="C.4.3" class="anchored" data-anchor-id="s7contract"><span class="header-section-number">C.4.3</span> s7contract</h3>
+<ul>
+<li><a href="https://github.com/sounkou-bioinfo/s7contract">Repository</a></li>
+<li><a href="https://cran.r-project.org/package=s7contract">CRAN package page</a></li>
+<li><a href="https://github.com/sounkou-bioinfo/s7contract/blob/41dce50d482ad4bfac382e859662abcae0ba56c4/README.md">Immutable README at revision <code>41dce50</code></a></li>
+</ul>
+<p><strong>Official package documentation and public source observation.</strong> These sources support the claims about structural interfaces, explicit traits, runtime argument and return contracts, and generative laws with shrinking. The limits of sampled laws are an editorial caution, not a package guarantee.</p>
+</section>
+<section id="optimizers7-and-parameters7" class="level3" data-number="C.4.4">
+<h3 data-number="C.4.4" class="anchored" data-anchor-id="optimizers7-and-parameters7"><span class="header-section-number">C.4.4</span> optimizers7 and parameters7</h3>
+<ul>
+<li><a href="https://github.com/statmodels7/optimizers7">optimizers7 repository</a></li>
+<li><a href="https://github.com/statmodels7/parameters7">parameters7 repository</a></li>
+<li><a href="https://github.com/statmodels7/optimizers7/blob/c50e41416c411b530124f2329679cdc72ec85ff0/README.md">Immutable optimizers7 README at revision <code>c50e414</code></a></li>
+<li><a href="https://github.com/statmodels7/parameters7/blob/21076ad92cd2442b8be767d1b0546f7f783937c5/README.md">Immutable parameters7 README at revision <code>21076ad</code></a></li>
+</ul>
+<p><strong>Public package documentation.</strong> The linked READMEs support the claims that stopping rules are modeled separately and compositionally, and that constrained parameters expose reusable maps, inverses, and derivatives. The decision threshold for promoting policy to an object is editorial.</p>
+</section>
+</section>
+<section id="other-public-package-references" class="level2" data-number="C.5">
+<h2 data-number="C.5" class="anchored" data-anchor-id="other-public-package-references"><span class="header-section-number">C.5</span> Other public package references</h2>
+<ul>
+<li>ellmer: <a href="https://ellmer.tidyverse.org/">documentation</a>, <a href="https://ellmer.tidyverse.org/reference/Chat.html"><code>Chat</code></a>, <a href="https://ellmer.tidyverse.org/reference/Turn.html"><code>Turn</code></a>, and <a href="https://ellmer.tidyverse.org/reference/Model.html"><code>Model</code></a></li>
+<li>ragnar: <a href="https://ragnar.tidyverse.org/reference/MarkdownDocument.html"><code>MarkdownDocument</code></a> and <a href="https://ragnar.tidyverse.org/reference/markdown_chunk.html"><code>markdown_chunk()</code></a></li>
+<li>s7x: <a href="http://s7x.josiah.rs/">package site</a> and <a href="https://josiah.rs/posts/enums-in-r/">enum note</a></li>
+<li><a href="https://github.com/api2r/rapid">rapid</a></li>
+<li><a href="https://github.com/devOpifex/tooey">tooey</a></li>
+<li><a href="https://github.com/ixpantia/structr">structr</a></li>
+<li>reflect/datarr: <a href="https://github.com/SanD94/datarr">repository</a> and <a href="https://github.com/SanD94/datarr/blob/main/R/s7.R">S7 source</a></li>
+</ul>
+<p>Ellmer appears in the deputy discussion only to identify the public chat abstraction with which deputy composes; the linked official documentation is the source for that identification. The remaining packages are retained as descriptive public references used elsewhere in the book. Inclusion is not a claim about popularity, maturity, or comparative quality.</p>
+</section>
+<section id="public-theory-and-engineering-references" class="level2" data-number="C.6">
+<h2 data-number="C.6" class="anchored" data-anchor-id="public-theory-and-engineering-references"><span class="header-section-number">C.6</span> Public theory and engineering references</h2>
+<ul>
+<li><a href="https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/">Alexis King, “Parse, don’t validate”</a></li>
+<li><a href="https://existentialtype.wordpress.com/2011/03/15/boolean-blindness/">Robert Harper, “Boolean blindness”</a></li>
+<li><a href="https://www.destroyallsoftware.com/talks/boundaries">Gary Bernhardt, “Boundaries”</a></li>
+<li><a href="https://blog.janestreet.com/effective-ml-revisited/">Yaron Minsky, “Effective ML”</a></li>
+<li><a href="https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt">Philip Wadler, “The expression problem”</a></li>
+<li><a href="https://www.infoq.com/presentations/Value-Values/">Rich Hickey, “The Value of Values”</a></li>
+<li><a href="http://langsec.org/">LANGSEC resources</a></li>
+<li><a href="https://adv-r.hadley.nz/translation.html">Hadley Wickham, <em>Advanced R</em>, “Translating R code”</a></li>
+<li><a href="https://design.tidyverse.org/">Hadley Wickham, <em>Tidy design principles</em></a></li>
+<li><a href="https://tidyverse.org/blog/2024/11/s7-0-2-0/">S7 0.2.0 release notes</a>, including native-serialization limitations</li>
+<li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/readRDS.html">R serialization reference</a></li>
+<li><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-27322">NVD, CVE-2024-27322</a> on untrusted R deserialization</li>
+<li><a href="https://www.kb.cert.org/vuls/id/238194">CERT Coordination Center, VU#238194</a></li>
+<li><a href="https://rdrr.io/bioc/BiocGenerics/man/updateObject.html">BiocGenerics <code>updateObject()</code> reference</a></li>
+<li>future guidance for <a href="https://cran.r-project.org/web/packages/future/vignettes/future-7-for-package-developers.html">package developers</a> and <a href="https://cran.r-project.org/web/packages/future/vignettes/future-4-non-exportable-objects.html">non-exportable objects</a></li>
+</ul>
+<p>Conceptual background also includes Bertrand Meyer’s <em>Object-Oriented Software Construction</em>; Eric Evans’s <em>Domain-Driven Design</em>; Gamma, Helm, Johnson, and Vlissides’s <em>Design Patterns</em>; Scott Wlaschin’s <em>Domain Modeling Made Functional</em>; and David Parnas’s “On the Criteria To Be Used in Decomposing Systems into Modules.”</p>
+</section>
+<section id="evidence-labels" class="level2" data-number="C.7">
+<h2 data-number="C.7" class="anchored" data-anchor-id="evidence-labels"><span class="header-section-number">C.7</span> Evidence labels</h2>
+<ul>
+<li><strong>Official mechanism:</strong> documented by S7 or another authoritative public specification.</li>
+<li><strong>Public source observation:</strong> visible in a linked public repository; behavior may change. Version-sensitive observations should use an immutable revision link.</li>
+<li><strong>Public test assertion:</strong> encoded in a linked package test suite.</li>
+<li><strong>Released-version probe:</strong> reproducible execution naming R, S7, and package versions.</li>
+<li><strong>Editorial proposal:</strong> guidance offered for evaluation, not a claim that a package implements it.</li>
+</ul>
+<p>A source comment, README statement, or single implementation can motivate a question. It should not become a universal claim without corroborating evidence.</p>
+</section>
+<section id="bibliography" class="level2" data-number="C.8">
+<h2 data-number="C.8" class="anchored" data-anchor-id="bibliography"><span class="header-section-number">C.8</span> Bibliography</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-future-package-dev" class="csl-entry" role="listitem">
+Bengtsson, Henrik. 2026a. <span>“A Future for r: Best Practices for
+Package Developers.”</span> <a href="https://cran.r-project.org/web/packages/future/vignettes/future-7-for-package-developers.html">https://cran.r-project.org/web/packages/future/vignettes/future-7-for-package-developers.html</a>.
+</div>
+<div id="ref-future-nonexportable" class="csl-entry" role="listitem">
+Bengtsson, Henrik. 2026b. <span>“A Future for r: Non-Exportable
+Objects.”</span> <a href="https://cran.r-project.org/web/packages/future/vignettes/future-4-non-exportable-objects.html">https://cran.r-project.org/web/packages/future/vignettes/future-4-non-exportable-objects.html</a>.
+</div>
+<div id="ref-bernhardt2012" class="csl-entry" role="listitem">
+Bernhardt, Gary. 2012. <span>“Boundaries.”</span> <a href="https://www.destroyallsoftware.com/talks/boundaries">https://www.destroyallsoftware.com/talks/boundaries</a>.
+</div>
+<div id="ref-cert2024" class="csl-entry" role="listitem">
+CERT Coordination Center. 2024. <span>“R Programming Language
+Implementations Are Vulnerable to Arbitrary Code Execution During
+Deserialization.”</span> <a href="https://www.kb.cert.org/vuls/id/238194">https://www.kb.cert.org/vuls/id/238194</a>.
+</div>
+<div id="ref-ghc-newtype" class="csl-entry" role="listitem">
+Glasgow Haskell Compiler contributors. 2026. <span>“The Newtype
+Declaration.”</span> <a href="https://downloads.haskell.org/ghc/latest/docs/users_guide/exts/newtype.html">https://downloads.haskell.org/ghc/latest/docs/users_guide/exts/newtype.html</a>.
+</div>
+<div id="ref-hickey2012" class="csl-entry" role="listitem">
+Hickey, Rich. 2012. <span>“The Value of Values.”</span> <a href="https://www.infoq.com/presentations/Value-Values/">https://www.infoq.com/presentations/Value-Values/</a>.
+</div>
+<div id="ref-king2019" class="csl-entry" role="listitem">
+King, Alexis. 2019. <span>“Parse, Don’t Validate.”</span> November 5. <a href="https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/">https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/</a>.
+</div>
+<div id="ref-zod-brand" class="csl-entry" role="listitem">
+McDonnell, Colin. 2026. <span>“Zod: Branded Types.”</span> <a href="https://zod.dev/api?id=branded-types">https://zod.dev/api?id=branded-types</a>.
+</div>
+<div id="ref-nvd2024" class="csl-entry" role="listitem">
+National Vulnerability Database. 2024. <span>“CVE-2024-27322.”</span> <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-27322">https://nvd.nist.gov/vuln/detail/CVE-2024-27322</a>.
+</div>
+<div id="ref-r-serialization" class="csl-entry" role="listitem">
+R Core Team. 2026. <span>“Serialization Interface for Single
+Objects.”</span> <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/readRDS.html">https://stat.ethz.ch/R-manual/R-devel/library/base/html/readRDS.html</a>.
+</div>
+<div id="ref-rust-tryfrom" class="csl-entry" role="listitem">
+Rust Project Developers. 2026. <span>“Trait
+Std::convert::TryFrom.”</span> <a href="https://doc.rust-lang.org/std/convert/trait.TryFrom.html">https://doc.rust-lang.org/std/convert/trait.TryFrom.html</a>.
+</div>
+<div id="ref-s7-release-020" class="csl-entry" role="listitem">
+Vaughan, Davis. 2024. <span>“S7 0.2.0.”</span> November 18. <a href="https://tidyverse.org/blog/2024/11/s7-0-2-0/">https://tidyverse.org/blog/2024/11/s7-0-2-0/</a>.
+</div>
+<div id="ref-wadler1998" class="csl-entry" role="listitem">
+Wadler, Philip. 1998. <span>“The Expression Problem.”</span> <a href="https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt">https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt</a>.
+</div>
+</div>
 
 
 </section>
@@ -641,11 +829,6 @@ ul.task-list li input[type="checkbox"] {
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -961,8 +1144,8 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./open-questions.html" class="pagination-link" aria-label="Open Questions: The Inquiry Ledger">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span>
+      <a href="./glossary.html" class="pagination-link" aria-label="Glossary">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

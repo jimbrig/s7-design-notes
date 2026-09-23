@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
 
 <title>1&nbsp; Overview: The Whole Argument in Miniature – S7 Design Notes</title>
 <style>
@@ -38,6 +39,7 @@ ul.task-list li input[type="checkbox"] {
 <meta name="quarto:offset" content="./">
 <link href="./01-object-systems.html" rel="next">
 <link href="./index.html" rel="prev">
+<link href="./assets/favicon.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -49,9 +51,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1f846c7865d629590e2cadd4f479fcb7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-81a3b542eb5e89c0ecbe2096688e9360.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-c13f21f511963f2a6363cc37617da2fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-aa3c77f98e2dccecf3c490e1ed6547de.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -81,6 +83,13 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
+<meta property="og:title" content="1&nbsp; Overview: The Whole Argument in Miniature – S7 Design Notes">
+<meta property="og:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta property="og:site_name" content="S7 Design Notes">
+<meta name="twitter:title" content="1&nbsp; Overview: The Whole Argument in Miniature – S7 Design Notes">
+<meta name="twitter:description" content="A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R.">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://docs.jimbrig.com/s7-design-notes/00-overview.html">
 </head>
 
 <body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
@@ -254,7 +263,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./00-overview.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./00-overview.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -292,7 +301,7 @@ ul.task-list li input[type="checkbox"] {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./00-overview.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview: The Whole Argument in Miniature</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -307,19 +316,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./01-object-systems.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./02-values-and-state.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State: Reference Semantics, Immutability, and Where Change Lives</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Values and State</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./03-types-and-meaning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning: Semantic Types, Structure, and Type-Driven Design</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Types and Meaning</span></span></a>
   </div>
 </li>
       </ul>
@@ -336,19 +345,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04-parse-dont-validate.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate: Boundaries, the Checking Ladder, and Conditions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Parse, Don’t Validate</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05-composition-and-dispatch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch: Sum Types, Hierarchy, Interfaces, and Indirection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Composition and Dispatch</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06-documents-schemas-dsls.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages: Object Models at the Wire</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Documents, Schemas, and Languages</span></span></a>
   </div>
 </li>
       </ul>
@@ -365,7 +374,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./07-ecosystem-field-guide.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide: What Real S7 Packages Teach</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Ecosystem Field Guide</span></span></a>
   </div>
 </li>
       </ul>
@@ -382,19 +391,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./08-doctrine.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine: Principles, Decision Guides, and Named Anti-Patterns</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Doctrine</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./09-playbooks.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks: How to Approach S7, by Situation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Playbooks</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./10-middlegame.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame: From Doctrine to a Real Package</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The Middlegame</span></span></a>
   </div>
 </li>
       </ul>
@@ -411,13 +420,19 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./open-questions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions: The Inquiry Ledger</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Open Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./sources.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Sources</span></span></a>
   </div>
 </li>
       </ul>
@@ -432,16 +447,16 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#s7-is-functional-oop-and-that-changes-what-class-means" id="toc-s7-is-functional-oop-and-that-changes-what-class-means" class="nav-link active" data-scroll-target="#s7-is-functional-oop-and-that-changes-what-class-means"><span class="header-section-number">1.1</span> 1. S7 is functional OOP, and that changes what “class” means</a></li>
-  <li><a href="#choosing-the-object-system-is-a-semantic-decision-not-a-stylistic-one" id="toc-choosing-the-object-system-is-a-semantic-decision-not-a-stylistic-one" class="nav-link" data-scroll-target="#choosing-the-object-system-is-a-semantic-decision-not-a-stylistic-one"><span class="header-section-number">1.2</span> 2. Choosing the object system is a semantic decision, not a stylistic one</a></li>
-  <li><a href="#value-semantics-are-the-foundation-state-is-an-opt-in-at-the-edges" id="toc-value-semantics-are-the-foundation-state-is-an-opt-in-at-the-edges" class="nav-link" data-scroll-target="#value-semantics-are-the-foundation-state-is-an-opt-in-at-the-edges"><span class="header-section-number">1.3</span> 3. Value semantics are the foundation; state is an opt-in at the edges</a></li>
-  <li><a href="#types-carry-meaning-not-just-shape" id="toc-types-carry-meaning-not-just-shape" class="nav-link" data-scroll-target="#types-carry-meaning-not-just-shape"><span class="header-section-number">1.4</span> 4. Types carry meaning, not just shape</a></li>
-  <li><a href="#parse-dont-validate-construction-is-the-proof" id="toc-parse-dont-validate-construction-is-the-proof" class="nav-link" data-scroll-target="#parse-dont-validate-construction-is-the-proof"><span class="header-section-number">1.5</span> 5. Parse, don’t validate — construction is the proof</a></li>
-  <li><a href="#every-invariant-has-exactly-one-home" id="toc-every-invariant-has-exactly-one-home" class="nav-link" data-scroll-target="#every-invariant-has-exactly-one-home"><span class="header-section-number">1.6</span> 6. Every invariant has exactly one home</a></li>
-  <li><a href="#sum-types-deserve-representation-and-s7-gives-you-four-encodings" id="toc-sum-types-deserve-representation-and-s7-gives-you-four-encodings" class="nav-link" data-scroll-target="#sum-types-deserve-representation-and-s7-gives-you-four-encodings"><span class="header-section-number">1.7</span> 7. Sum types deserve representation, and S7 gives you four encodings</a></li>
-  <li><a href="#inherit-for-dispatch-and-substitutability-compose-for-structure" id="toc-inherit-for-dispatch-and-substitutability-compose-for-structure" class="nav-link" data-scroll-target="#inherit-for-dispatch-and-substitutability-compose-for-structure"><span class="header-section-number">1.8</span> 8. Inherit for dispatch and substitutability; compose for structure</a></li>
-  <li><a href="#documents-are-declarative-programs-model-them-as-object-graphs-verify-them-at-boundaries" id="toc-documents-are-declarative-programs-model-them-as-object-graphs-verify-them-at-boundaries" class="nav-link" data-scroll-target="#documents-are-declarative-programs-model-them-as-object-graphs-verify-them-at-boundaries"><span class="header-section-number">1.9</span> 9. Documents are declarative programs; model them as object graphs, verify them at boundaries</a></li>
-  <li><a href="#abstractions-must-earn-their-keep" id="toc-abstractions-must-earn-their-keep" class="nav-link" data-scroll-target="#abstractions-must-earn-their-keep"><span class="header-section-number">1.10</span> 10. Abstractions must earn their keep</a></li>
+  <li><a href="#type-driven-design-makes-domain-knowledge-explicit" id="toc-type-driven-design-makes-domain-knowledge-explicit" class="nav-link active" data-scroll-target="#type-driven-design-makes-domain-knowledge-explicit"><span class="header-section-number">1.1</span> 1. Type-driven design makes domain knowledge explicit</a></li>
+  <li><a href="#nouns-and-verbs-are-co-designed" id="toc-nouns-and-verbs-are-co-designed" class="nav-link" data-scroll-target="#nouns-and-verbs-are-co-designed"><span class="header-section-number">1.2</span> 2. Nouns and verbs are co-designed</a></li>
+  <li><a href="#choose-the-substrate-by-semantics" id="toc-choose-the-substrate-by-semantics" class="nav-link" data-scroll-target="#choose-the-substrate-by-semantics"><span class="header-section-number">1.3</span> 3. Choose the substrate by semantics</a></li>
+  <li><a href="#separate-editable-values-read-only-snapshots-and-reference-owners" id="toc-separate-editable-values-read-only-snapshots-and-reference-owners" class="nav-link" data-scroll-target="#separate-editable-values-read-only-snapshots-and-reference-owners"><span class="header-section-number">1.4</span> 4. Separate editable values, read-only snapshots, and reference owners</a></li>
+  <li><a href="#put-each-contract-at-the-smallest-boundary-that-can-state-it" id="toc-put-each-contract-at-the-smallest-boundary-that-can-state-it" class="nav-link" data-scroll-target="#put-each-contract-at-the-smallest-boundary-that-can-state-it"><span class="header-section-number">1.5</span> 5. Put each contract at the smallest boundary that can state it</a></li>
+  <li><a href="#construction-should-retain-knowledge" id="toc-construction-should-retain-knowledge" class="nav-link" data-scroll-target="#construction-should-retain-knowledge"><span class="header-section-number">1.6</span> 6. Construction should retain knowledge</a></li>
+  <li><a href="#alternatives-families-and-failure-protocols-are-separate-designs" id="toc-alternatives-families-and-failure-protocols-are-separate-designs" class="nav-link" data-scroll-target="#alternatives-families-and-failure-protocols-are-separate-designs"><span class="header-section-number">1.7</span> 7. Alternatives, families, and failure protocols are separate designs</a></li>
+  <li><a href="#one-meaning-may-have-several-deliberate-projections" id="toc-one-meaning-may-have-several-deliberate-projections" class="nav-link" data-scroll-target="#one-meaning-may-have-several-deliberate-projections"><span class="header-section-number">1.8</span> 8. One meaning may have several deliberate projections</a></li>
+  <li><a href="#documents-require-explicit-preservation-and-authority-policies" id="toc-documents-require-explicit-preservation-and-authority-policies" class="nav-link" data-scroll-target="#documents-require-explicit-preservation-and-authority-policies"><span class="header-section-number">1.9</span> 9. Documents require explicit preservation and authority policies</a></li>
+  <li><a href="#general-machinery-must-earn-its-keep-meaningful-concepts-need-not" id="toc-general-machinery-must-earn-its-keep-meaningful-concepts-need-not" class="nav-link" data-scroll-target="#general-machinery-must-earn-its-keep-meaningful-concepts-need-not"><span class="header-section-number">1.10</span> 10. General machinery must earn its keep; meaningful concepts need not</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jimbrig/s7-design-notes/edit/main/00-overview.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jimbrig/s7-design-notes/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -468,48 +483,62 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Everything in this research folder elaborates a single compact position. This document states that position in ten theses. Each thesis gets a paragraph here and a fuller treatment in the numbered documents.</p>
-<section id="s7-is-functional-oop-and-that-changes-what-class-means" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="s7-is-functional-oop-and-that-changes-what-class-means"><span class="header-section-number">1.1</span> 1. S7 is functional OOP, and that changes what “class” means</h2>
-<p>S7 belongs to the generic-function tradition of object orientation (CLOS, Dylan, Julia, S3, S4), not the message-passing tradition (Smalltalk, Java, Python, R6). In this tradition a class answers the question <em>what is this thing?</em> — its data, its invariants, its place in a dispatch hierarchy — while a generic function answers <em>what can be done?</em> Methods belong to generics, not to classes. This inversion is not cosmetic. It means behavior is organized around verbs that many types can implement, extension happens by registering methods from the outside, and “interface” is an implicit concept: a set of generics that a class happens to support. Designing well in S7 means designing the generic vocabulary with as much care as the class graph. See <a href="./01-object-systems.html">01-object-systems.qmd</a>.</p>
+<p>The central question is simple:</p>
+<blockquote class="blockquote">
+<p>What knowledge can the model carry so that the rest of the program no longer has to rediscover it?</p>
+</blockquote>
+<p>The answer is to define meaningful values, establish their contracts at the right boundaries, and compose operations that preserve or deliberately transform that meaning. The following ten theses summarize the argument.</p>
+<section id="type-driven-design-makes-domain-knowledge-explicit" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="type-driven-design-makes-domain-knowledge-explicit"><span class="header-section-number">1.1</span> 1. Type-driven design makes domain knowledge explicit</h2>
+<p>Type-driven design is a way of structuring thought: identify domain concepts, admissible states, relationships, and operations, then represent them in the values and contracts from which the program is composed. The mechanism in R is runtime construction, validation, and dispatch, but the consequence is larger than catching bad values. A named <code>DateRange</code> can retain the fact that its endpoints are ordered; a raw pair of dates forces every consumer to infer which is first, decide whether equality is allowed, and repeat the check.</p>
+<p>S7 provides nominal classes, properties, validators, and generic dispatch for carrying this knowledge. A useful model is therefore measured not by how many classes it creates, but by how much rediscovery it removes. See <a href="./03-types-and-meaning.html">Types and Meaning</a>.</p>
 </section>
-<section id="choosing-the-object-system-is-a-semantic-decision-not-a-stylistic-one" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="choosing-the-object-system-is-a-semantic-decision-not-a-stylistic-one"><span class="header-section-number">1.2</span> 2. Choosing the object system is a semantic decision, not a stylistic one</h2>
-<p>R offers S3, S4, S7, R6, environments, and vctrs, and the choice among them is determined by the semantics of the thing being modeled. Domain values with invariants and dispatch needs want S7. Homogeneous vectors that must slice, recycle, and live in data frame columns want vctrs. Ongoing processes with identity — sessions, connections, caches, accumulating conversations — want reference semantics, which means R6 or an environment. Thin interoperability veneers want S3. Real systems mix these deliberately: the most instructive modern example is ellmer, where the mutable <code>Chat</code> is R6 and the immutable <code>Turn</code>, <code>Content</code>, <code>Model</code>, and <code>Provider</code> objects it manages are S7. See <a href="./01-object-systems.html">01-object-systems.qmd</a> and <a href="./02-values-and-state.html">02-values-and-state.qmd</a>.</p>
+<section id="nouns-and-verbs-are-co-designed" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="nouns-and-verbs-are-co-designed"><span class="header-section-number">1.2</span> 2. Nouns and verbs are co-designed</h2>
+<p>In S7’s generic-function tradition, classes describe domain nouns and generics describe domain verbs. Methods belong to generics rather than being stored inside classes, so behavior is organized around operations that many types may support. That mechanism changes the design process: a model is not finished when its property graph looks plausible. Asking how values will be <code>render()</code>ed, <code>combine()</code>d, <code>prepare()</code>d, or serialized often exposes a distinction the nouns missed; a newly distinguished noun may in turn reveal a clean dispatch axis or a law shared by several operations.</p>
+<p>A good design therefore iterates between representative values and the operations consumers need. Nouns without verbs become inert schemas; verbs without meaningful nouns become branches over loose data. Co-design lets each side correct the other. See <a href="./01-object-systems.html">Object Systems</a>.</p>
 </section>
-<section id="value-semantics-are-the-foundation-state-is-an-opt-in-at-the-edges" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="value-semantics-are-the-foundation-state-is-an-opt-in-at-the-edges"><span class="header-section-number">1.3</span> 3. Value semantics are the foundation; state is an opt-in at the edges</h2>
-<p>R’s copy-on-modify physics makes S7 objects behave as immutable values: “modifying” a property produces a new object. This is a strength to be embraced, not a limitation to be engineered around. Values permit local reasoning, cheap snapshots, honest testing, and freedom from defensive copying. The architecture that follows is the functional core / imperative shell: pure construction and transformation of domain values in the middle, and a thin stateful rim — I/O, sessions, orchestration — around it. When invariants span several properties, updates must be atomic (<code>S7::set_props()</code>), which is the value-world analogue of a database transaction. See <a href="./02-values-and-state.html">02-values-and-state.qmd</a>.</p>
+<section id="choose-the-substrate-by-semantics" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="choose-the-substrate-by-semantics"><span class="header-section-number">1.3</span> 3. Choose the substrate by semantics</h2>
+<p>S7 is useful for domain values with invariants and dispatchable behavior. vctrs is useful for homogeneous vectors that must slice, recycle, and inhabit data-frame columns. R6 objects and environments are useful for shared identity and live resources. S3 remains effective for lightweight interoperability and for designs driven by an existing external registry. The choice determines which promises are natural: vector algebra, nominal contracts, or shared identity.</p>
+<p>Real systems therefore combine substrates instead of choosing a camp. ellmer’s R6 <code>Chat</code> owns an ongoing conversation, network activity, and an accumulating lifecycle; its S7 <code>Turn</code>, <code>Content</code>, <code>Model</code>, and <code>Provider</code> objects carry inspectable records and descriptions through that process. The contrast is memorable because each system does the job its semantics fit. S7 must earn its place through meaning, invariants, operations, or composition, not merely through formality.</p>
 </section>
-<section id="types-carry-meaning-not-just-shape" class="level2" data-number="1.4">
-<h2 data-number="1.4" class="anchored" data-anchor-id="types-carry-meaning-not-just-shape"><span class="header-section-number">1.4</span> 4. Types carry meaning, not just shape</h2>
-<p>A string that holds an email address and a string that holds a layer id have the same structure and entirely different meanings. Semantic types — the newtype idea from statically typed languages — give meaning its own name and its own laws. In S7 there are three carriers for this: a reused property definition (cheapest), a class inheriting from a base type (nominal identity while the value remains the primitive — ragnar’s <code>MarkdownDocument</code> is a character string with an origin), and a full composite class (when the concept has internal structure). Sharing semantics rather than structure is also the deep principle of loosely coupled integration: systems that agree on what data <em>means</em> can evolve how it is <em>arranged</em> independently. See <a href="./03-types-and-meaning.html">03-types-and-meaning.qmd</a>.</p>
+<section id="separate-editable-values-read-only-snapshots-and-reference-owners" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="separate-editable-values-read-only-snapshots-and-reference-owners"><span class="header-section-number">1.4</span> 4. Separate editable values, read-only snapshots, and reference owners</h2>
+<p>An editable S7 value changes through replacement: an operation returns a revised value while other bindings ordinarily retain the prior one. This makes branching and history explicit—a draft can become two candidate drafts without either candidate silently changing the other. A read-only snapshot is also a value, but its public API intentionally offers no revision path because it records a completed fact. A reference owner has shared identity, a live resource, or an observable lifecycle, so aliases are expected to observe the same change.</p>
+<p>These are three lifecycle policies, not synonyms for mutable and immutable. A draft document may be an editable value, its published form a snapshot, and the editor coordinating both a reference owner. Copy-on-modify does not make every S7 property read-only, and wrapping an environment, R6 object, or external pointer does not turn the payload into a value. See <a href="./02-values-and-state.html">Values and State</a>.</p>
 </section>
-<section id="parse-dont-validate-construction-is-the-proof" class="level2" data-number="1.5">
-<h2 data-number="1.5" class="anchored" data-anchor-id="parse-dont-validate-construction-is-the-proof"><span class="header-section-number">1.5</span> 5. Parse, don’t validate — construction is the proof</h2>
-<p>Alexis King’s slogan names the difference between a check that discards its own result (validation) and a check that records it in a richer type (parsing). In a dynamic language the translation is: boundary functions accept loose input and return domain objects or fail loudly; from then on, possession of the object <em>is</em> the evidence that its laws hold, and downstream code stops re-asking. Constructors normalize; validators verify; nothing inside the core ever touches raw wire input. The alternative — checks scattered through processing code, each function distrusting its inputs — is what the language security literature calls shotgun parsing, and it is both a correctness and a clarity disaster. See <a href="./04-parse-dont-validate.html">04-parse-dont-validate.qmd</a>.</p>
+<section id="put-each-contract-at-the-smallest-boundary-that-can-state-it" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="put-each-contract-at-the-smallest-boundary-that-can-state-it"><span class="header-section-number">1.5</span> 5. Put each contract at the smallest boundary that can state it</h2>
+<p>Property definitions carry intrinsic shape, cardinality, membership, bounds, and local presence policy. Class validators carry relationships among one object’s properties. Aggregate roots carry rules over contained objects and references. Contextual operations carry checks that require datasets, metadata, resources, or authority. The mechanism follows information visibility: a scalar property can know that alpha lies in <code>[0, 1]</code>, but only a style aggregate can know that every layer names an existing source, and only an operation with runtime metadata can know that the source still exists.</p>
+<p>Placing each rule once lets higher layers trust lower ones and keeps one predicate from drifting across constructors, methods, and serializers. Construction certifies only the invariants visible at that boundary and preserved by supported transformations; it is a bounded certificate, not a claim of omniscience.</p>
 </section>
-<section id="every-invariant-has-exactly-one-home" class="level2" data-number="1.6">
-<h2 data-number="1.6" class="anchored" data-anchor-id="every-invariant-has-exactly-one-home"><span class="header-section-number">1.6</span> 6. Every invariant has exactly one home</h2>
-<p>Checking logic belongs on a ladder: external schema validators at the wire, parsers at the boundary, property classes for type, property validators for local laws, class validators for cross-property laws, aggregate-root validators for cross-object laws, method preconditions for operation legality, and internal assertions for developer invariants. Each rung may assume all rungs below it and must not duplicate them. The most common validation design failure is not a missing check but the same check living in four places, drifting apart over time. See <a href="./04-parse-dont-validate.html">04-parse-dont-validate.qmd</a>.</p>
+<section id="construction-should-retain-knowledge" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="construction-should-retain-knowledge"><span class="header-section-number">1.6</span> 6. Construction should retain knowledge</h2>
+<p>A useful boundary does more than reject bad input. Rejection says only “not this”; retention lets later code rely on what was established. A <code>DateRange</code> records ordered endpoints, explicit candidate values record tuning intent that would otherwise be guessed from vector shape, and a prepared run can record completion of data-dependent checks. The consequence is fewer repeated questions: possession of the richer value answers them.</p>
+<p>This is the dynamic-language form of parse, don’t validate, with an important qualification. Strict construction of known values can coexist with tolerant parsing when uncertainty is represented explicitly as an unknown or partial variant with diagnostics. Retaining uncertainty is still retaining knowledge; silently collapsing it to a familiar value is not.</p>
 </section>
-<section id="sum-types-deserve-representation-and-s7-gives-you-four-encodings" class="level2" data-number="1.7">
-<h2 data-number="1.7" class="anchored" data-anchor-id="sum-types-deserve-representation-and-s7-gives-you-four-encodings"><span class="header-section-number">1.7</span> 7. Sum types deserve representation, and S7 gives you four encodings</h2>
-<p>Much of real-world modeling is alternatives: a source is vector <em>or</em> raster <em>or</em> image; a message part is text <em>or</em> a tool call. Flag fields, clusters of mutually exclusive nullables, and stringly typed mode switches are all sum types begging for honest representation. S7 offers four encodings — subclass families under an abstract parent, anonymous unions, enum-valued properties, and discriminator-plus-validator hybrids — and choosing among them follows from whether the variants differ in fields, in behavior, or only in value. The notable loss relative to ML-family languages is exhaustiveness checking, which must be recovered by convention and tests. See <a href="./05-composition-and-dispatch.html">05-composition-and-dispatch.qmd</a>.</p>
+<section id="alternatives-families-and-failure-protocols-are-separate-designs" class="level2" data-number="1.7">
+<h2 data-number="1.7" class="anchored" data-anchor-id="alternatives-families-and-failure-protocols-are-separate-designs"><span class="header-section-number">1.7</span> 7. Alternatives, families, and failure protocols are separate designs</h2>
+<p>An S7 union states which alternatives a property accepts, and those alternatives may include primitive or domain classes. Concrete classes preserve variant identity. An abstract parent supplies shared schema or a dispatch protocol, but does not seal the family. These mechanisms solve different problems: acceptance, identity, shared behavior, and extension. Coverage tests and loud fallbacks help detect unsupported cases; neither proves exhaustiveness.</p>
+<p>Failure adds a second axis that is easy to hide. A <code>Success</code>/<code>Failure</code> outcome family represents what happened, but it does not decide what happens when several outcomes are combined. One workflow may stop on the first failure, another may accumulate all diagnostics, and an interactive boundary may turn the same failure into an R condition. Modeling the failure shape and the composition protocol separately prevents a sum type from smuggling in one global control-flow policy.</p>
 </section>
-<section id="inherit-for-dispatch-and-substitutability-compose-for-structure" class="level2" data-number="1.8">
-<h2 data-number="1.8" class="anchored" data-anchor-id="inherit-for-dispatch-and-substitutability-compose-for-structure"><span class="header-section-number">1.8</span> 8. Inherit for dispatch and substitutability; compose for structure</h2>
-<p>The classic warnings about inheritance — fragile base classes, implementation coupling, a single rigid hierarchy axis — lose some force in functional OOP, because an S7 parent contributes a property schema and a dispatch position rather than a method table full of self-calls. But the discipline stands: inheritance is for is-a relationships that dispatch exploits, shallow trees with abstract roots and concrete leaves; composition is for has-a structure, which is most structure. Inheriting merely to reuse field names is schema cosplay. Interfaces — sets of generics with behavioral laws — are the third mechanism, implicit in S7 and made explicit by s7contract. See <a href="./05-composition-and-dispatch.html">05-composition-and-dispatch.qmd</a>.</p>
+<section id="one-meaning-may-have-several-deliberate-projections" class="level2" data-number="1.8">
+<h2 data-number="1.8" class="anchored" data-anchor-id="one-meaning-may-have-several-deliberate-projections"><span class="header-section-number">1.8</span> 8. One meaning may have several deliberate projections</h2>
+<p>An authoritative declaration can drive a native validator, schema, documentation, UI description, or serializer. The mechanism is projection: one owned semantic specification is interpreted into several artifacts. The consequence is not infallibility but a smaller agreement problem. Instead of maintaining five independent definitions, tests can check that each generator faithfully projects the one source.</p>
+<p>This makes generation from an owned semantic specification a legitimate architecture. Blindly generating a class graph from incidental foreign structure is different: it imports someone else’s arrangement without first deciding which distinctions have meaning in the R API.</p>
 </section>
-<section id="documents-are-declarative-programs-model-them-as-object-graphs-verify-them-at-boundaries" class="level2" data-number="1.9">
-<h2 data-number="1.9" class="anchored" data-anchor-id="documents-are-declarative-programs-model-them-as-object-graphs-verify-them-at-boundaries"><span class="header-section-number">1.9</span> 9. Documents are declarative programs; model them as object graphs, verify them at boundaries</h2>
-<p>A style, a config, a catalog, a query, a conversation transcript — these are declarative programs interpreted by some engine elsewhere. The R package’s job is to be a good compiler front-end: construct lawful documents, enforce the invariants that are cheap and local, and delegate full conformance to the authoritative external validator at the wire. Schemas (JSON Schema, TypeScript definitions, protobuf) are contracts and design inputs, not blueprints: mirroring a schema one-interface-per-class imports its structure while discarding the opportunity to encode meaning. Expression languages embedded in documents deserve an escalation ladder — opaque passthrough, then constructor combinators, then a typed AST — climbed only as far as analysis needs justify. See <a href="./06-documents-schemas-dsls.html">06-documents-schemas-dsls.qmd</a>.</p>
+<section id="documents-require-explicit-preservation-and-authority-policies" class="level2" data-number="1.9">
+<h2 data-number="1.9" class="anchored" data-anchor-id="documents-require-explicit-preservation-and-authority-policies"><span class="header-section-number">1.9</span> 9. Documents require explicit preservation and authority policies</h2>
+<p>A document is often a declarative program: a style, query, configuration, or conversation transcript is data that another engine will interpret. The R package is therefore closer to a compiler front-end than a bag of setters. Its object graph should make meaningful constructions convenient, preserve the distinctions required for a faithful projection, and delegate full conformance when an external engine is the authority.</p>
+<p>A parser, adapter, compiler, or serializer should consequently say what it preserves, normalizes, loses, and compares. External authority may act as a wire-format gate, a runtime metadata provider, or a test oracle. Typing depth is chosen per node: semantic nodes with identity or operations deserve types, extensible key spaces may remain validated bags, and embedded languages can remain opaque until consumers need to inspect them. A schema is an important compiler input and contract, not automatically the ideal native class graph.</p>
 </section>
-<section id="abstractions-must-earn-their-keep" class="level2" data-number="1.10">
-<h2 data-number="1.10" class="anchored" data-anchor-id="abstractions-must-earn-their-keep"><span class="header-section-number">1.10</span> 10. Abstractions must earn their keep</h2>
-<p>Every abstraction is indirection, and indirection has a comprehension price. The layers that pay rent absorb a real axis of change: generic-to-method absorbs behavioral variation across types; a semantic atom absorbs meaning drift; a canonical spec projected into many artifacts absorbs representation churn; a wire-name map absorbs serialization churn. Layers that do not pay — pass-through wrappers, speculative interfaces with one implementation, factories for shapes that occur once — should not exist yet. The practical test is the rule of three: abstract after the pattern has recurred, not before. The ecosystem itself demonstrates convergent evolution here: multiple independent projects (s7x, rtemis’s <code>PropertySpec</code> factories, and property-factory layers in private codebases) grew nearly identical helper strata over S7’s deliberately minimal core, which is strong evidence for which abstractions are genuinely load-bearing. See <a href="./08-doctrine.html">08-doctrine.qmd</a>.</p>
+<section id="general-machinery-must-earn-its-keep-meaningful-concepts-need-not" class="level2" data-number="1.10">
+<h2 data-number="1.10" class="anchored" data-anchor-id="general-machinery-must-earn-its-keep-meaningful-concepts-need-not"><span class="header-section-number">1.10</span> 10. General machinery must earn its keep; meaningful concepts need not</h2>
+<p>Every abstraction introduces a new place to look. It earns that indirection when it absorbs a real axis of change: generic-to-method dispatch absorbs behavioral variation across types, a semantic class prevents meanings with the same primitive representation from being confused, and a wire-name map contains serialization churn. A pass-through wrapper or speculative factory with one use merely moves code without removing a decision.</p>
+<p>The rule of three is therefore a useful restraint on generalized factories, metamodels, and framework layers. It is not a requirement to leave an important domain concept unnamed until it appears three times. Start from the domain and intended consumers, sketch representative values and operations, record the contracts encountered, and extract reusable machinery only from real repetition. A large flat class or generated facade is not wrong merely because it has many fields; the question is whether its shape is authoritative and whether it makes its consumers simpler. Abstractions pay rent by deleting rediscovery, branching, duplication, or coordinated change.</p>
 <hr>
-<p>The remaining documents unpack these theses with mechanics, examples from the published ecosystem, and named anti-patterns. The doctrine document at the end compresses everything back into decision guides you can apply in a design review.</p>
+<p>The remaining chapters develop these theses through mechanics, public package examples, decision guides, and executable laws. The <a href="./08-doctrine.html">Doctrine</a> compresses them for design reviews.</p>
 
 
 </section>
@@ -615,11 +644,6 @@ ul.task-list li input[type="checkbox"] {
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
-            // target, if specified
-            link.setAttribute("target", "_blank");
-            if (link.getAttribute("rel") === null) {
-              link.setAttribute("rel", "noopener");
-            }
         }
       }
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
@@ -940,8 +964,8 @@ ul.task-list li input[type="checkbox"] {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./01-object-systems.html" class="pagination-link" aria-label="Object Systems: What Kind of OOP S7 Is">
-        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems: What Kind of OOP S7 Is</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./01-object-systems.html" class="pagination-link" aria-label="Object Systems">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Object Systems</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
