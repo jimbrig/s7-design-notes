@@ -1,0 +1,13 @@
+aggregate root: The object boundary that sees a complete consistency unit and can enforce relationships among its contained values.
+canonical equality: Equality after applying the documented normalization rules, without requiring exact R representation identity.
+contextual preparation: A named operation that combines an intrinsically valid value with external data, metadata, resources, or authority and returns a value recording what was resolved.
+domain equality: Equality defined by the meaning of values in the problem domain rather than by their exact storage representation.
+invariant: A condition that must remain true for a value or consistency boundary throughout its supported lifecycle.
+operation contract: The meaning, accepted concepts, result, failure policy, and laws shared by every implementation of an operation.
+property contract: The class, shape, cardinality, presence policy, default behavior, and intrinsic constraints attached to one property position.
+projection: A deliberate representation derived from an authoritative model, such as a schema, serializer output, interface description, or documentation page.
+reference owner: An object with shared identity or a live lifecycle whose aliases must observe the same evolving state.
+semantic class: A nominal class that preserves a domain concept independently so it can travel through the program or participate in dispatch.
+snapshot: A value representing a fact at a point in time, often with a public policy that forbids revision.
+sum type: A representation of alternatives in which a value is exactly one of several meaningful variants.
+wire representation: The serialized form exchanged with another system, distinct from the program's semantic domain model.

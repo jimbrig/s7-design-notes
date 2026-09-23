@@ -1,10 +1,9 @@
 # Doctrine: Principles, Decision Guides, and Named Anti-Patterns
 
-This document compresses the whole research folder into what you would
-actually use in a design session: nineteen principles stated as prose, five
-decision guides stated as questions, and a catalog of named anti-patterns
-with their failure narratives. Nothing here is new; everything is justified
-in the earlier documents.
+This document compresses the preceding argument into principles, decision
+guides, and named anti-patterns for design reviews. Each principle is framed
+by its downstream payoff: knowledge belongs in the model when it removes
+interpretation, checking, or branching from consumers.
 
 A register note before the principles: everything in this document is
 **doctrine** — deliberately imperative defaults distilled from documented S7
@@ -17,114 +16,135 @@ needed to make the trade explicitly.
 
 ## Principles
 
-**1. Model meaning before structure.** Begin with the domain's semantic atoms
-— the indivisible meanings and their laws — and only then compose the
-document structures that arrange them. Structure is the volatile part;
-meaning is the stable contract. Systems (and dialects of a domain) that share
-semantics can differ in structure and still interoperate; systems that share
-only structure are totally coupled.
+**Model meaning through representative designs.** Begin with the domain,
+intended consumers, and a few representative values and operations. Record the
+semantic atoms and laws those examples expose, then revisit both structure and
+behavior. Meaning can be more stable than document shape, but it is discovered
+iteratively rather than by completing a universal foundation first.
 
-**2. Let construction be the proof.** Arrange the system so that no unlawful
-object of a class can exist: boundary functions parse loose input into
-objects or fail loudly, validators run on construction and every replacement,
-and possession of the object certifies its laws. Downstream code demands
-classes instead of re-checking contents.
+**Let construction retain evidence.** Boundary functions turn loose input
+into representations that record what was learned, so downstream code can
+demand those representations instead of re-checking raw contents.
+Construction certifies only invariants visible at that boundary and preserved
+by supported transformations; references inside an object and external facts
+remain outside that certificate.
 
-**3. Constructors normalize; validators verify; boundaries translate.**
+**Constructors normalize; validators verify; boundaries translate.**
 Coercion, canonicalization, and version gating happen once, at the boundary.
 Validators judge canonical values only, and stay pure and cheap because they
 run on every property write. A validator accommodating multiple input shapes
 is a parser in the wrong place, running forever.
 
-**4. Every invariant has one authoritative home.** Place each law on its
-rung: external conformance at the wire, parsing at the boundary, type on the
+**Give every invariant one authoritative home.** Place each law at the lowest
+boundary that sees everything it mentions: external conformance at the wire,
+parsing at the boundary, type on the
 property class, local law in the property validator, cross-property law in
 the class validator, cross-object law in the aggregate root, operation
 legality in the mutator, developer invariants in assertions. Each rung
 assumes the rungs below and duplicates none. A cheap duplicate deliberately
 retained for better boundary diagnostics is a documented trade; a law found
 on two rungs *by accident* is a bug waiting to be two different laws.
+The governing test is the rule's **visibility horizon**. A channel range is
+visible to one property; start-before-end needs the whole object; unique ids
+need the collection; authorization needs the live authority. Below that
+horizon the rule is uncheckable, while above it the rule runs too often and
+couples code to context it does not need.
 
-**5. Invariants live at the lowest point that sees everything they mention.**
-A channel range belongs to the channel property; a start-before-end rule to
-the class; unique-ids-across-the-collection to the root that holds the
-collection. Placing a law lower than its visibility horizon makes it
-uncheckable; higher, and it runs too often and knows too much.
+**Treat presence and default ownership as a contract.** Required in the
+result, caller-supplied, nullable, `NA`-able, empty, defaulted, and omitted on
+serialization are separate decisions. Record whether R, an external authority,
+or the caller requesting materialization owns a default. One `optional` flag
+cannot preserve these meanings.
 
-**6. Presence is a four-way decision.** Required-at-construction, nullable in
-the model, defaulted, and omitted-on-serialization are independent axes, and
-JSON's omitted / null / empty forms are distinct meanings. Decide per
-property, record the policy, and never let one `optional` flag conflate what
-"the user cleared this" and "the user never touched this."
+**Treat constants as identity when instances cannot differ.** If two
+instances of a class can never differ on a field, the field is part of what
+the class *is*: model it as a computed property or inject it at serialization,
+and keep it out of the constructor. Store it only when round-trip fidelity or
+spec evolution demands that instances carry it.
 
-**7. Constants are identity, not state.** If two instances of a class can
-never differ on a field, the field is part of what the class *is*: model it
-as a computed property or inject it at serialization, and keep it out of the
-constructor. Store it only when round-trip fidelity or spec evolution demands
-that instances carry it.
-
-**8. Represent alternatives as alternatives.** Flag fields, mutually
+**Represent alternatives as alternatives.** Flag fields, mutually
 exclusive nullables, and mode strings are sum types flattened into products.
-Give variants honest representation: subclass families when fields or
-behavior differ, enum properties when only the tag differs, unions for
-primitive alternatives in one slot. Recover exhaustiveness with loud
-defaults and registry-driven tests.
+Give variants honest representation: concrete variant classes when identity,
+fields, or behavior differ; enum properties when only the tag differs; unions
+when one slot accepts several primitive or domain classes. Abstract parents
+provide shared schema or protocol but do not seal a family. Loud fallbacks and
+coverage tests detect unsupported known cases; they do not prove
+exhaustiveness.
 
-**9. Inherit for dispatch and substitutability; compose for structure.**
+**Inherit for dispatch and substitutability; compose for structure.**
 Parents contribute a property schema and a dispatch position to things that
 genuinely are the parent. Everything else — nesting, reuse, independent
 dimensions — is composition. Hierarchies stay shallow: abstract root,
-concrete leaves, intermediate levels only when they add both schema and a
-dispatch target. Inherit from a base type only when the object *is* that
-primitive.
+concrete leaves, intermediate levels only when they add a genuine is-a
+concept and either a useful dispatch position, shared invariant-bearing
+schema, or structural exclusion of illegal states. Inherit from a base type
+only when the object *is* that primitive.
 
-**10. Behavior belongs to generics, and interfaces are generic-sets plus
-laws.** Design the verb vocabulary as deliberately as the class graph. An
+**Co-design nouns and verbs.** Behavior belongs to generics, and interfaces
+are generic sets plus laws. Design the verb vocabulary as deliberately as the
+class graph. An
 extension point is a set of generics an implementor must support *and* the
 laws those methods must satisfy — write the laws down, executably where
-possible. Reach for multiple dispatch when behavior genuinely varies along
-two type axes; it turns a conditionals matrix into small methods.
+possible. Let operations revise the representation when they reveal missing
+distinctions. Reach for multiple dispatch when behavior genuinely varies
+along two type axes.
 
-**11. Values in the core, references in the shell.** Records of fact are
-immutable S7 values transformed by pure functions; ongoing processes with
-identity — sessions, caches, conversations — are R6 or environments at the
-system's rim. The domain must be reconstructible from the values alone.
+**Choose lifecycle policy explicitly.** Editable values are revised through
+replacement. Read-only snapshots are values whose public API forbids revision.
+Reference owners coordinate shared identity, resources, or observable
+lifecycles. Keep domain knowledge in values where possible, and document any
+reference-valued payload because outer validation will not observe its
+internal mutation.
 
-**12. Mutate atomically, through the front door.** Invariants spanning
-several properties imply every update of those properties goes through one
-atomic replacement (`S7::set_props()`), wrapped in a mutator function so
-callers cannot do it wrong. Guarantees hold for clients of the exported
-surface; make the front door the easiest path.
+These policies answer different questions. A **value** says that revision
+produces another value. A **snapshot** says that the represented fact is
+complete and the public API offers no revision, even though S7 replacement
+machinery still exists underneath. An **owner** says that aliases must observe
+one evolving process or resource. A chat may therefore own a live stream while
+emitting completed turns as snapshots; the hybrid is explicit rather than an
+exception hidden inside a nominally immutable object.
 
-**13. One canonical artifact, many projections.** When several outputs encode
-the same knowledge — an expression and a legend; a class graph and its
-documentation; a wire format and a pretty printer — designate one canonical
-source (usually a small, reviewable data structure) and generate every
-projection. Hand-maintained parallel encodings *will* diverge.
+**Revise related properties together, through the front door.** Invariants
+spanning several properties imply every update of those properties goes
+through one grouped replacement (`S7::set_props()`), wrapped in a
+transformation function. Guarantees hold for supported clients of the
+exported surface; make the front door the easiest path.
 
-**14. Property access is cheap and pure.** Getters compute derivations; they
+**Use one authoritative meaning with deliberate projections.** When several
+outputs encode the same knowledge — an expression and a legend; a class graph
+and its documentation; a wire format and a pretty printer — designate one
+canonical source and derive deliberate projections. This removes independently
+maintained definitions and makes consistency testable; translators and
+generators can still be wrong.
+
+**Keep property access cheap and pure.** Getters compute derivations; they
 never perform I/O, never mutate, never surprise. The moment `x@thing` can be
 slow or effectful, the object stops being data in the reader's mind, and the
 whole value-semantics reasoning collapses.
 
-**15. Abstractions must earn their keep.** Every layer of indirection pays
-rent by absorbing a demonstrated axis of variation — behavioral variation
-across types, meaning shared across sites, representation churn at a
-boundary. Abstract after the third occurrence, not the first. Delete layers
-that no longer pay. The ecosystem's convergent evolution (independent
-projects growing the same enum/scalar/presence property helpers) is the
-positive form of this evidence: those particular abstractions keep earning.
+**Make generalized machinery earn its keep.** Every layer of indirection pays
+rent by absorbing a demonstrated axis of variation. Apply the rule of three
+to factories, metamodels, and framework layers, not to naming an important
+domain concept. Delete machinery that no longer simplifies its consumers.
 
-**16. Schemas are contracts and inputs, not blueprints.** Validate against
+**Choose schema authority before generation strategy.** Validate against
 external schemas with the schema ecosystem's own tools at the wire; read
-schemas as a census that informs hand-designed models; generate tables (enums,
-name maps, requiredness) rather than class graphs. A 1:1 mirror of an
-external type system imports its structure and discards the chance to encode
-meaning. And when your own model is the source of truth, store its
-constraints as data so the schema can be *projected* from it — one datum, and
-the validator and the published contract cannot disagree.
+foreign schemas as a census that can inform a hand-designed semantic model.
+Generating a native transport facade may be appropriate when foreign flatness
+is authoritative. When the package owns a semantic specification, generating
+classes, validators, schemas, and documentation from it may also be
+appropriate. Do not confuse either case with mirroring incidental foreign
+structure without a consumer-driven reason.
 
-**17. Refuse to guess.** Where no correct behavior is known, an error beats a
+The key distinction is between a **transport facade** and a **semantic
+model**. A facade may intentionally preserve foreign names, optionality, and
+nesting because exact interchange is its job. A semantic model collapses
+structural duplicates, names domain distinctions, and serves native
+operations. Some packages need both, joined by an explicit parser or adapter;
+generation is then a maintenance technique, not evidence that the two layers
+mean the same thing.
+
+**Refuse to guess.** Where no correct behavior is known, an error beats a
 default. sqlr states the reason perfectly in declining to ship an "ANSI SQL"
 fallback dialect: an untestable default "would quietly accumulate behaviour no
 database had ever accepted." The same logic condemns silent coercion of
@@ -132,7 +152,7 @@ ambiguous input, fallback branches for "unknown type," and any code path no
 test can exercise against a real authority. A loud, early error is
 information; a guess is deferred corruption.
 
-**18. Check as early as the inputs allow, as late as the context requires.**
+**Check as early as the inputs allow, as late as the context requires.**
 The value of a check is proportional to the cost of the work it gates.
 Declarations should validate themselves at package load (a default violating
 its own bounds is the author's bug, catchable before any user exists);
@@ -141,15 +161,25 @@ and laws that mention context not yet in hand — data dimensions, live
 resources — should be *declared* at construction and *checked* in one named
 pass at the moment the context arrives, never guessed at and never skipped.
 
-**19. Failure travels one of two channels; choose per boundary.** Conditions
-(classed, chained, `cli`-formatted) are the channel for bugs and contract
-violations — control flow that should stop. Result-style values are the
-channel when failure is an expected outcome the caller branches on as data —
-partial batches, fallible lookups feeding pipelines. Convert between the
-channels at one designed adapter (resultr's `wrap_in_result()` is the model),
-never with ad hoc `tryCatch` scattered through the core.
+**Design failure representation and composition separately.** Conditions suit
+contract violations and control flow that should stop. Computational result
+values suit expected success or failure that callers compose as data. Domain
+outcome families describe events such as denied authority, cancellation, or
+completion. For each subsystem, separately specify whether failures
+short-circuit or accumulate, which diagnostics survive, and where conditions
+become values or values become conditions.
+
+A computational result answers “did this calculation produce a value?” and
+usually carries mechanics such as diagnostics or partial results. A domain
+outcome answers “what happened in the modeled world?” and may represent
+denial or cancellation even when the computation behaved perfectly. Keeping
+those meanings apart prevents a business event from being mistaken for a bug,
+or an implementation failure from becoming a permanent domain variant.
 
 ## Decision guides
+
+The principles explain the defaults; the guides turn them into ordered
+questions for a concrete design review.
 
 Formulated as the questions to ask, in order, rather than flowcharts to
 follow mechanically.
@@ -160,12 +190,19 @@ with observers sharing its changes? — R6 or an environment. Is it a domain
 value with laws and dispatchable behavior? — S7. Is it a veneer for ecosystem
 politeness? — S3. Mixed answers mean a hybrid, which is normal.
 
+**Which lifecycle policy?** Is ordinary revision through replacement part of
+the concept? — editable value. Is it a completed fact whose public API should
+forbid revision? — read-only snapshot. Must aliases observe the same evolving
+resource or process? — reference owner. A value holding a reference is a
+hybrid, not a deeply isolated value.
+
 **Which sum-type encoding?** Do variants differ in fields, or does behavior
 dispatch on them? — subclass family under an abstract parent. Do they differ
-only in the tag? — enum-valued property. Is it several primitive shapes
-lawful in one slot? — union. Is the wire genuinely one bag with conditional
-fields, variants are many and trivial, and dispatch is never needed? — a
-discriminator plus class validator, chosen consciously as denormalization.
+only in the tag? — enum-valued property. Is it several primitive shapes or
+domain classes lawful in one slot? — union. Is the wire genuinely one bag
+with conditional fields, variants are many and trivial, and dispatch is never
+needed? — a discriminator plus class validator, chosen consciously as
+denormalization.
 
 **Which semantic-type tier?** Does the concept merely repeat a validation
 shape across sites? — a reused property definition. Must it be impossible to
@@ -180,6 +217,25 @@ value? If yes — stored, with lenient parsing at the boundary and one
 canonical stored form. Might the spec extend the value set? — stored enum
 with a parse-time version gate.
 
+**Where does a rule belong?** Does it mention one property's intrinsic shape
+or value? — property contract. Several properties of one object? — class
+validator. References among contained objects? — aggregate root. External
+data, metadata, resources, or authority? — contextual operation.
+
+**Condition, computational result, or domain outcome?** Is the event a
+contract violation that should unwind control flow? — condition. Is expected
+failure composed with a computation? — result value plus an explicit
+short-circuit or accumulation protocol. Is the event meaningful in the
+domain regardless of computation mechanics? — domain outcome family. Design
+adapters among channels at named boundaries.
+
+**Faithful conversion, adapter, compiler, or intermediate representation?**
+Does the target preserve the same meaning pairwise? — `S7::convert()`. Is the
+translation lossy, contextual, one-to-many, policy-bearing, or diagnostic? —
+a named adapter or compiler. Have multiple real inputs or outputs exposed a
+stable shared semantics? — consider an intermediate representation then, not
+before.
+
 **How deep should an embedded language go?** Does anything analyze or
 transform the expressions, or target more than one output format? If no —
 opaque passthrough, with the engine's validator as judge. Do humans
@@ -190,18 +246,23 @@ deep as the analysis, and no deeper.
 
 ## Anti-pattern catalog
 
+The guides identify a choice before implementation. The names below identify
+the recurring failure shapes once code or a design proposal exists.
+
 Named, so design reviews can point at them.
 
-**Schema cosplay.** Mirroring an external type system one class per
-interface. The model inherits every serialization quirk as a nominal type,
-class count tracks the schema forever, and no semantic layer exists because
-the schema never had one. *Tell:* classes whose names and nesting match the
-wire exactly, none of which ever gains a method.
+**Schema cosplay.** Mirroring incidental foreign structure as nominal domain
+meaning without identifying the consumers or guarantees it serves. A
+generated transport facade can be legitimate when flatness or exact fields
+are authoritative; field count alone proves nothing. *Tell:* every foreign
+interface becomes a hand-maintained class, yet downstream code still
+interprets raw tags and nullable combinations.
 
-**Validator soup.** The same law encoded in the constructor, the property
-validator, the class validator, and a boundary schema. The encodings drift;
-error messages disagree; nobody knows which one fired. *Tell:* fixing one
-validation bug requires a grep.
+**Validator soup.** The same law independently defined in the constructor,
+property validator, class validator, and boundary schema. One authoritative
+declaration may have several deliberate enforcements or projections; the
+failure is duplicated authority with no agreement tests. *Tell:* fixing one
+rule requires unrelated edits in several places.
 
 **Shotgun parsing.** Input checks interleaved with processing across many
 functions, no single point after which input is known-good, rejection
@@ -221,7 +282,7 @@ discipline lost; every rung's law in one place, none assumable by the others.
 
 **Convert-everything.** Routing lossy, contextual, one-to-many translation
 through a coercion generic because it exists. Coercion generics
-(`convert(from, to)`) suit faithful pairwise conversion; translation with
+(`S7::convert(from, to)`) suit faithful pairwise conversion; translation with
 diagnostics, options, and asset generation deserves named functions with
 room for a context argument and a report. *Tell:* a `convert` method with
 side effects or a dozen options.
@@ -236,10 +297,10 @@ nested lists interpreting operator names.
 take the fake is-a seriously. *Tell:* an abstract parent with one child, or
 parents whose children never appear in a method signature.
 
-**The mutable domain object.** Domain facts held in R6 "for convenience,"
-surrendering local reasoning, cheap snapshots, and testability to avoid
-reassignment. *Tell:* `$clone()` calls sprinkled defensively; tests full of
-setup/teardown for what should be a value.
+**The accidental reference owner.** Domain facts held in R6 "for
+convenience," creating shared identity where observers did not need it.
+*Tell:* `$clone()` calls sprinkled defensively and lifecycle tests for what
+consumers treat as a value.
 
 **Nullable confusion.** `NULL` doing triple duty as "required but not yet
 supplied," "explicitly cleared," and "omitted on the wire," with no presence

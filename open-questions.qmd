@@ -1,250 +1,250 @@
 # Open Questions: The Inquiry Ledger
 
-Everything else in this folder records what the investigation *concluded*.
-This document records what it did not: hypotheses resting on a single data
-point, S7 behaviors that may shift under the compendium's feet, design
-tensions the doctrine acknowledges but does not resolve, and the standing
-requests for evidence — especially contrary evidence — that would change a
-recommendation. A living compendium that keeps only its conclusions slowly
-forgets why it believes them; this ledger is the hedge against that.
+This ledger records what the design guidance does not yet settle: hypotheses
+resting on sparse evidence, version-sensitive mechanics, and tensions for
+which either choice can fail. Its purpose is movement, not accumulation.
+Questions graduate into doctrine when public documentation, source, tests, or
+reproducible released-version probes support a bounded recommendation. They
+retreat when counterexamples expose a missing condition, and the affected
+doctrine should then be amended rather than silently defended.
 
-Entries move in both directions. When new evidence promotes a hypothesis,
-it graduates into the numbered documents and is struck here. When a
-counterexample lands, it is recorded here first, and the relevant doctrine
-is amended second — never silently.
+Every entry should preserve the competing risks. More metadata can align
+projections but make authoring and startup expensive. A richer semantic model
+can enable analysis but duplicate a foreign authority. Strict admission can
+protect invariants but destroy unknown content needed for round trips. The
+ledger is useful only if it asks what evidence distinguishes those losses,
+not merely whether a favored technique can be made to work.
 
-## Working hypotheses: patterns with one source
+## Scale of property metadata
 
-Each of these is treated in the main documents as a real pattern, and each
-currently rests on a single package. Recurrence in a second independent
-project would promote it to a convergent pattern; failure to recur, or a
-discovered flaw, demotes it.
+[rtemis](07-ecosystem-field-guide.qmd#rtemis-property-contracts-as-inspectable-data)
+shows contract-as-data driving validation, defaults, schema output, interfaces,
+and contextual preparation. The unresolved question is when that machinery
+pays for itself.
 
-- **Write-once property setters** as tamper-evidence for certificate-like
-  fields (resultr). Open question: how robust is setter-based enforcement,
-  given that attributes remain reachable by other means and copies re-run
-  setters in some paths? A second sighting, or a demonstrated bypass that
-  matters in practice, would settle its standing.
-- **One designed adapter between the condition channel and the value
-  channel** (resultr's `wrap_in_result()`). The principle (doctrine 19)
-  is derived and stands on general reasoning; the *single-adapter
-  discipline* specifically has one exhibit.
-- **Model-View-Update as a whole-program S7 architecture** (tooey). The
-  claim that MVU answers "where do events go?" for value-oriented R
-  designs generalizes beyond terminal UIs — but nobody has yet done it
-  beyond terminal UIs.
-- **Constraints-as-data driving four projections from one declaration**
-  (rtemis: validator, default, JSON Schema, TUI form). The reverse arrow
-  itself has a second exhibit (sqlr's DDL/diff/reflect projections), but
-  the full property-spec-to-many-artifacts machine is a single sighting.
-- **A metaobject descriptor layer** — reflection productized as immutable
-  descriptor objects (datarr/reflect). The underlying fact (classes are
-  data) is documented mechanism; the usefulness of a dedicated descriptor
-  package is hypothesis.
-- **Interface-first design with the implementations deferred**
-  (objectstore, which is explicit about being a bet). This one is
-  *self-declared* unresolved: the interesting datum will be whether the
-  interface survives its first two real backends unchanged.
+Evidence needed: maintenance histories comparing handwritten and
+metadata-driven properties; contributor cost for adding or debugging a
+property; alignment tests across releases; and examples where such a system
+was simplified or removed.
 
-## The S7 watch list: version-anchored facts
+## Promotion from reusable property to semantic class
 
-S7 is at 0.2.x. The compendium's verified mechanics are anchored to
-S7 0.2.2 on R 4.6.1, and several could legitimately change:
+A shared property names a contract cheaply; a class lets the value travel
+independently and participate in dispatch. The boundary remains
+judgment-dependent when a concept is meaningful but has no operation of its
+own.
 
-- **Validator invocation counts** — once per construction, once per
-  `@<-` replacement (affected property only), once per `set_props()`
-  batch. Optimizations here would change the cost model's arithmetic but
-  not its structure.
-- **Copy behavior under `@<-`** — currently a full shallow copy per
-  replacement, observable via `tracemem()`. Any future in-place
-  optimization for singly-referenced objects would change the observable
-  mechanics while (probably) preserving the semantics; the two-binding
-  divergence test is the invariant to re-run, not the `tracemem()` output.
-- **The object representation itself** — properties as attributes, the
-  class definition embedded in each instance under the `S7_class`
-  attribute (see the evolution section below; this one has large
-  consequences if it changes).
-- **S4 interop, `convert()`, and `super()`** semantics — used lightly in
-  the compendium, but worth re-verifying at each S7 release.
-- **Possible future features that would retire current advice**: sealed
-  classes or any native exhaustiveness checking would obsolete the
-  registry-driven exhaustiveness tests recommended in
-  [05-composition-and-dispatch.qmd](05-composition-and-dispatch.qmd); a
-  load-time revalidation hook would rewrite the evolution guidance below.
+Evidence needed: cases where early promotion prevented ambiguity or rework;
+cases where it only added wrapping overhead; and criteria based on extraction,
+independent persistence, or operation vocabulary.
 
-On the R side, the value-semantics story rests on the post-4.0 reference
-counter's behavior (including its one-sided approximations, which we
-verified can strand counts high in IDE sessions). ALTREP expansion or
-refcounting changes would warrant re-running the probe suite.
+## Direct adaptation versus semantic IR
 
-## Unresolved design tensions
+A pairwise adapter is simpler for one source and target. An IR may reduce
+duplication across several sources and targets, but an “uber-schema” can merely
+accumulate incidental fields.
 
-The doctrine's closing note admits the principles collide; these are the
-collisions where the ledger does not yet know the resolution conditions.
+Evidence needed: multiple real inputs or outputs sharing stable semantics;
+operations that consume shared meaning independently of serialization;
+preservation and loss matrices; and migration experience showing whether an IR
+reduces or relocates complexity.
 
-- **Boundary strictness versus round-trip fidelity.** Open nodes
-  (pass-through bags) buy fidelity for foreign content at the cost of
-  weaker guarantees. The doctrine says "choose per node, on the record" —
-  but the *conditions* under which an open node's weaker guarantee becomes
-  unacceptable (security boundary? multi-writer round trips?) are not
-  characterized.
-- **Semantic atoms early versus abstraction earned by the rule of three.**
-  Naming meanings early is doctrine 1; waiting for the third occurrence is
-  doctrine 15. They directly disagree about timing, and the current
-  resolution ("meaning is different from machinery") is a judgment call,
-  not a rule.
-- **One authoritative home versus diagnostic duplicates.** The revised
-  doctrine 4 permits a "cheap, documented duplicate" for better boundary
-  errors. How many is too many, and what makes a duplicate cheap enough?
-  Unquantified.
-- **Enum property versus subclass family at the margin.** The decision
-  guide is clear at the extremes; the margin — variants differing in one
-  optional field, or in behavior for exactly one generic — still gets
-  decided by taste.
-- **Aggregate-root granularity in deep documents.** When a document is
-  five levels deep with cross-references at three of them, is there one
-  root or nested roots with delegated validators? The DDD literature says
-  aggregates should be small; document trees resist that. Unresolved.
-- **Value purity versus practical caching.** A derived value worth
-  memoizing wants a reference cell inside a value, which
-  [02-values-and-state.qmd](02-values-and-state.qmd) correctly flags as
-  piercing value semantics. Snapshot-or-document is the current answer;
-  a blessed cache pattern (compute-at-construction? external memo table
-  keyed by content?) has not been worked out.
+The competing risks are premature generalization and adapter proliferation.
+An IR introduced before stable shared meaning is visible becomes another
+schema to migrate. Waiting too long leaves every pairwise adapter to rediscover
+normalization, equality, and loss policy. Graduation therefore requires
+evidence from independent consumers, not the size of the class graph.
 
-## Counterexamples wanted
+## Typed expression catalogs
 
-A standing collection protocol. The field guide selects successes and
-extracts patterns from them; that is a sampling bias, and the correction
-is to record, whenever encountered:
+Opaque expressions preserve engine authority and version flexibility. Typed
+nodes enable analysis, safer construction, and multi-target compilation. The
+point at which analysis justifies the catalog remains domain-specific.
 
-- A design that violates the doctrine and works well anyway.
-- A project that adopted S7 and retreated (to S3, R6, or plain lists),
-  with the stated reasons.
-- A case where the flattened transport model beat semantic modeling on
-  total cost — including maintenance, not just initial build.
-- A case where duplicated validation earned its diagnostics for years
-  without drifting.
-- A case where an R6 domain model was simpler *and safer* than the pure
-  value core it replaced or prevented.
-- A typed AST that was collapsed back to combinators, and what the
-  collapse cost.
+Evidence needed: a substantive consumer beyond serialization; measured
+versioning cost; a policy for unknown operators; and evidence that combinators
+are insufficient but a full AST is maintainable.
 
-Each entry should record what happened, which pressure the doctrine
-missed, and which principle (if any) should gain a stated exception. None
-exist in the ledger yet — which after one day is expected, and after one
-year would itself be evidence of not looking.
+## Deep value semantics with references
 
-## The object-evolution frontier
+An S7 value may contain an environment, R6 object, external pointer,
+connection, or cache. Replacing the outer value does not make referenced
+internals independent, and inner mutation does not automatically re-run outer
+validation.
 
-The largest open architectural topic: what happens when S7 *values become
-persisted records* and outlive their class definitions. Initial probes
-(S7 0.2.2, R 4.6.1) establish the mechanics, and they are sharp-edged:
+Open questions include which payloads should be forbidden, snapshotted, or
+excluded from equality and serialization; whether external memo tables keyed
+by semantic content are reliable; and how APIs should state shallow versus
+deep guarantees.
 
-- **The class definition travels inside every object.** An S7 instance
-  carries its full class object — property list, validator closures,
-  constructor — in its `S7_class` attribute, and `saveRDS()` serializes
-  all of it. A one-property object's reachable graph measured ~37 KB
-  against ~340 B for the equivalent bare list; per-file overhead of that
-  order applies to every individually serialized value.
-- **Reloaded objects pass identity checks against redefined classes.**
-  After redefining a class (new required property, new validator), a
-  reloaded old-shape object still satisfies `S7_inherits()` — identity is
-  by class *name*, not structure. New methods therefore dispatch on old
-  objects and fail only when they touch the missing property
-  (`Can't find property <evo_cls>@b`), mid-operation.
-- **`S7::validate()` runs the embedded, stale validator.** The reloaded
-  object validates against the class definition it carries, not the
-  current one. Load-time revalidation against the live class does not
-  happen and cannot be requested from S7 today.
+## Method coverage for open families
 
-The pattern of these three facts: version skew is *silent at the
-boundary and loud in the middle* — the exact inversion of everything
-[04-parse-dont-validate.qmd](04-parse-dont-validate.qmd) argues for. Which
-makes the working hypothesis, recorded here for future testing:
+Abstract parents and fallback methods do not seal a family. Registries and
+tests can check known variants, but extensions may add classes after those
+checks run.
 
-> **rds is a cache format, not a persistence format.** Serialized S7
-> objects are trustworthy only within a single class-definition version —
-> same session, same package version, same process family. Durable
-> persistence should travel the wire channel (`to_wire()` /
-> `from_wire()`), because the parser re-validates against the *current*
-> class on entry, version-gates explicitly, and pays none of the embedded
-> class-definition overhead.
+Open questions: whether coverage belongs at test time, registration, or first
+use; how optional generics differ from missing methods; and how third parties
+run reusable conformance suites. Native sealed-family or exhaustiveness
+support would change the guidance.
 
-Open questions beneath the hypothesis:
+## Explicit null, omission, and defaults
 
-- Should classes intended for persistence carry an explicit
-  schema-version property, with `from_wire()` dispatching migration
-  (`upgrade_v1_to_v2()`) on it? (This is standard practice elsewhere;
-  no S7 package has been observed doing it yet.)
-- Do pass-through extension bags actually survive multiple
-  read-modify-write cycles in practice, or do intermediate normalizations
-  quietly drop foreign keys? (Testable against stacbuildr or a local
-  document model.)
-- What are the compatibility expectations across package releases —
-  is a serialized object from version N a supported input to version N+1,
-  and who documents that? (Currently: nobody, implicitly no.)
-- Does the embedded class definition capture *environments* through
-  validator closures, and can that leak surprising amounts of data into
-  rds files? (The measured 37 KB suggests yes; unexamined.)
+R's `NULL`, absent arguments, empty vectors, `NA`, and absent wire keys can
+represent different states. Preserving every needed distinction remains
+difficult, especially for generated constructors.
 
-## Targeted cost questions
+Evidence needed: released-version probes for omitted arguments versus explicit
+`NULL`; public formats where omission changes behavior; ergonomic constructor
+patterns; and serializer laws for omitted, `null`, empty, and defaulted states.
 
-The cost model in [04-parse-dont-validate.qmd](04-parse-dont-validate.qmd)
-is architectural, not measured, and that is probably sufficient. If
-measurement ever becomes worthwhile, these are the specific decisions to
-weigh — not a generic "is S7 fast" benchmark:
+## Survival of unknown extensions
 
-- Bulk construction: constructor-per-element versus
-  `valid_eventually()`-batched, at 10^4 to 10^6 nodes.
-- Multi-property update: `set_props()` versus sequential `@<-`, wall time
-  (validator counts are already verified: one versus per-assignment).
-- Copy cost of nested graphs: the shallow-copy probes imply replacement
-  cost tracks top-level property count while payloads share structure;
-  unverified at document scale.
-- Dispatch overhead versus S3 in hot loops — relevant to rung-3 AST
-  passes, where every node visit is a generic call.
-- Load-time cost of property-factory strata at rtemis scale (their
-  factory-time validation trades startup cost for author safety; the
-  price is unmeasured).
-- Serialized-corpus overhead of embedded class definitions (single-object
-  anchor measured above; corpus-scale unexamined).
+A pass-through bag promises fidelity only if every supported transformation
+and serialization cycle preserves it. Typed and raw state can collide when a
+specification promotes a formerly unknown field.
 
-## S7-specific, or merely illustrated with S7?
+Open questions: whether extensions survive repeated read-modify-write cycles;
+how upgrades detect collisions; whether preservation is byte-level,
+structural, or normalized; and whether untrusted extensions create security
+or resource risks. Corpus-based round-trip tests across released format
+versions are needed.
 
-An unperformed classification pass: for each doctrine principle, would it
-survive a substrate change to, say, Python dataclasses with pydantic, or
-TypeScript with zod? The working expectation is that the checking ladder,
-presence axes, parse-don't-validate, functional core / imperative shell,
-one-canonical-artifact, and the two error channels are fully portable;
-the specific rungs 2–5 (property classes, property validators, class
-validators, aggregate roots as S7 mechanisms), dispatch-position abstract
-parents, and the property-factory stratum are S7's local realization.
-Making the tagging explicit would tell a reader which halves of this
-compendium they are allowed to keep when they change languages — worth a
-pass if the documents ever get one more edition.
+## Persistence and class evolution
 
-## What evidence would change what
+Persisted S7 values may outlive the package version that created them. Current
+guidance prefers durable wire representations parsed by current code, but
+compatibility policy is under-specified.
 
-Concrete tripwires, so revisions are triggered by evidence rather than
-mood:
+Open questions: explicit schema versions; migration registration and
+composition; cross-release compatibility promises; serialized validator
+environments; and S7 mechanics for revalidation after loading. Version-pinned
+cross-release probes and public persistence policies are needed. RDS
+compatibility should be stated narrowly rather than assumed.
 
-- **If S7 gains sealed classes or exhaustiveness checking** — retire the
-  registry-driven exhaustiveness tests; simplify the sum-type decision
-  guide.
-- **If S7 gains a load-time revalidation or migration hook** — rewrite
-  the object-evolution section; the rds-is-a-cache hypothesis weakens.
-- **If measured validator overhead proves negligible on realistic
-  document graphs** — the *cost* rationale for keeping validators cheap
-  softens; the *purity* rationale (validators run on every write, so
-  effects would be chaos) stands regardless.
-- **If two or more packages ship generated class graphs with a healthy
-  hand-designed semantic layer on top** — soften "generate tables, not
-  class graphs" toward "generate either, but always label the transport
-  stratum."
-- **If `valid_eventually()` turns out to be routine in user code rather
-  than rare** — reword "construction is the certificate" to lead with the
-  conventional nature of the guarantee, not mention it as a footnote.
-- **If a second MVU-style S7 application appears outside terminal UIs** —
-  promote MVU from named variant to recommended architecture for
-  event-driven value cores.
+## Equality relations
+
+Exact `identical()` representation, canonical equality, domain equality, and
+observational equivalence answer different questions. Packages often need
+several, especially for reflected or normalized documents.
+
+Open questions: which relation powers user comparison; whether canonicalization
+is stored or computed; how extensions participate; and how diagnostics
+suppress incidental noise.
+[sqlr](07-ecosystem-field-guide.qmd#sqlr-one-model-for-rendering-reflection-and-comparison)
+supplies one model; recurrence elsewhere would clarify reusable patterns.
+
+## Strict parsing and tolerant admission
+
+Strict known construction can coexist with a tolerant parser preserving
+unknown or partial variants plus diagnostics. The unresolved issue is when
+tolerance becomes unsafe or misleading.
+
+Evidence needed: security boundaries requiring rejection; tools that preserve
+partial documents but refuse compilation; policies for diagnostics and
+revalidation; and issue histories showing whether partial values clarify or
+defer failures.
+
+## Aggregate-root granularity
+
+Deep documents resist a simple “one document, one validator” rule. A single
+root can enforce cross-reference invariants in one place, but it also makes a
+small edit pay for traversal of an entire graph and can turn unrelated
+subtrees into one consistency boundary. Nested roots localize construction,
+replacement, and diagnostics, but delegation can miss invariants that cross
+their boundaries or duplicate checks at several levels.
+
+Evidence needed: real document models with cross-references at multiple
+depths; mutation traces showing which edits require global knowledge; failure
+reports comparing one root with delegated roots; and examples where aggregate
+boundaries remained stable as the format evolved. The question should
+graduate only as a decision rule for choosing a boundary, not as a fixed
+maximum tree depth.
+
+## Diagnostic duplication threshold
+
+The guidance permits a cheap, documented duplicate check when it catches a
+bad input at a boundary with a materially better message. “Cheap” remains
+undefined. One duplicate can improve locality; several can drift, disagree on
+edge cases, and obscure which rule is authoritative.
+
+Evidence needed: maintenance histories where duplicate checks did or did not
+drift; tests that prove equivalence to the authoritative rule; measurements
+for checks on realistic payloads; and user evidence that the earlier
+diagnostic changes recovery. A candidate threshold is that a duplicate must
+have one named authority, an explicit equivalence test, negligible cost on
+the boundary's expected payload, and no independent evolution. A duplicate
+that needs its own exceptions or release policy has become a second authority
+and should retreat.
+
+## S7 version watch list
+
+Recheck these mechanics against publication versions:
+
+- constructor defaults and omitted versus explicit `NULL`;
+- validator order, invocation count, and character-vector diagnostics;
+- grouped replacement and deferred validation;
+- getter output validation behavior;
+- multiple dispatch specificity and `S7::super()`;
+- environment, R6, and external-pointer properties;
+- serialization across class-definition changes;
+- package hooks relevant to validation or migration.
+
+## Focused benchmark agenda
+
+The useful question is not whether S7 is “fast.” Measurements should compare
+design alternatives at the points where the guidance makes a choice, with R
+and S7 versions, payload shape, garbage-collection policy, and warm-up stated.
+
+**Bulk construction.** Compare constructor-per-node construction with
+documented deferred-validation or batching mechanisms across realistic flat
+and nested values. Record allocations and validation work as well as elapsed
+time; a fast path that weakens the certification boundary is not equivalent.
+
+**Grouped versus sequential replacement.** Compare `S7::set_props()` with
+sequential `@<-` updates for several property counts and validator costs.
+Measure intermediate copies and validator invocations, and include a case
+where only the final grouped state is valid.
+
+**Nested copy cost.** Vary top-level width, nesting depth, and shared payload
+size to determine what replacement copies and what remains shared. Include
+two-binding divergence checks so an optimization is not mistaken for a
+semantic change.
+
+**Hot-loop dispatch.** Compare direct calls, S3 dispatch, and S7 single and
+multiple dispatch in representative compiler or tree-walk loops. Report the
+fraction of total pass time attributable to dispatch; isolated nanoseconds do
+not establish architectural significance.
+
+**Metamodel startup.** Measure package load and class-definition cost as the
+number and richness of property factories increase, including declaration
+validation and generated projections. This tests the author-safety benefit
+against interactive and worker-startup latency.
+
+**Serialized-corpus overhead.** Compare many small S7 objects, aggregate
+serialization, and durable wire forms across corpus sizes. Separate payload
+bytes from repeated class or validator metadata, and test cross-version load
+behavior rather than treating successful deserialization as compatibility.
+
+These benchmarks should graduate guidance only when they reproduce across
+released versions and realistic graphs. Surprising results should first
+narrow the recommendation; they should not become a universal performance
+claim.
+
+## Evidence tripwires
+
+Revise the guidance if S7 adds sealed classes, exhaustiveness checks, or
+load-time migration; several packages sustain generated native graphs from
+owned semantic specifications; property metadata is removed as uneconomic; a
+typed AST is collapsed; an open bag beats a semantic model on long-term
+correctness; or public round-trip corpora reveal systematic extension loss.
+
+The ledger should also collect counterexamples: designs that violate current
+defaults and work well, migrations away from S7 with stated reasons, and
+duplicated checks that remain aligned because their diagnostic value is worth
+the cost.
+
+A counterexample entry should name the pressure the current guidance missed,
+the competing risk that dominated, and the smallest exception that explains
+the result. Repeated retreats are evidence that the doctrine's boundary is
+wrong; an isolated exception is not permission to erase the boundary.

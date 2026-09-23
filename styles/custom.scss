@@ -1,0 +1,71 @@
+/*-- scss:defaults --*/
+
+$content-max-width: 48rem;
+
+/*-- scss:rules --*/
+
+.quarto-title-block .quarto-title {
+  letter-spacing: -0.02em;
+}
+
+main.content {
+  line-height: 1.68;
+}
+
+main.content > section > p,
+main.content > p {
+  max-width: $content-max-width;
+}
+
+main.content h2 {
+  margin-top: 2.5rem;
+}
+
+main.content h3 {
+  margin-top: 2rem;
+}
+
+.callout {
+  margin-block: 1.5rem;
+}
+
+.table {
+  margin-block: 1.5rem;
+}
+
+.table caption {
+  color: var(--bs-secondary-color);
+  font-size: 0.925rem;
+  text-align: left;
+}
+
+pre code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sidebar-title {
+  line-height: 1.2;
+}
+
+.glossary {
+  color: var(--bs-link-color);
+  background: transparent;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.15em;
+}
+
+.glossary:hover .def,
+.glossary:focus .def {
+  display: inline-block;
+}
+
+@media (max-width: 767.98px) {
+  main.content {
+    line-height: 1.58;
+  }
+
+  .sourceCode {
+    font-size: 0.875rem;
+  }
+}

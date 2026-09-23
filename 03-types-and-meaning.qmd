@@ -20,28 +20,31 @@ strings-as-sets, and support the same operations-as-contracts, yet naming them
 separately encodes knowledge: these are different *kinds* of thing, and
 substituting one for the other is a bug even when no operation would fail.
 
-Static languages let a compiler exploit all three lenses. In R, a dynamic
-language, the sets are enforced at runtime (validators), the contracts by
-dispatch and convention, and the meanings by the class graph you choose to
-build. The absence of a compiler does not make type thinking pointless — it
-makes it a *design discipline* rather than a checked artifact. Your
-constructor set is your type system; your validators are its proof
-obligations; your generics are its interfaces.
+Static languages let a compiler exploit all three lenses. R distributes the
+work across constructors, property and class validation, generic dispatch,
+schemas, boundary checks, and tests. These mechanisms enforce different
+things, but they share a design move: make meaning explicit enough that
+consumers can rely on it.
 
 ## Structural versus nominal — and where semantics enters
 
-Type systems differ in what makes two types "the same." **Structural** typing
-(TypeScript, Go interfaces) says: same shape, same type — any object with the
-right fields satisfies the interface. **Nominal** typing (Java, Haskell's
-newtypes) says: same *name*, same type — identical shapes with different
-declarations are different types.
+Type systems differ in what makes two types "the same," and most languages
+mix several mechanisms. TypeScript object types and Go interfaces are
+prominent **structural** examples: compatibility can follow from the required
+shape without an explicit declaration. Java class identity and Haskell
+`newtype` declarations are prominent **nominal** examples: distinct
+declarations remain distinct despite similar representations. Those
+languages also contain exceptions and additional mechanisms, so the contrast
+is a design lens rather than a complete taxonomy.
 
-R at runtime is loosely structural: code that reaches into `x$field` works on
-anything with that field. S7 layers nominal identity on top: dispatch and
-property-class checks consult the declared class, not the shape. And a
-property's declared class is itself a structural constraint on that slot. So
-an S7 design mixes the two deliberately: **nominal identity where meaning must
-not be confused, structural constraints where shape is what matters.**
+R code can be written in a structurally permissive style: a function that
+reaches into `x$field` may work on anything exposing that component. That does
+not make S7 structurally typed. S7 dispatch and property-class checks use
+declared class identity and inheritance. Shape requirements such as scalar
+length, names, or required components are additional runtime contracts,
+usually expressed by properties and validators rather than inferred from
+structure. An S7 design can therefore combine nominal identity with explicit
+shape constraints without confusing the two.
 
 The third notion — **semantic** typing — is the design payoff of nominal
 identity. The classic statically typed device is the *newtype*: wrap a
@@ -65,20 +68,87 @@ exchangeable, because the *meanings* are the stable contract.
 
 (This idea is developed explicitly in data-integration languages like Taxi,
 where `type CustomerId inherits String` declarations are shared across systems
-precisely so models do not have to be. The design notes in
-`s7-thoughts-and-notes.md` arrive at the same conclusion independently.)
+precisely so models do not have to be.)
 
-The general lesson for any multi-dialect domain — several external schemas
-describing overlapping concepts — is to build the **semantic layer first**
-(the atoms shared across dialects) and let each dialect's document structure
-be a separate, local composition of those atoms. The alternative, modeling
-one dialect's structure and treating others as deviations from it, couples
-you to the dialect you happened to start with.
+The general lesson for a multi-dialect domain is to seek stable shared
+meanings without assuming they are known in advance. Sketch representative
+documents and operations for more than one dialect, then extract the semantic
+concepts that survive the comparison. Modeling one dialect as universal
+couples every other dialect to its incidental structure; designing an
+"uber-schema" before seeing real consumers is the opposite error.
+
+## A running concept: color in a style document
+
+To keep the rest of the chapter concrete, consider a `Color` used by a style
+document. At first it appears to be “four numbers”: red, green, and blue
+channels in `[0, 255]`, plus alpha in `[0, 1]`. That description already hides
+several decisions. Are channels integers or merely integerish numerics? Is
+alpha stored when omitted, and who chooses its default? Can a color travel
+independently of the style? Must callers blend colors, render them as hex, or
+preserve the exact spelling read from a wire document?
+
+Those questions are not implementation trivia. They determine whether color
+is a repeated property recipe, a nominal value, or an incidental wire shape;
+which rules are local and which relate several channels; and whether
+serialization is a projection of the domain value or the source of truth for
+it. The sections that follow revisit the same concept as each design layer
+comes into view.
+
+## A practical property and contract inventory
+
+Before choosing a class graph, inventory the questions each concept raises.
+This is a design worksheet, not a requirement to build a property framework
+first. For the running color, it turns “four numbers” into the actual
+decisions a representation must retain:
+
+- **Representation:** What R class and shape are canonical? Is the value a
+  scalar, vector, record, alternative, or collection? A color could be a
+  length-four numeric vector or a record with named channels; the choice
+  affects readability and projection.
+- **Cardinality:** What lengths are lawful? Are names, order, or uniqueness
+  significant? An unnamed vector makes channel order load-bearing, while
+  named properties make the association explicit.
+- **Membership and bounds:** Is the value drawn from an enum, literal set,
+  interval, pattern, or other locally decidable set? Each RGB channel has a
+  local integer and range law; alpha has a different range.
+- **Presence:** Must the resulting object contain it? Must the caller supply
+  it? May the stored value be `NULL` or `NA`? Are zero-length and empty
+  values meaningful? A style may require a color while allowing callers to
+  omit alpha.
+- **Default ownership:** Does omission mean an R-owned domain default, a
+  value supplied by an external authority, or a caller request to materialize
+  a default later? If opaque is the domain default, R can store `alpha = 1`;
+  if an external renderer chooses opacity, materializing `1` would invent
+  knowledge the model does not own.
+- **Relationships:** Which rules mention several properties of one object,
+  several contained objects, or external context?
+- **Lifecycle:** Is this an editable value, a read-only snapshot, or part of
+  a reference owner?
+- **Operations:** Which verbs consume or produce it, what do they preserve,
+  and how do they fail? `blend()`, `as_hex()`, and contrast calculations may
+  justify color as an independent dispatchable concept.
+- **Projection:** How does it serialize, and which distinctions among
+  omission, `null`, unknown, and empty must survive? A wire format may accept
+  a hex string, an array, or an object even if the domain stores one canonical
+  form.
+
+The inventory determines rule placement. Intrinsic shape, cardinality,
+membership, bounds, and local presence policy belong in property contracts.
+Relationships among one object's properties belong in its class validator.
+Cross-object references belong at an aggregate boundary. Rules needing data,
+metadata, resources, or authority belong in a named contextual operation.
+When one slot accepts alternatives, an S7 union may name primitive classes,
+domain classes, or both; a union describes accepted values, not a closed
+variant family. For `Color`, channel bounds are property contracts, the
+relationship among channels belongs to the `Color` class if one exists, and
+whether a foreground color meets an accessibility threshold is contextual to
+its background and belongs in an operation with both values.
 
 ## Three carriers of semantics in S7
 
 S7 gives three mechanisms for making meaning first-class, in ascending order
-of weight.
+of weight. The running color can stop at any tier, depending on how far its
+meaning must travel.
 
 **1. A reused property definition.** A property object is a value; define it
 once, use it in many classes:
@@ -88,7 +158,9 @@ prop_email <- S7::new_property(
   class = S7::class_character,
   validator = function(value) {
     if (length(value) != 1L) return("must be a single string")
-    if (!grepl("^[^@\\s]+@[^@\\s]+$", value)) return("must be an email address")
+    if (!grepl("^[^@[:space:]]+@[^@[:space:]]+$", value)) {
+      return("must be an email address")
+    }
     NULL
   }
 )
@@ -101,6 +173,11 @@ This is the cheap tier: shared validation, meaning by convention. Note the S7
 convention that property validators do not mention the property's name; S7
 prepends it, which is exactly what makes one definition reusable across many
 properties.
+
+The corresponding color design is a reused `prop_rgb_channel` plus a separate
+`prop_alpha`. This is enough when channels matter only in their containing
+style class and no consumer receives a color as a unit. It shares the local
+laws without claiming that an extracted integer is itself a color.
 
 **2. A class inheriting from a base type.** `S7::new_class("MarkdownText",
 parent = S7::class_character)` creates a nominal type whose instances *are
@@ -125,33 +202,71 @@ Choosing the tier is a judgment about the concept, not the code: does it have
 parts? Does behavior dispatch on it? Must it be impossible to confuse with its
 underlying primitive? Escalate only when a "yes" appears.
 
+The decisive distinction is whether meaning must travel independently. Reused
+channel properties can enforce that red, green, and blue are scalar bounded
+integers and alpha is a bounded scalar. A `Color` class is warranted when the
+four channels
+must remain related after extraction, when operations such as `blend()` or
+`as_hex()` dispatch on the concept, or when a color must not be confused with
+an arbitrary numeric vector. The property shares a contract in a containing
+position; the class gives the concept nominal identity and an independent
+life. This is not “more type safety” in the abstract. It is a direct answer to
+whether consumers manipulate channels or colors.
+
 ## Type-driven design in a dynamic language
 
-The type-driven design slogan — **make illegal states unrepresentable**
-(Yaron Minsky) — translates to dynamic R as **make illegal states
-unconstructable**. You cannot stop the interpreter from holding a bad list,
-but you can arrange that no bad *object of your class* ever exists: the
-constructor parses, the validators enforce, and every mutation path
-revalidates. Possession of the object then certifies its laws, which is the
-bridge to [04-parse-dont-validate.qmd](04-parse-dont-validate.qmd).
+Type-driven design means making domain concepts, admissible states,
+relationships, and operations explicit in the values and contracts from which
+the program is composed. Its goal is not to imitate a static typechecker. Its
+test is whether the representation retains knowledge and makes consumers
+simpler.
 
-The practical workflow, adapted from the typed-functional world (Scott
-Wlaschin's *Domain Modeling Made Functional* is the best book-length
-treatment):
+Use an iterative workflow:
 
-1. **Enumerate the vocabulary.** List the domain's nouns and the sets of
-   values each can take, before writing any class. Distinguish atoms
-   (indivisible meanings) from composites (arrangements of atoms).
-2. **Write the laws next to the nouns.** "Alpha is a proportion." "A zoom
-   level lies in [0, 24]." "Every layer references an existing source." Each
-   law will land on a specific rung of the validation ladder.
-3. **Represent alternatives as alternatives.** Where the domain says "either
-   X or Y," reach for a sum-type encoding
-   ([05-composition-and-dispatch.qmd](05-composition-and-dispatch.qmd)) rather
-   than optional fields with implicit exclusivity.
-4. **Let the verbs emerge.** Once the nouns are stable, the generic vocabulary
-   — construct, combine, serialize, render, convert — tends to write itself,
-   and methods slot in per class.
+1. **Start from domain and consumers.** Identify the decisions the program
+   must make and the outputs, side effects, or external authorities involved.
+2. **Sketch representative nouns and verbs.** Model a few important values,
+   variants, containment relationships, and operations directly.
+3. **Inventory contracts.** Record shape, cardinality, membership, presence,
+   defaults, local constraints, and contextual requirements encountered in
+   those sketches.
+4. **Place each rule.** Use properties, classes, aggregates, or contextual
+   operations according to information visibility.
+5. **Exercise the operations.** Let methods expose missing distinctions,
+   awkward variants, and laws the representation should preserve.
+6. **Extract repeated recipes.** Generalize property or validator machinery
+   only after real repetition, then revisit both nouns and verbs.
+
+```{mermaid}
+%%| label: fig-modeling-loop
+%%| fig-cap: "Type-driven design is an iterative loop between domain meaning, representation, and operations."
+flowchart LR
+  Domain["Domain pressures"] --> Sketch["Representative nouns and verbs"]
+  Sketch --> Inventory["Property and contract inventory"]
+  Inventory --> Placement["Place rules by information boundary"]
+  Placement --> Operations["Exercise operations and laws"]
+  Operations --> Refine["Refine distinctions and representations"]
+  Refine --> Sketch
+  Operations --> Extract["Extract repeated machinery"]
+```
+
+@fig-modeling-loop emphasizes that the model and its operations mature
+together; neither is a one-way derivation from the other.
+
+The color example shows why the loop matters. Starting from the noun alone
+might produce a four-field class. Exercising `as_hex(color)` then forces a
+decision about rounding, alpha inclusion, and canonical case. Exercising
+`blend(foreground, background)` reveals that alpha is semantically different
+from the RGB channels and that the result should again satisfy the `Color`
+contract. Asking for faithful round trips may reveal a second concern—the
+original wire spelling—that should not be confused with domain equality. Each
+verb either confirms the representation or exposes knowledge it failed to
+retain.
+
+Construction can then act as evidence for the invariants visible at that
+boundary. It is not a universal certificate: unsupported mutation, shared
+reference payloads, and external facts outside the validator's view require
+their own contracts.
 
 ## Data-driven design, in two senses
 
@@ -160,22 +275,31 @@ them causes confusion.
 
 **Design driven by data about the domain.** Before abstracting, census the
 actual corpus: which shapes recur across a specification, which fields are
-required in practice, which enum values actually occur. Abstractions are then
-*earned* by observed repetition rather than speculated. A property-factory
-layer, for instance, should contain exactly the factories the census
-justifies — the shapes that occur dozens of times — and nothing "for
-completeness." This is the rule of three operating at design scale, and it is
-the discipline that keeps foundation layers small and honest.
+required in practice, which enum values actually occur. Generalized machinery
+is then *earned* by observed repetition rather than speculation. A
+property-factory layer should contain the recipes real models reuse, not
+entries added "for completeness." This restraint applies to infrastructure,
+not to naming an important concept that appears only once.
 
 **Behavior represented as data.** Tables and specifications that *drive*
 computation: a classification table that generates both a style expression and
 a legend; a schedule that drives a state machine; quoted expressions composed
 into generated validator functions. This is the older Lisp/Unix sense —
 programs manipulating programs-as-data — and it reappears in
-[06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd) as the foundation
-of DSL and codegen work. Its cardinal rule: the data is the single source of
-truth, and *all* downstream artifacts are projections from it, never
-hand-maintained in parallel.
+[Documents, Schemas, and Languages](06-documents-schemas-dsls.qmd) as the foundation
+of DSL and codegen work. When the specification is owned and semantic,
+validators, defaults, schemas, documentation, and interfaces can be deliberate
+projections from it. This removes independent definitions and makes agreement
+testable; it does not make generators infallible.
+
+Candidate values show why retaining intent matters. A numeric vector alone
+does not say whether its elements are observations, bounds, or values to try
+during tuning. A `CandidateValues` concept can establish non-emptiness,
+element constraints, ordering or uniqueness policy, and the fact that the
+vector expresses a search choice. Once constructed, preparation and execution
+code no longer infer intent from length or naming conventions. Whether this
+concept is a validated property or a nominal class depends on whether it must
+travel independently or participate in dispatch.
 
 ## The wire universe versus the domain universe
 
@@ -187,9 +311,9 @@ Designing a document model means designing the mapping between universes, and
 most of the notorious bugs live in four mismatches:
 
 - **Number:** JSON does not distinguish `8` from `8L`. If a property demands
-  `class_integer`, wire input and casual users will supply doubles. Either
-  accept `class_numeric` plus an integerish validator, or coerce in the
-  constructor — but decide once, globally.
+  `S7::class_integer`, wire input and casual users will supply doubles. Either
+  accept `S7::class_numeric` plus an integerish validator, or coerce in the
+  admission function — but decide once for that boundary.
 - **Scalar:** JSON has scalars; R has length-one vectors. Every "string"
   property needs a length-1 law somewhere, which is why scalar-ness is
   usually the first check in any property-validator foundation.
@@ -203,27 +327,62 @@ most of the notorious bugs live in four mismatches:
   differently and often mean different things (`"layers": []` versus no
   `layers` key). Serializers need a stated omit-empty policy per field.
 
-## Presence is a four-way decision, not a boolean
+For the running example, the domain may store a canonical `Color(red, green,
+blue, alpha)` while one wire format accepts `"#336699"`, another accepts
+`c(51, 102, 153, 1)`, and a third emits named fields. Admission functions can
+normalize all three into the domain value, and serializers can project it
+back into the chosen dialect. If exact lexical round-tripping matters—such as
+preserving `"#369"` rather than emitting `"#336699"`—the original spelling is
+additional provenance that must be stored explicitly. It cannot be recovered
+from the normalized color.
 
-"Optional" conflates independent axes that a property model should separate:
+## Presence and default ownership
 
-- **Required at construction?** May an object exist without a caller-supplied
-  value? (Enforced by a quoted stop-default or constructor check.)
-- **Nullable in the model?** Is `NULL` a *lawful stored value*, typically
-  meaning "omitted on the wire"? (Enforced by a `NULL` union member — and
-  note the S7 subtlety that a union's default prototype comes from its first
-  member, so union order is load-bearing.)
-- **Defaulted?** Is there a domain-meaningful value when the caller is
-  silent? (A real default is domain knowledge — `alpha = 1` — not a
-  placeholder.)
-- **Omitted on serialization?** Does an unset value vanish from the wire, or
-  serialize as null/empty?
+"Optional" conflates questions a property model should answer separately:
 
-Every combination occurs in real specifications. Collapsing them into one
-`optional = TRUE` flag is how models end up unable to distinguish "user
-explicitly cleared this" from "user never touched this" — a distinction that
-matters enormously in patch/merge semantics and in round-tripping foreign
-documents.
+- Must the resulting object contain the property?
+- Must the caller explicitly provide it?
+- May the stored value be `NULL` or `NA`?
+- Are a zero-length vector, empty string, list, or bag meaningful?
+- Does omission invoke a default?
+- Does serialization omit the field, emit `null`, or emit an empty value?
+- Who owns the default: R construction, an external authority, or a caller
+  requesting later materialization?
+
+A default should encode domain knowledge, not merely make construction stop
+complaining. Empty strings, zeroes, and sentinel values are not harmless when
+they mean “the model does not know”; they erase the distinction between
+omission and a meaningful value. If no lawful value follows from the domain,
+require the caller to supply one or represent absence explicitly.
+
+`Color` makes default ownership visible. If the style language defines omitted
+alpha as fully opaque, `alpha = 1` is domain knowledge and an R-owned default
+can record it immediately. If omission means “let the rendering engine choose,”
+storing `1` destroys a distinction the wire and runtime may care about. The
+model should then preserve omission—perhaps with `NULL` or a distinct
+deferred-default state—and materialize the value only when the authoritative
+engine or metadata is available. A convenient default is correct only when
+the model owns the choice.
+
+The compact example is a document version restricted to `8`. The document may
+require the field and always emit it, while the R constructor permits omission
+because it owns the default. The stored value may be non-null and restricted
+to one literal. Those statements are compatible: "required in the resulting
+document" does not imply "the caller must type it." If wire input may contain
+`8`, `8L`, or another tolerated spelling, coercion belongs in the admission
+function; the literal property contract should judge only the canonical
+stored representation.
+
+Collapsing these choices into `optional = TRUE` loses distinctions needed for
+patching, merging, and faithful round trips.
+
+One S7 mechanic makes this especially concrete. In S7 0.2.2, a property with
+no explicit default receives the prototype of its declared class; for a union,
+that prototype comes from the union's first member. Reordering a union can
+therefore change constructed values even though the set of accepted classes
+is unchanged. Treat member order as behavior when relying on the implicit
+default, or specify the default explicitly so order does not silently choose
+one.
 
 ## Literals, enums, and identity
 
@@ -239,14 +398,14 @@ choice is a genuine design decision, not a technicality:
 - **Stored with a default and a closed validator.** The field is state that
   happens to have one lawful value *today* — the spec may add values, or
   round-tripping must preserve exactly what the wire said.
-- **Constructor-normalized.** Accept lenient input (`8`, `8L`, even `"8"`) at
-  the boundary and store the canonical form.
+- **Boundary-normalized.** Accept lenient input (`8`, `8L`, even `"8"`) at
+  the admission boundary and store the canonical form.
 
 The two questions that decide it: **can two instances of this class ever
 differ on this value?** (If no, it is identity, not state.) And **must a
 round-trip preserve the user's supplied value verbatim?** (If yes, it must be
 stored.) Type discriminators in tagged unions ("this is a geojson source")
-are almost always class identity — the class *is* the tag — while version
+are often class identity — the class *is* the tag — while version
 fields are judgment calls that depend on whether one class will represent
 multiple spec versions.
 
@@ -256,7 +415,7 @@ If you come from typed languages, the property validator is best understood
 as a **runtime refinement type**: `{ x : numeric | 0 <= x && x <= 255 }`. The
 class system checks the base type; the refinement predicate narrows it. This
 framing explains the layering rule in
-[04-parse-dont-validate.qmd](04-parse-dont-validate.qmd) — base type and
+[Parse, Don't Validate](04-parse-dont-validate.qmd) — base type and
 refinement are checked in that order, and S7 formalizes it by validating
 `class` before calling the property validator — and it explains why
 refinements should be *pure and cheap*: they run at every construction and

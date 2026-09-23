@@ -5,22 +5,54 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: publish-s7-design-notes
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.6.1"
+          use-public-rspm: true
+
+      - name: Install verification dependencies
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::cli
+            any::knitr
+            any::rlang
+            any::rmarkdown
+            any::S7@0.2.2
+            any::testthat
+            any::withr
+
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.10.18
 
-      - name: Render and publish to gh-pages
+      - name: Verify S7 mechanics and examples
+        run: Rscript verification/verify.R
+
+      - name: Render book
+        run: quarto render
+
+      - name: Publish to gh-pages
         uses: quarto-dev/quarto-actions/publish@v2
         with:
           target: gh-pages
+          render: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

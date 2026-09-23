@@ -52,3 +52,7 @@ rsconnect/
 **/*.quarto_ipynb
 
 /_book/
+/_book-check/
+
+# private research context
+/.cursor/

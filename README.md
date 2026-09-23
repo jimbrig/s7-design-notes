@@ -1,20 +1,16 @@
 # S7 Design Notes
 
 [![Publish](https://github.com/jimbrig/s7-design-notes/actions/workflows/publish.yml/badge.svg)](https://github.com/jimbrig/s7-design-notes/actions/workflows/publish.yml)
-[![pages-build-deployment](https://github.com/jimbrig/s7-design-notes/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/jimbrig/s7-design-notes/actions/workflows/pages/pages-build-deployment)
 
-Doctrine, field guide, and playbooks for functional OOP in R with
+Meaningful values, explicit contracts, and composable operations in R with
 [S7](https://rconsortium.github.io/S7/).
 
 **Read online:** <https://docs.jimbrig.com/s7-design-notes/>
 
-Working notes on designing object systems with S7 — types, values,
-validation, dispatch, composition, documents, schemas, and the craft of
-deciding among them. Opinionated and technically grounded: mechanics are
-verified against a live R session (S7 0.2.2, R 4.6.1), patterns are drawn
-from a survey of the real S7 ecosystem (ellmer, ragnar, quickr, rtemis,
-sqlr, stacbuildr, resultr, and a dozen more), and the recommendations are
-written as strong defaults, not laws.
+A design guide to making domain concepts, valid states, and operations
+explicit with S7. The recommendations are opinionated defaults grounded in
+documented mechanics, executable probes, public package evidence, and stated
+counterexamples.
 
 ## Contents
 
@@ -28,22 +24,27 @@ written as strong defaults, not laws.
 - **Practice** — the doctrine (principles, decision guides, anti-patterns);
   situation-indexed playbooks; and the middlegame, with a fully annotated
   design derivation.
-- **Appendices** — an inquiry ledger of open questions, and sources.
+- **Appendices** — an inquiry ledger of open questions, a glossary, and
+  public sources.
 
 ## Building locally
 
-The book is built with [Quarto](https://quarto.org). No R execution is
-required to render (code blocks are static and verified separately):
+The book is built with Quarto 1.10.18. Most code blocks are explanatory;
+selected examples execute during rendering, and a separate verification suite
+checks S7 mechanics and recurring examples against R 4.6.1 and S7 0.2.2.
 
 ```sh
+Rscript verification/verify.R
 quarto render
-quarto preview
 ```
+
+Use `quarto preview` for local editing. Pushes to `main` run the verification
+suite, render the book, and publish `_book/` to the `gh-pages` branch.
 
 ## Contributing
 
-Corrections, counterexamples, and second sightings of single-source
-patterns are especially welcome — open an issue or a pull request.
+Corrections, counterexamples, and public examples that strengthen or challenge
+the design guidance are especially welcome.
 
 ## License
 

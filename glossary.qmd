@@ -1,0 +1,83 @@
+# Glossary
+
+Terms in this glossary name recurring design distinctions rather than new S7
+APIs. Each definition links to its principal treatment in the book.
+
+Aggregate root
+
+: The object boundary that sees a complete consistency unit and can enforce
+  relationships among its contained values. See
+  [the checking ladder](04-parse-dont-validate.qmd#one-authoritative-definition-several-uses).
+
+Canonical equality
+
+: Equality after applying documented normalization rules, without requiring
+  exact R representation identity. See
+  [identity and equality](02-values-and-state.qmd#identity-equality-and-testing).
+
+Contextual preparation
+
+: A named operation that combines an intrinsically valid value with external
+  data, metadata, resources, or authority and returns a value recording what
+  was resolved. See
+  [contextual preparation](04-parse-dont-validate.qmd#contextual-preparation).
+
+Domain equality
+
+: Equality defined by meaning in the problem domain rather than exact storage
+  representation. See
+  [round-trip equivalence](06-documents-schemas-dsls.qmd#round-trips-require-named-equivalence).
+
+Invariant
+
+: A condition that must remain true for a value or consistency boundary
+  throughout its supported lifecycle. See
+  [retained knowledge](04-parse-dont-validate.qmd#keep-the-result-of-checking).
+
+Operation contract
+
+: The meaning, accepted concepts, result, failure policy, and laws shared by
+  every implementation of an operation. See
+  [defining operations](05-composition-and-dispatch.qmd#define-the-operation-before-its-methods).
+
+Property contract
+
+: The class, shape, cardinality, presence policy, default behavior, and
+  intrinsic constraints attached to one property position. See
+  [the property inventory](03-types-and-meaning.qmd#a-practical-property-and-contract-inventory).
+
+Projection
+
+: A deliberate representation derived from an authoritative model, such as a
+  schema, serializer output, interface description, or documentation page.
+  See [schema architectures](06-documents-schemas-dsls.qmd#four-schema-and-model-architectures).
+
+Reference owner
+
+: An object with shared identity or a live lifecycle whose aliases must
+  observe the same evolving state. See
+  [the lifecycle policies](02-values-and-state.qmd#three-lifecycle-policies).
+
+Semantic class
+
+: A nominal class that preserves a domain concept independently so it can
+  travel through the program or participate in dispatch. See
+  [the semantic carriers](03-types-and-meaning.qmd#three-carriers-of-semantics-in-s7).
+
+Snapshot
+
+: A value representing a fact at a point in time, often with a public policy
+  that forbids revision. See
+  [the lifecycle policies](02-values-and-state.qmd#three-lifecycle-policies).
+
+Sum type
+
+: A representation of alternatives in which a value is exactly one of several
+  meaningful variants. See
+  [alternatives and variants](05-composition-and-dispatch.qmd#alternatives-belong-in-the-representation).
+
+Wire representation
+
+: The serialized form exchanged with another system, distinct from the
+  program's semantic domain model. See
+  [documents and schemas](06-documents-schemas-dsls.qmd#a-document-model-is-a-contract-between-representations).

@@ -1,85 +1,118 @@
 # Preface {.unnumbered}
 
-These are working notes on designing object systems with S7 in R, and on the
-broader programming-theory ideas that make such designs good or bad: types,
-values, validation, dispatch, composition, documents, schemas, and the craft
-of deciding among them. They began as private research — a deliberate
-"wisdom extraction" pass over the S7 ecosystem and the software-design
-literature — and are published in that spirit: opinionated, technically
-grounded, and alive, rather than neutral, complete, or final.
+These are working notes on designing object systems with S7 in R and on the
+larger programming ideas that determine whether such systems clarify a domain
+or merely add ceremony. They ask one recurring question:
 
-A note on register, so the imperative prose is read as intended. These
-notes braid several strengths of claim, from strongest to weakest:
+> What knowledge can the model carry so that the rest of the program no
+> longer has to rediscover it?
 
-- **Documented mechanism** — guaranteed by the official S7 documentation:
-  validation timing, dispatch rules, `set_props()` semantics, the
-  `valid_eventually()` / `valid_implicitly()` escape hatches.
-- **Verified mechanic** — additionally checked empirically against S7 0.2.2
-  on R 4.6.1: validator run counts per construction and replacement, copy
-  behavior under `@<-`, transactional `set_props()`, the code in the
-  playbooks and middlegame chapters, and the serialization skew recorded in
-  the open-questions appendix. These are facts about a version; the
-  appendix's watch list says which could move.
-- **Convergent pattern** — a design move observed independently in several
-  ecosystem packages. Recurrence is evidence of utility, not proof of
-  correctness.
-- **Demonstrated pattern** — observed in exactly one identified package,
-  tracked in the open-questions appendix as a hypothesis awaiting a second
-  sighting.
-- **Derived recommendation** — reasoned from mechanics plus examples; the
-  default register of the doctrine chapter, written in the imperative on
-  purpose. "Always" and "never" mean "strong default you may overrule for
-  stated reasons," not laws.
-- **Authorial preference** — taste, flagged as such where it appears.
+The answer is a style of design, not an S7 API catalog. Define what a
+meaningful thing is, establish the contracts that can be established at its
+boundary, and then build the program from those things and operations that
+preserve or deliberately transform their meaning. The contrast is practical:
+without a domain model, each consumer receives loose data and must rediscover
+whether a string is an identifier, whether two endpoints are ordered, whether
+an omitted field differs from `null`, and whether a failure should stop or
+accumulate. With a good model, those decisions have names and homes.
+
+S7 contributes nominal classes, properties, validation, and generic dispatch,
+but the larger subject is how to make domain concepts, admissible states,
+relationships, and operations explicit. The notes therefore move repeatedly
+between mechanics and consequences: not only what S7 permits, but what a
+choice lets downstream code stop doing.
+
+The intended outcome is practical. A reader should be able to identify
+concepts worth naming, place each rule at the boundary that can enforce it,
+choose between a reusable property and an independent class, distinguish an
+editable value from a {{< glossary "snapshot" display="read-only snapshot" >}}
+or a {{< glossary "reference owner" >}}, design nouns and verbs together,
+and show which checks and branches disappear from downstream code. The goal
+is not maximum typing. It is a representation whose extra structure pays for
+itself in simpler consumers.
+
+## Evidence and register
+
+The prose moves among four kinds of claim. A **documented mechanism** is
+behavior promised by official documentation. A **version-verified mechanic**
+has also been exercised against the stated R and package versions; it is a
+fact about those versions and should be rechecked after relevant upgrades. A
+**published example** is a design observed in public package source,
+documentation, or tests. Recurrence across independent packages strengthens
+the example, but neither recurrence nor popularity turns a pattern into a
+law. A **recommendation** is the editorial conclusion drawn from mechanisms,
+examples, and trade-offs. Imperative language states a strong default that
+may be overruled for a stated reason, not an exceptionless command.
+
+This distinction matters because the chapters intentionally braid API facts,
+empirical observations, and design judgment. A validator running after
+replacement is a mechanic; choosing a class validator as the home of a
+particular relationship is a design decision. Readers should be able to tell
+which kind of claim they are being asked to trust.
+
+The [inquiry ledger](open-questions.qmd) records version-sensitive claims,
+unresolved tensions, and the evidence that would change a recommendation.
+Public sources are collected in the [sources appendix](sources.qmd). Examples
+and provenance in the published notes are limited to public source,
+documentation, tests, specifications, talks, and literature. Private code,
+local notes, and chat transcripts are not evidence here.
 
 ## How to read
 
-The chapters build on one another, but each is self-contained enough to
-read alone. The [overview](00-overview.qmd) states the whole argument in
-ten theses. The three parts that follow supply the reasoning: foundations
-(what kind of OOP S7 is, how value semantics shape design, what semantic
-types are), laws and composition (where every check belongs, how sum types
-and dispatch fit together, how to model documents and schemas), and
-evidence (what real S7 packages teach, package by package). The practice
-part compresses everything back into usable form: the
-[doctrine](08-doctrine.qmd) for design reviews, the
-[playbooks](09-playbooks.qmd) for a project's opening moves, and the
-[middlegame](10-middlegame.qmd) for how decisions interact at real scale,
-including one fully annotated design derivation.
+The chapters form an argument, but they can also be entered by problem. The
+[overview](00-overview.qmd) states the whole position in miniature. The first
+three chapters establish the foundation. [Object Systems](01-object-systems.qmd)
+explains why R's message-passing and generic-function traditions lead to
+different designs and why S7 asks for a vocabulary of verbs as well as nouns.
+[Values and State](02-values-and-state.qmd) separates editable values,
+{{< glossary "snapshot" display="read-only snapshots" >}}, and
+{{< glossary "reference owner" display="reference owners" >}}, then follows
+the consequences into aliasing, process boundaries, MVU, and grouped
+replacement. [Types and Meaning](03-types-and-meaning.qmd) is the conceptual
+center: it connects
+{{< glossary "property contract" display="property contracts" >}},
+{{< glossary "semantic class" display="semantic classes" >}}, presence and
+defaults, wire representations, and the co-design of domain nouns and verbs.
 
-If you read only two chapters, read the overview and the doctrine. If you
-are starting an actual project, start with the playbooks instead.
+The next three chapters ask where laws and variation belong.
+[Parse, Don't Validate](04-parse-dont-validate.qmd) places checks at the
+smallest boundary with enough information and explains what construction can
+and cannot certify. [Composition and Dispatch](05-composition-and-dispatch.qmd)
+separates unions, variant families, inheritance, interfaces, and failure
+protocols. [Documents, Schemas, and Languages](06-documents-schemas-dsls.qmd)
+treats documents as compiler input: representations that must preserve,
+normalize, and sometimes defer to external authority.
 
-Two appendices keep the notes honest: an
-[inquiry ledger](open-questions.qmd) of what remains unresolved — hypotheses
-resting on single packages, version-anchored facts, unresolved tensions,
-and the evidence that would change a recommendation — and the
-[sources](sources.qmd).
+The [ecosystem field guide](07-ecosystem-field-guide.qmd) then tests these
+ideas against public packages. The [doctrine](08-doctrine.qmd) compresses the
+argument into reviewable defaults, the [playbooks](09-playbooks.qmd) organize
+common opening situations, and the [middlegame](10-middlegame.qmd) compares
+plausible representations once real constraints begin to interact. The
+[glossary](glossary.qmd) collects the recurring design vocabulary, while the
+inquiry ledger keeps unsettled or version-sensitive claims visible rather
+than smoothing them into doctrine.
 
-## Provenance
+If you read only two chapters, read the overview and Types and Meaning. If
+you are beginning a design, use the playbooks alongside them. If you are
+debugging a modeling decision, begin with the chapter whose boundary is in
+question: lifecycle, contract placement, alternatives, or wire projection.
 
-The ecosystem survey covers ellmer, ragnar, stacbuildr, S7schema,
-s7contract, quickr, sqlr and its dialect packages, s7x, the R-ArcGIS
-packages, resultr, datarr/reflect, rtemis, tooey, rapid, typedjson,
-objectstore, optimizers7 and parameters7, and structr as a deliberate
-non-S7 contrast — each checked against its current documentation or source
-in September 2026 rather than recalled from memory. The programming-theory
-lineage (parse-don't-validate, boolean blindness, functional core /
-imperative shell, the expression problem, design by contract, aggregates,
-and more) is cited in the sources appendix. Mechanics that matter were
-verified in a live R session rather than trusted from documentation.
+## Editorial policy
 
-## Living notes
+These notes are deliberately opinionated, but they are also revisable. A
+counterexample belongs in the inquiry ledger before it silently weakens a
+recommendation. A pattern seen once remains an example; repeated independent
+public sightings can strengthen it. Version-verified mechanics remain tied to
+their version until rerun. New playbooks should correspond to genuinely new
+design situations, not merely new packages wearing familiar shapes.
 
-This is a living collection, and it stays honest by a few maintenance
-rules: counterexamples get recorded in the ledger before doctrine is
-amended, never silently; single-source patterns are promoted only on a
-second independent sighting; verified mechanics are re-run against new S7
-releases per the watch list; new playbooks are added only when a genuinely
-new *situation* appears, not a new package; and doctrine changes when the
-balance of evidence changes, with the tripwires for that written down in
-the ledger's final section.
+Most importantly, corrections are additive when the evidence allows it. A
+qualification should narrow an overclaim without erasing the useful reasoning
+that made the claim memorable. “S7 objects are immutable,” for example, is too
+strong; the better account distinguishes replacement-based editable values,
+read-only API policy, and reference-valued payloads while retaining the local
+reasoning that value-oriented design buys. The same standard governs the book:
+preserve the mechanism, restore the argument, and state the boundary.
 
-Corrections, counterexamples, and second sightings are welcome — the
-[issue tracker](https://github.com/jimbrig/s7-design-notes/issues) is the
-front door.
+Corrections and counterexamples are welcome through the
+[issue tracker](https://github.com/jimbrig/s7-design-notes/issues).

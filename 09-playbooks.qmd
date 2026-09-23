@@ -1,604 +1,479 @@
-# Playbooks: How to Approach S7, by Situation
+# Playbooks: One Workflow, Different Pressures
 
-Every other document in this folder is organized by *concept* — values,
-types, validation, dispatch, documents. This one is organized by
-*situation*. You arrive with a project, not a concept: a published spec to
-conform to, a pile of TypeScript definitions to interoperate with, an idea
-for a little language, a training run to configure, a live connection to
-wrap, an interface others will implement. Each of those situations has a
-known sequence of opening moves, a known set of traps, and known exemplars
-in the ecosystem. This document writes those sequences down.
+These situations differ, but they should not begin from different design
+philosophies. Each starts with the same workflow and then emphasizes the steps
+where its pressures are unusual.
 
-Two references set the genre. Advanced R's
-[Translating R code](https://adv-r.hadley.nz/translation.html) chapter
-(formerly the [DSL chapter](http://adv-r.had.co.nz/dsl.html)) teaches
-domain-specific languages not by theory but by two worked campaigns — an
-HTML generator and a LaTeX translator — each proceeding from *know the
-target language* through *build the vocabulary* to *handle the unknown
-cases*, and each making different design choices for stated reasons. And
-[Tidy design principles](https://design.tidyverse.org/) covers the "art"
-register — the naming, argument-design, and ergonomics decisions that no
-type system settles — as patterns and principles that trade off against one
-another, to be balanced rather than obeyed. The playbooks below aim for the
-same registers: sequences of moves that are concrete enough to follow, with
-the judgment calls flagged as judgment calls.
+Choose a playbook by asking two questions: where does the truth about
+correctness live, and what kind of life does the artifact have? A published
+format points to external conformance; foreign type definitions to
+translation; an invented vocabulary to language design; deferred expensive
+work to configuration; a live resource to fact/process separation; and
+third-party implementations to an extension contract. A real package often
+needs several answers. The workflow below stays shared so those parts can meet
+without inventing incompatible design philosophies.
 
-One orienting fact before the playbooks: **they compose.** A real package
-almost never lives inside a single playbook. ellmer runs three at once —
-wrapping a live resource (the `Chat` object), modeling wire documents (the
-`Turn`/`Content` graph), and exposing an extension surface (the `Provider`
-family). A map-style package runs the spec playbook for the document, the
-language playbook for embedded expressions, and often the configuration
-playbook for build options. Identify every playbook in play, because each
-one places its validation, its state, and its boundaries differently.
+## The shared opening workflow
 
-## Finding your playbook
+Use these eight moves for every S7 design.
 
-Ask where the *truth about correctness* lives, and what the artifact's
-*life* is:
+### 1. Inventory meanings and consumers
 
-- **A published spec, format, or schema exists, and my objects must produce
-  or consume it** — [Playbook 1](#playbook-1-modeling-an-existing-specification).
-  Truth lives outside, in the spec and its official validator.
-- **Type definitions exist in another language — TypeScript, Rust, Go, C,
-  protobuf — and I must mirror or interoperate with them** —
-  [Playbook 2](#playbook-2-translating-foreign-type-definitions). Truth
-  lives outside, but in a type system rather than a document format, so the
-  work is translation rather than parsing.
-- **I am inventing the representation: an AST, an IR, a little language** —
-  [Playbook 3](#playbook-3-building-a-language-from-scratch). Truth is
-  yours to define, which is more dangerous than it sounds.
-- **Objects exist to configure computation that happens later, elsewhere,
-  or expensively** — [Playbook 4](#playbook-4-configuring-expensive-computation).
-  Truth is partly deferred: some laws mention data that does not exist yet.
-- **There is a live thing with a lifetime — a connection, session, device,
-  conversation** — [Playbook 5](#playbook-5-wrapping-a-live-resource).
-  The design problem is drawing the membrane between process and fact.
-- **Other people will implement my classes and generics** —
-  [Playbook 6](#playbook-6-designing-a-surface-others-extend). The
-  artifact is the contract itself.
+Name the concepts the program cares about and the consumers that need them:
+constructors, operations, serializers, databases, interfaces, workers, or
+external validators. Record what each consumer currently infers or re-checks.
 
----
+### 2. Sketch representative values and variants
+
+Draw a small top-down slice before building foundations. Include an ordinary
+case, an edge case, and an unknown or extension case. Distinguish containment
+from references and value facts from live owners.
+
+### 3. Inventory property contracts
+
+For every property, record shape, cardinality, membership, bounds,
+caller-requiredness, stored presence, nullability, emptiness, default
+ownership, and wire omission. Decide whether meaning belongs to a reusable
+property or must travel as a semantic class.
+
+### 4. Place rules at the smallest informed boundary
+
+Put intrinsic rules on properties, relationships among one object's fields on
+the class, cross-object rules on an aggregate root, and data-, host-, or
+authority-dependent rules in a named contextual operation. Do not ask a
+boundary to certify facts it cannot see.
+
+### 5. Co-design operations and failure policy
+
+List domain verbs, accepted concepts, result meanings, and laws. Decide where
+generic dispatch clarifies variation. State which failures are conditions,
+which are outcome values, and whether outcomes short-circuit or accumulate.
+
+### 6. Extract only repeated recipes
+
+After the representative slice works, extract repeated property factories,
+validators, or projection metadata. Important meanings may be named
+immediately; generalized machinery should earn its cost through repetition or
+multiple consumers.
+
+### 7. Define transformations and projections
+
+Name supported edits, parsers, serializers, renderers, schema projections, and
+host-binding steps. For each, state what is preserved, normalized, rejected,
+or lost. Reserve `S7::convert()` for faithful representation changes; name
+policy-bearing work `parse_*()`, `adapt_*()`, or `compile_*()`.
+
+### 8. Write acceptance laws
+
+Test promised behavior and downstream simplification:
+
+- construction followed by supported replacement remains intrinsically valid;
+- preparing a run resolves every contextual bound before execution;
+- serialize then parse preserves a named equality relation;
+- render then reflect is semantically equal within documented dialect limits;
+- every known variant has methods for required operations;
+- consumers no longer repeat scalar, range, presence, or reference checks.
 
 ## Playbook 1: Modeling an existing specification
 
-**You are here if** the domain has a published spec — a map style
-specification, STAC, GeoJSON, an OpenAPI description, a config file format
-— and your package's job is to construct, manipulate, and emit documents
-that conform to it. This is the document-object-model situation of
-[06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd), approached
-now as a sequence of moves rather than an anatomy.
+**Pressure.** Contract authority is external, versions change, and unknown
+content may matter.
 
-### The moves
+**Opening.** You have a published format—perhaps STAC, GeoJSON, OpenAPI, or a
+style document—and users must construct, edit, and emit conforming documents.
+Collect the specification, machine-readable schema, official validator,
+reference implementation, and representative public examples before choosing
+classes. The first design artifact is a small vertical slice, not a
+transcription of every schema definition.
 
-**1. Collect the authorities before writing any code.** The spec text, the
-official machine-readable schema if one exists, the official validator, a
-reference implementation, and — most valuable of all — a corpus of *gold
-files*: real documents produced by the reference tooling, covering the
-cases you care about. Wire up rung 0 of the checking ladder (the external
-validator, called mechanically) on day one, because every later decision
-about what *you* validate is a decision about what to leave to it.
+1. Include the specification, official validator, reference implementation,
+   and representative documents in the consumer inventory.
+2. Sketch a vertical slice rather than transcribing the schema: one typed
+   node, one open node, one reference edge, and one round trip.
+3. Record presence separately from nullability and defaults. External formats
+   commonly distinguish omitted, `null`, empty, and defaulted values.
+4. Put document-wide references and uniqueness at the aggregate root; retain
+   the external validator as conformance oracle.
+5. Design operations users need inside R. Those operations, not schema field
+   count, determine which nodes deserve semantic classes.
+6. Extract recipes from recurring shapes or an owned machine-readable
+   specification. Generated native classes are legitimate when source and
+   authority are explicit.
+7. State the unknown-key and version policy per node. Preserve extensions only
+   if serializers and transformations can keep them.
+8. Test conformance and the named round-trip relation. Byte identity,
+   canonical equality, and domain equality are different laws.
 
-**2. Census the schema; do not transcribe it.** This is the
-schema-as-design-input posture: read the schema as evidence. Count the
-recurring property shapes (enums, bounded numbers, string-or-expression
-slots), find the sum types (`oneOf` with a discriminator, clusters of
-mutually exclusive optionals), find the deliberately open nodes
-(`additionalProperties`, metadata blocks, vendor extensions), and build the
-requiredness matrix. The census's output is a page of notes, and that page
-— not the schema file — is what you design from.
+[stacbuildr](07-ecosystem-field-guide.qmd#stacbuildr-native-boundary-constructors-plus-conformance)
+shows native constructors plus external conformance.
+[S7schema](07-ecosystem-field-guide.qmd#s7schema-an-externally-validated-container)
+shows detailed entries remaining under external-schema authority.
 
-**3. Draw the ownership tree, then the reference edges, then pick the
-root.** Composition edges become nested properties; symbolic references
-(a layer names a source *by id*) become the referential-integrity laws
-that will live on the aggregate root's validator. The root is the unit of
-consistency, serialization, and external validation.
+### A parser/serializer slice
 
-**4. Name the semantic atoms and collapse the structural duplicates.** The
-spec's type definitions will contain many structurally distinct spellings
-of one meaning (the proverbial fifteen colors). One semantic type per
-*meaning*, per the tiers of
-[03-types-and-meaning.qmd](03-types-and-meaning.qmd), regardless of how many
-shapes the wire uses.
-
-**5. Build one vertical slice before broadening.** Pick a single leaf node
-and take it all the way: class, boundary parser, serializer, presence
-policy, round-trip test against a gold file. The slice forces every
-infrastructure decision — wire-name mapping, omit-empty policy, unknown-key
-policy, the equivalence relation your round-trip law uses — while the
-stakes are one class instead of forty. Only then fan out across the node
-catalog, which by that point is mostly mechanical.
-
-**6. Decide presence per property and openness per node, on the record.**
-The four presence axes (required, nullable, defaulted, omitted) and the
-open/closed decision are the two choices that cannot be retrofitted
-cheaply. Strict where you claim semantics; pass-through where the spec is
-deliberately extensible.
-
-**7. Meet users at the objects they already hold.** The best boundary
-constructors lift *native* objects into the model — stacbuildr's
-`item_from_terra()` builds STAC items from rasters, not from hand-assembled
-metadata lists. Ask what your users have in their hands before you ask
-them to learn your class graph.
-
-### A slice, worked
-
-The smallest complete slice — one node, one parser, one serializer, one
-law (verified against S7 0.2.2):
+The slice below keeps wire spelling at the boundary, injects the constant
+`type` field at serialization, remembers whether an engine default was
+actually supplied, and preserves unknown keys. That presence bit is necessary:
+without it, parsing an explicit `minzoom = 0` and parsing an omitted `minzoom`
+would collapse two wire states that a later specification version may treat
+differently.
 
 ```r
 to_wire <- S7::new_generic("to_wire", "x")
 
-vector_source <- S7::new_class("vector_source", properties = list(
-  url         = S7::class_character,
-  min_zoom    = S7::new_property(S7::class_numeric, default = 0),
-  attribution = S7::new_property(
-    S7::new_union(S7::class_character, NULL), default = NULL
+vector_source <- S7::new_class(
+  "vector_source",
+  properties = list(
+    url = S7::class_character,
+    min_zoom = S7::new_property(S7::class_numeric, default = 0),
+    min_zoom_supplied = S7::new_property(S7::class_logical, default = FALSE),
+    extensions = S7::new_property(S7::class_list, default = list())
   )
-))
+)
 
-source_from_wire <- function(json) {
-  # the boundary owns wire names, defaults, and coercion, once
+source_from_wire <- function(x) {
+  if (!is.list(x) || is.null(x[["url"]])) {
+    cli::cli_abort("A vector source must contain {.field url}.")
+  }
+
+  known <- c("type", "url", "minzoom")
+  supplied <- "minzoom" %in% names(x)
+
   vector_source(
-    url         = json[["url"]],
-    min_zoom    = json[["minzoom"]] %||% 0,
-    attribution = json[["attribution"]]
+    url = x[["url"]],
+    min_zoom = if (supplied) x[["minzoom"]] else 0,
+    min_zoom_supplied = supplied,
+    extensions = x[setdiff(names(x), known)]
   )
 }
 
 S7::method(to_wire, vector_source) <- function(x) {
-  out <- list(type = "vector", url = x@url)   # 'type' is identity, injected
-  if (x@min_zoom != 0) out[["minzoom"]] <- x@min_zoom
-  if (!is.null(x@attribution)) out[["attribution"]] <- x@attribution
+  out <- c(list(type = "vector", url = x@url), x@extensions)
+  if (x@min_zoom_supplied) {
+    out[["minzoom"]] <- x@min_zoom
+  }
   out
 }
 ```
 
-Small as it is, the slice already embodies five decisions: the wire
-spelling `minzoom` exists in exactly two functions; the `type` constant is
-identity, not a stored property; `attribution` is nullable *and* omitted
-when absent (two axes, decided separately); the default `min_zoom` is
-omitted on the wire (so the round-trip law must be canonical equality, not
-byte identity); and the parser is the only path in. Scaling to the full
-spec is repetition of this shape, which is exactly why the slice comes
-first.
-
-### Traps
-
-Schema cosplay (transcribing the schema instead of censusing it),
-expression-system envy (re-implementing the engine's validator for
-embedded expressions — see Playbook 3 for what to do instead), and
-validator soup (your rungs re-checking what the official validator already
-owns). All three are named in the
-[anti-pattern catalog](08-doctrine.qmd#anti-pattern-catalog).
-
-**Exemplars:** stacbuildr (the pattern complete), rapid (an OpenAPI spec
-as a strict domain object), S7schema (rung 0 productized), typedjson (the
-round trip as the entire product). See
-[07-ecosystem-field-guide.qmd](07-ecosystem-field-guide.qmd), Cluster B.
-
----
+The law is not byte identity: key order may change. It is equality of known
+meaning plus preservation of untouched extensions and suppliedness. The short
+trap is **normalizing before recording evidence**. Its consequence is a
+serializer that cannot distinguish an omitted default from an explicit value,
+so an apparently harmless round trip silently rewrites user intent.
 
 ## Playbook 2: Translating foreign type definitions
 
-**You are here if** the source of truth is a *type system* rather than a
-document format: a TypeScript definition file, Rust or Go structs, C
-headers, protobuf messages. The deliverable is different from Playbook 1's
-— not a parser for documents but a *correspondence* between two type
-systems, and the central artifact is a translation table you write before
-any class.
+**Pressure.** A foreign type system expresses distinctions R may encode
+differently.
 
-### The moves
+**Opening.** The source of truth is a TypeScript declaration, Rust enum, Go
+struct, C header, or protobuf schema. This is not yet a domain model. Begin
+with a ledger that records what crosses the boundary and what is lost, then
+separate generated transport shapes from hand-designed semantic concepts.
+Direction determines ownership. If R only decodes a foreign artifact, the
+foreign validator and parser own conformance while the R model may be a
+one-way semantic projection. If R also emits artifacts, the encoder owns
+omission, defaults, and unknown-field preservation, and conformance must be
+tested in that direction as well. A bidirectional claim therefore requires
+two boundary contracts, not one vaguely “equivalent” class graph.
 
-**1. Write the translation table first.** Every foreign construct gets a
-row: what it is there, what it becomes here, and what is *lost or gained*
-in the crossing. The table below covers the recurring rows; your table
-adds the domain-specific ones. The discipline matters because translation
-decisions made ad hoc, class by class, drift — the same TS `string | null`
-becomes three different presence policies in three files.
+1. Inventory foreign meanings and both sides' consumers.
+2. Sketch tagged unions, newtypes, optional fields, and extension records.
+3. Create a translation ledger for required, absent, `null`, defaulted, and
+   unknown values. Do not collapse `undefined`, explicit `null`, and an absent
+   key without policy.
+4. Separate transport checks from domain invariants and host-context rules.
+5. Import behavioral laws, not only shapes. Ownership, read-only declarations,
+   or capabilities may need operations rather than properties.
+6. Extract translation recipes only after a construct recurs.
+7. Name direction and loss: decoding, encoding, adapting, or compiling are not
+   automatically faithful conversions.
+8. Test conformance in each direction and use a named equality relation for
+   bidirectional claims.
 
-| Foreign construct | S7 move | Watch for |
-| --- | --- | --- |
-| TS `interface` / struct | hand-designed class, *after* collapsing structural duplicates | serialization artifacts posing as domain objects |
-| tagged union (TS discriminated union, Rust `enum` with payloads, protobuf `oneof`) | abstract parent + subclass family; the tag is class identity | flattening it into one bag with a mode string |
-| TS string-literal union (`"a" \| "b"`) | validated enum property (or a formalized enum class) | modeling it as a free character |
-| TS `field?: T` vs `field: T \| null` vs `field: T \| undefined` | three *different* presence decisions on the four axes | collapsing all three to one `NULL` |
-| Rust `Option<T>` | `NULL` union member plus an explicit presence policy | — |
-| Rust `Result<T, E>` | conditions, or resultr values, per [doctrine 19](08-doctrine.qmd) | mirroring it structurally without choosing a channel |
-| Rust newtype (`struct Meters(f64)`) | semantic type: base-type-inheriting class or reused property, per tier | dropping it to a bare double |
-| Go zero values | explicit defaults + presence policy | conflating "absent" with "zero" |
-| Go embedded struct / TS `extends` | composition first; a parent class only if is-a is honest | decorative hierarchy |
-| generics (`Vec<T>`, `Array<T>`, `Map<K,V>`) | list property + membership validator; element type documented and enforced, not parametric | pretending S7 has parametric types (it does not) |
-| TS utility types (`Partial<T>`, `Pick<T, K>`) | do not mirror; they are structural *derivations* — re-derive at the boundary if needed | one class per derived shape |
-| protobuf unknown fields / extensions | inert pass-through bag with key discipline | interpreting bag contents in core logic |
+A concrete starting ledger prevents each class from improvising a different
+translation:
 
-**2. Sort every foreign type into transport or domain.** The foreign
-definitions almost always mix both: types that exist because the wire
-needed a shape, and types that carry the domain's actual concepts. The
-transport stratum may be mirrored mechanically (the generated transport
-model of [06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd)) —
-*labeled as transport and kept behind boundary parsers*. The domain
-stratum is hand-designed from the census, exactly as in Playbook 1. The
-whole failure mode of this playbook is letting the first stratum stand in
-for the second.
+| Foreign construct | R/S7 representation | Crossing policy |
+|---|---|---|
+| `field?: T` | presence record plus a `T` slot | preserve absent separately from present |
+| `field: T \| null` | union with `NULL` | explicit `null` is a supplied value |
+| caller/defaulted field | value plus provenance state | record who owns materialization |
+| tagged union / `oneof` | abstract parent plus concrete variants | tag becomes variant identity |
+| string-literal union | validated enum property | reject or version-gate unknown literals |
+| Rust newtype | reused property or semantic class | retain unit/meaning, not only storage |
+| unknown protobuf fields | inert extension bag | preserve, but do not interpret |
+| `readonly` declaration | value or read-only snapshot API | import the law, not its syntax |
 
-**3. Fix the interop direction, because it places the parsing.** If you
-*consume* their values (their runtime serializes, you deserialize), your
-boundary is a parser and the certificate is yours to mint. If you
-*produce* values for their runtime, their validator is rung 0 and your
-serializer must satisfy it — which usually means gold files generated by
-their tooling and a conformance test that runs their checker if it is
-invocable. Bidirectional interop means both, plus a round-trip law with a
-named equivalence relation.
+A tagged union may become concrete variants under an abstract dispatch parent,
+but the parent is not sealed and does not prove coverage. Maintain
+method-coverage tests when a known family must be handled.
 
-**4. Import the laws, not just the shapes.** Foreign type systems encode
-some invariants you cannot see in the type text: Rust's ownership rules
-mean an `&mut` parameter is a promise about aliasing that R cannot state;
-TS's `readonly` is a promise S7 can approximate with a write-once setter
-or simply by value semantics. Read the foreign *documentation* for the
-laws that live outside the types, and give them homes on the ladder — they
-are the part a mechanical translation silently drops.
+The trap is **shape-only translation**. It produces classes that resemble the
+foreign declarations while dropping ownership, equality, readonly, and
+presence laws. The consequence appears later as incompatible round trips and
+defensive checks spread across every consumer.
 
-### Traps
+## Playbook 3: Building a language or semantic model
 
-The deadliest is **assuming their equality and their nullability idioms
-transfer.** Two structurally equal Go structs are `==`-comparable; two S7
-objects are compared however *you* define comparison, and until you define
-it, `identical()` — representational identity — is all you have, which is
-almost never the contract the foreign code meant. Likewise `undefined`
-versus `null` versus absent-key is a real distinction in a TS codebase and
-a single `NULL` in naive R translation. Both are presence-policy and
-equality-relation decisions ([06](06-documents-schemas-dsls.qmd)) that the
-translation table must settle globally, not per class.
+**Pressure.** The package owns the vocabulary, so premature abstraction is
+easy.
 
-**Exemplars:** rapid (OpenAPI's component types as a strict S7 substrate),
-the R-ArcGIS stack (Esri's JSON types over s7x foundations), structr (the
-contrast: when fidelity to a schema *is* the product and no domain layer
-is wanted, a compiled non-S7 schema engine is honest about that).
+**Opening.** You are inventing an AST, query vocabulary, compiler IR, or
+embedded language. Write target artifacts by hand first. Stay with opaque
+payloads while serialization is the only operation; add combinators when
+construction is painful; introduce typed nodes only when analysis or
+multi-target behavior pays for them.
 
----
+Target-language fluency comes before class design: until the package can state
+which target forms are valid, idiomatic, and meaning-preserving, an AST merely
+formalizes guesses. Make one early representation choice explicit as well:
+will users construct the language through dedicated constructors, or will the
+package capture and interpret quoted R expressions? Constructor APIs are more
+verbose but keep host-language evaluation out of the grammar; quoted R can
+feel natural but requires a precise policy for names, calls, environments, and
+unsupported syntax.
 
-## Playbook 3: Building a language from scratch
+1. Inventory actual consumers: rendering, analysis, optimization, comparison,
+   or execution.
+2. Sketch the smallest meaningful node family and write target artifacts by
+   hand.
+3. Give nodes precise local contracts; leave embedded languages opaque when no
+   operation interprets them.
+4. Place tree-wide name resolution and reference laws at the root.
+5. Define passes as operations. Analysis as well as rendering is strong
+   evidence that typed nodes carry useful meaning.
+6. Extract smart constructors and node recipes after usage becomes repetitive.
+7. Distinguish faithful conversion, policy-bearing adaptation or compilation,
+   and an IR earned by several sources, targets, or analyses.
+8. Test rendering laws, method coverage, normalization, and explicit refusal
+   of unsupported syntax.
 
-**You are here if** no external spec constrains you: you are designing an
-AST, a compiler IR, a query builder, an expression vocabulary — a little
-language whose truth you define. This is the most seductive playbook,
-because R's metaprogramming makes language-building nearly frictionless
-and S7's variant families make ASTs pleasant; the discipline is the
-escalation ladder of [06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd),
-climbed slowly.
+[sqlr](07-ecosystem-field-guide.qmd#sqlr-one-model-for-rendering-reflection-and-comparison)
+demonstrates a middle representation earned by several consumers.
 
-### The moves
+### A small AST progression
 
-**1. Write the target artifact by hand until it hurts.** The Advanced R
-translation chapter's silent first lesson: both case studies begin with
-the author fluent in the target language (HTML, LaTeX), writing target
-output manually, before any R vocabulary exists. The pain points of manual
-writing are the *requirements list* for the DSL; a DSL designed before the
-pain is felt ossifies the wrong abstractions (the premature-DSL
-anti-pattern). If nobody has hand-written the nested lists your
-combinators will generate, you do not yet know which constructions need
-help.
-
-**2. Default to rung 1 and demand justification for each climb.** Opaque
-passthrough — store the expression as a list or string, let the engine
-judge it — is the correct *default*, not a temporary embarrassment. Climb
-to rung 2 (constructor combinators) when humans demonstrably suffer
-writing the raw form. Climb to rung 3 (a typed AST) only when analysis or
-multi-target translation is the product.
-
-**3. At rung 2, name the vocabulary after the domain's idioms, not the
-wire's grammar.** A combinator layer that mirrors the wire one-to-one adds
-spelling safety and nothing else. The valuable combinators are the ones
-that compress an idiom — `expr_interpolate(zoom, stops)` rather than a
-transliteration of the underlying operator tree. This is where
-[Tidy design principles](https://design.tidyverse.org/) does the most
-work: enumerate the possible options in arguments, required arguments
-without defaults, prefer an enum over two booleans, put the data argument
-first. Combinators are functions; function-design craft is DSL craft.
-
-**4. At rung 3, the shape is fixed: closed variant family, smart
-constructors, passes as generics.** An abstract node root, concrete leaf
-nodes, constructors that reject unlawful nodes at build time, and — the
-part functional OOP uniquely rewards — every operation over the tree is a
-*generic*, so each new analysis is a new generic with per-node methods,
-not an edit to the node classes. This is the expression problem resolved
-in the direction a language wants: the node set is closed and stable; the
-operation set is open and growing.
-
-**5. Write the printer immediately after the nodes.** A language whose
-values cannot render themselves readably is undebuggable, and the printer
-doubles as the first real pass — writing it forces you to walk every node
-kind once, which surfaces structural mistakes while the family is still
-small. (In S7 terms: a `format()` method per node, before any clever
-pass.)
-
-**6. Decide the surface syntax last: constructors or quoted R.** Two
-different products. Constructor syntax (`cmp("==", "class", "park")`)
-is ordinary code — honest, pipeable, no magic. Quoted-R syntax
-(`filter(class == "park")`) makes R itself the surface language via
-quotation, which is strictly more powerful and strictly more dangerous:
-you inherit R's grammar for free and its ambiguity forever. The Advanced R
-LaTeX case study shows the cost concretely — a translator over quoted R
-must decide what every *unknown* symbol means, and the honest options are
-translate-known / error-unknown (refuse to guess, doctrine 17) or an
-explicit escape hatch, never silent passthrough. quickr is the full-scale
-version: R source with `declare(type())` annotations, parsed into a typed
-S7 IR, passes over the IR, Fortran out. Choose quotation when your users
-should *think in R*; choose constructors when they should think in your
-domain's nouns.
-
-### A rung-3 core, worked
-
-The minimal honest AST — abstract root, two nodes, two passes — verified
-against S7 0.2.2:
+Start with one leaf and one composition node, then justify the hierarchy with
+two independent passes:
 
 ```r
 filter_expr <- S7::new_class("filter_expr", abstract = TRUE)
 
-cmp <- S7::new_class("cmp", parent = filter_expr, properties = list(
-  op = S7::new_property(S7::class_character, validator = function(value) {
-    if (length(value) != 1 || !value %in% c("==", "!=", "<", ">")) {
-      "must be one of ==, !=, <, >"
-    }
-  }),
-  field = S7::class_character,
-  value = S7::class_any
-))
+comparison <- S7::new_class(
+  "comparison",
+  parent = filter_expr,
+  properties = list(
+    op = S7::new_property(
+      S7::class_character,
+      validator = function(value) {
+        if (length(value) != 1L || !value %in% c("==", "!=", "<", ">")) {
+          "must be one of ==, !=, <, >"
+        }
+      }
+    ),
+    field = S7::class_character,
+    value = S7::class_any
+  )
+)
 
-all_of <- S7::new_class("all_of", parent = filter_expr, properties = list(
-  exprs = S7::new_property(S7::class_list, validator = function(value) {
-    if (!all(vapply(value, S7::S7_inherits, logical(1), class = filter_expr))) {
-      "every element must be a filter_expr"
-    }
-  })
-))
+all_of <- S7::new_class(
+  "all_of",
+  parent = filter_expr,
+  properties = list(
+    expressions = S7::new_property(
+      S7::class_list,
+      validator = function(value) {
+        inherits_expr <- vapply(
+          value,
+          S7::S7_inherits,
+          logical(1),
+          class = filter_expr
+        )
+        if (!all(inherits_expr)) {
+          "every element must be a filter_expr"
+        }
+      }
+    )
+  )
+)
 
-# each pass is a new generic; the node family never changes
-to_wire <- S7::new_generic("to_wire", "x")
-S7::method(to_wire, cmp)    <- function(x) list(x@op, x@field, x@value)
-S7::method(to_wire, all_of) <- function(x) c(list("all"), lapply(x@exprs, to_wire))
-
+render_filter <- S7::new_generic("render_filter", "x")
 fields_used <- S7::new_generic("fields_used", "x")
-S7::method(fields_used, cmp)    <- function(x) x@field
-S7::method(fields_used, all_of) <- function(x)
-  unique(unlist(lapply(x@exprs, fields_used)))
+
+S7::method(render_filter, comparison) <- function(x) {
+  list(op = x@op, field = x@field, value = x@value)
+}
+S7::method(render_filter, all_of) <- function(x) {
+  list(all = lapply(x@expressions, render_filter))
+}
+
+S7::method(fields_used, comparison) <- function(x) x@field
+S7::method(fields_used, all_of) <- function(x) {
+  unique(unlist(lapply(x@expressions, fields_used)))
+}
 ```
 
-The second pass is the entire justification for rung 3: `fields_used()` is
-an *analysis* — something a stored list could never answer without being
-re-parsed. If no such pass exists in your plans, `to_wire()` alone does
-not justify the nodes; stay at rung 2 and emit lists directly.
-
-### Traps
-
-Premature DSL (move 1 skipped), representation deeper than analysis (rung
-3 with one serializing consumer), and — for quoted surfaces — evaluating
-user text (`eval(parse())` is never the mechanism; quotation and walking
-are). Exhaustiveness is the structural weak point of R's closed families:
-a new node kind will not force old passes to update, so keep a registry of
-node classes and a test asserting every pass has a method for every node.
-
-**Exemplars:** quickr (rung 3 as a product: the IR *is* the compiler),
-sqlr (a schema language whose passes are renderers per dialect), dbplyr
-in S3 terms, and the Advanced R chapter's two case studies as the genre's
-teaching texts.
-
----
+`render_filter()` alone could have emitted lists from constructor functions.
+`fields_used()` is the second consumer that makes node identity useful.
+The trap is **representation deeper than analysis**. Its consequence is a
+large class family whose only behavior is reconstructing the list it replaced.
 
 ## Playbook 4: Configuring expensive computation
 
-**You are here if** your objects exist to *parameterize work* — a model
-training run, a rendering job, a deployment — and the gap between "config
-written" and "consequence discovered" is minutes, hours, or money. The
-organizing principle is doctrine 18: check as early as the inputs allow,
-as late as the context requires. rtemis is the fully worked exhibit.
+**Pressure.** Some mistakes are cheap during setup but expensive during
+execution; other rules need data not yet available.
 
-### The moves
+**Opening.** A configuration exists now, but the data, host, or compute budget
+needed to finish checking it arrives later. Split specification from
+preparation: construction records intrinsic intent; `prepare()` resolves
+context; execution accepts only the prepared certificate.
 
-**1. One class per decision cluster; compose the clusters.** A
-hyperparameter set, a resampling policy, a preprocessing pipeline — each
-is its own small class with its own laws, composed into the run
-configuration. The alternative (one flat bag of forty fields) has no place
-to put cross-field laws and no way to reuse a cluster across contexts.
+1. Inventory decisions and setup, preparation, execution, reporting, and
+   interface consumers.
+2. Sketch `RunSpecification`, candidate values, and `PreparedRun` rather than
+   one undifferentiated bag.
+3. Record bounded scalars, enums, optional selections, vector values,
+   candidate sets, and default ownership.
+4. Keep intrinsic and cross-property rules in the specification; resolve data
+   dimensions or host resources in `prepare()`.
+5. Make `execute()` accept the prepared value so it does not repeat contextual
+   checks. Define failure before expensive work.
+6. Extract property specifications only when repeated declarations or several
+   projections justify them.
+7. Define supported edits and projections to schemas, documentation, or
+   interfaces.
+8. Test that preparation resolves deferred rules and execution contains no
+   duplicate range or candidate-intent inference.
 
-**2. The constructor is a parser with opinions.** Enumerate options
-(`match.arg`-style, or an enum property), refuse required arguments with
-defaults, refuse to guess on ambiguity. Tidy design's argument canon
-applies with extra force here because a configuration constructor is the
-single point where a human's intent becomes machine-checkable — every
-leniency in it is a deferred debugging session.
+[rtemis](07-ecosystem-field-guide.qmd#rtemis-property-contracts-as-inspectable-data)
+is the focused public exhibit for candidate intent, contextual bounds, and
+multiple projections.
 
-**3. Validate everything validatable at setup time, before the expensive
-thing.** The `setup_*()` pattern: a fully validated configuration object
-is minted *before* the run, so a typo costs milliseconds. The object is a
-certificate; the run function demands the class and re-checks nothing.
+Inspection is part of the contract, not print-method decoration. For each
+setting, expose both value and state:
 
-**4. Declare context-dependent laws as data; resolve them in one named
-pass.** Some laws mention what does not exist yet — `mtry` bounded by the
-number of features, weights matching the number of rows. Declare these on
-the property as data (rtemis's `data_bound`), and check them in one
-explicit resolution step at the moment the data arrives. Never smuggle
-them into a validator that would have to guess, and never skip them
-because construction-time checking was impossible.
+- **supplied** — the caller chose the value;
+- **defaulted** — R or the external authority supplied it under a named policy;
+- **resolved** — preparation checked or derived it against actual context;
+- **pending** — a declared contextual rule still lacks the inputs needed to
+  decide it.
 
-**5. Make the configuration readable back.** A print method that shows the
-*resolved* state — supplied values, applied defaults, deferred checks
-still pending — is not cosmetics; it is the only way a user can confirm
-the certificate says what they meant before spending the compute. A
-config that cannot be inspected will be re-specified from scratch every
-time doubt arises, which defeats its purpose as a value.
+A printed `RunSpecification` should make pending checks visible; a
+`PreparedRun` should contain none. The trap is **late rediscovery**: execution
+re-infers whether a value was intentional and discovers a data-bound violation
+after expensive setup. The consequence is both wasted compute and a result
+that cannot explain which decisions were actually made.
 
-### Traps
+## Playbook 5: Binding portable definitions to live authority
 
-The flat god-config (move 1 skipped); silent defaults for consequential
-choices (an untestable default "quietly accumulates behaviour no database
-had ever accepted" — sqlr's phrase generalizes to every default nobody
-chose); and validating at run time what was knowable at setup time, which
-converts cheap errors into expensive ones at exactly the moment the user
-is least able to iterate.
+**Pressure.** A valid request is not authorization, and a live process has
+identity that a portable value does not.
 
-**Exemplars:** rtemis (`setup_*()` + `data_bound`, Cluster D of the
-[field guide](07-ecosystem-field-guide.qmd)), optimizers7 (stopping rules
-as composable configuration objects).
+**Opening.** The system contains both portable descriptions and something
+with a lifetime: a session, connection, device, browser, conversation, or
+worker. Sort every noun into fact or process before choosing its object
+system. Then place the authority boundary between the portable request and the
+live owner.
 
----
+1. Inventory definitions, host policy, executable capabilities, owners, and
+   completed outcomes.
+2. Sketch `TaskDefinition`, `AuthorizedTask`, a live runner, and `TaskOutcome`
+   as distinct concepts.
+3. Put identifiers, resource requests, and symbolic capability names in
+   portable values—not connections, closures, or secrets.
+4. Validate requested relationships locally; bind capabilities and enforce
+   authority ceilings in a host-context operation.
+5. Decide which operational failures throw and which become named outcomes.
+6. Extract permission and resource recipes after concrete tasks reveal
+   repetition.
+7. Define serialization before binding and projections of runtime state to
+   inspectable values.
+8. Test that serialization contains no executable resources, unauthorized
+   requests fail before effects, and outcomes require no flag interpretation.
 
-## Playbook 5: Wrapping a live resource
+[deputy](07-ecosystem-field-guide.qmd#deputy-portable-definitions-at-a-permission-boundary)
+illustrates tools, permissions, limits, and a live agent run.
 
-**You are here if** the domain contains something with a *lifetime* — a
-database connection, an HTTP session, a browser, a device handle, an
-accumulating conversation. Value semantics cannot model it, because its
-whole point is that observers share its changes. The design problem is
-not "how do I make S7 mutable" (you don't) but *where to draw the
-membrane* between the process and the facts it produces.
+The lifecycle argument is causal. Aliases must observe one connection or
+in-progress stream, so that process needs reference identity. Completed
+requests, turns, settings, and outcomes no longer evolve, so they become S7
+values that can be compared, serialized, and tested without the resource.
+The owner should therefore stay thin: lifecycle and orchestration around
+value-in/value-out operations. If a value carries a reference payload, state
+that explicitly because replacement and outer validation do not observe
+mutation inside the payload.
 
-### The moves
+The trap is **turning facts into owners for convenience**. Its consequence is
+defensive cloning, shared-state test setup, and uncertainty about whether two
+callers are looking at the same evolving thing or two equal facts.
 
-**1. Sort every noun into fact or process.** Facts — a completed turn, a
-query result, a fitted model, a snapshot of settings — are S7 values.
-Processes — the connection, the session, the accumulating history — get
-reference semantics: R6 or an environment. The sort is the design; ellmer
-is its exhibit (mutable R6 `Chat`, immutable S7 `Turn`/`Content`
-crossing the membrane in both directions).
+## Playbook 6: Designing an extension surface
 
-**2. Keep the reference object thin: lifecycle and orchestration only.**
-Everything computable belongs in pure functions over the value types,
-called *by* the process object. The test is direct: if a method's logic
-can be tested without standing up the live resource, it should not live
-on the reference class. This is functional core / imperative shell with
-the shell given a name and a lifetime.
+**Pressure.** Third parties implement operations, so signatures alone are
+insufficient.
 
-**3. Values in, values out.** The reference object's methods accept S7
-values and return S7 values. State never leaks out as a shared mutable
-structure; callers get facts, not handles into the internals. Where a
-property of an S7 *value* must hold a reference (a cache, a connection),
-remember the law from [02-values-and-state.qmd](02-values-and-state.qmd):
-value semantics is only as deep as the payload — document it, exclude it
-from equality and serialization, or snapshot it.
+**Opening.** Other packages will implement your storage backend, provider,
+renderer, or engine. Draft verbs and laws before polishing the abstract class.
+The class gives dispatch a place to stand; the real product is a stable
+generic set, behavioral laws, capability protocol, and executable conformance
+suite.
 
-**4. Make provider variation a dispatch surface, not a conditional.** When
-the live resource comes in flavors (LLM providers, database backends,
-tile services), the flavor is an S7 value the process object *holds*, and
-behavior varies by methods on generics over it. This is ellmer's
-`Provider` design and sqlr's dialect dispatch: the reference object stays
-one class; the variation lives in the value world where dispatch works.
+1. Inventory implementors and framework consumers.
+2. Sketch at least two implementations, including a small test implementation.
+3. Keep implementor-specific state out of the parent unless all implementations
+   share its meaning.
+4. Put framework-checkable preconditions at the framework boundary and
+   implementation-specific context inside methods.
+5. Define required generics, optional capabilities, results, failure policy,
+   and laws before freezing hierarchies.
+6. Extract helpers after two implementations reveal common structure.
+7. Define compatibility and adaptation rules for contract evolution.
+8. Export a conformance suite that exercises laws, capabilities, and
+   missing-method diagnostics.
 
-**5. Every important state must project to values.** A `snapshot()` /
-`as_data()` path from the process to plain values is what makes the
-system testable, persistable, and debuggable. If some state cannot be
-projected, that state cannot be asserted on in a test — which usually
-means it is about to become folklore.
+An abstract parent gives dispatch a place to stand. It does not seal the
+family, prove every method exists, or replace a conformance suite.
 
-### Traps
+The second implementation is not ceremonial. Build one realistic
+implementation and one deliberately small in-memory implementation before
+freezing signatures. The second exposes assumptions that accidentally belong
+to the first—filesystem paths in a generic, provider-specific state on the
+root, or a law that only one backend can satisfy. Run both through the same
+conformance function, including method-coverage and missing-capability cases.
 
-The mutable domain object (facts stored in R6 "for convenience" —
-[anti-pattern catalog](08-doctrine.qmd#anti-pattern-catalog)); the fat
-session class that accretes every function that ever needed the
-connection; and the leaked handle — returning internal mutable state to
-callers who then observe changes they never subscribed to.
+The trap is **a one-implementation interface**. Its consequence is an API that
+looks extensible but requires the second implementor either to emulate the
+first backend's accidents or to bypass the advertised contract.
 
-**Exemplars:** ellmer (the hybrid architecture, Cluster A of the
-[field guide](07-ecosystem-field-guide.qmd)); tooey for the fully inverted
-variant, where the framework owns the entire shell and user code is pure.
+## Combining playbooks
 
----
+Composition means assigning each concern its own authority and lifecycle, not
+blending the checklists. In a map-style package, the document follows the
+specification playbook, embedded expressions begin at the language playbook's
+opaque rung, and build options use the configuration playbook. The style
+itself remains a value; no live-resource playbook is needed unless a renderer
+session or remote engine actually introduces shared identity.
 
-## Playbook 6: Designing a surface others extend
+An API client combines them differently. Authentication, retries, and rate
+limits belong to a thin live owner; typed request and response payloads follow
+the foreign-types or published-specification playbook; multiple provider
+backends invoke the extension-surface playbook and its conformance suite. The
+shared eight-step workflow keeps the joins explicit: each part names its
+consumers, rule horizon, failure channel, transformation boundary, and laws.
 
-**You are here if** the point of the package is that *strangers implement
-it*: storage backends, model engines, providers, format plugins. In
-functional OOP the extension surface is a set of generics plus the laws
-their methods must satisfy — the interface is implicit in S7, so the work
-of this playbook is making it explicit enough to implement against.
+This matters because the playbooks intentionally disagree about first
+artifacts. A specification needs a gold-file slice, a translation needs a
+ledger, a language needs hand-written targets, configuration needs visible
+pending state, a live resource needs a fact/process cut, and an extension
+surface needs a second implementation. Combining them preserves those
+differences while giving the package one design vocabulary.
 
-### The moves
+## Choosing a playbook
 
-**1. Verbs before nouns.** Draft the generic vocabulary first — the
-operations every implementation must support — and write the *law* each
-generic carries (`store_read()` after `store_write()` returns what was
-written; `render()` is pure; `close()` is idempotent). The abstract root
-class exists to give dispatch a place to stand; the vocabulary and laws
-are the actual interface.
-
-**2. Build two implementations before freezing anything.** One real, one
-toy (an in-memory fake living in the test suite). The second implementor
-is where every accidental assumption of the first gets discovered — a
-generic whose signature only makes sense for the filesystem backend, a
-law that was really an implementation detail. An interface with one
-implementation is a speculation, not an abstraction (doctrine 15).
-
-**3. Export the conformance suite as a function.** A
-`test_backend_conformance(backend)` that any implementor can run against
-their class converts the written laws into executable ones. s7contract
-shows the machinery (contracts, traits, generative laws with shrinking);
-even without machinery, a plain testthat function over the generic
-vocabulary is the single highest-leverage artifact this playbook
-produces.
-
-**4. Make capabilities optional by declaration, not by error.** When some
-implementations support an operation and others cannot, add a capability
-predicate generic (`supports_streaming(x)`) with a default of `FALSE`,
-and let the framework branch on it — rather than requiring every
-implementor to stub methods that throw. This is interface evolution's
-front door: new capabilities arrive as new optional generics with safe
-defaults, and old implementations keep working unchanged
-([05-composition-and-dispatch.qmd](05-composition-and-dispatch.qmd)).
-
-**5. Version the contract in words.** State which generics are required,
-which are optional, and what a conforming implementation may assume about
-call order and argument validity (typically: the framework validates
-inputs, so methods may trust them — say so). Silence here means every
-implementor re-validates defensively, which is shotgun parsing
-distributed across an ecosystem.
-
-### Traps
-
-The speculative interface (one implementation, frozen API); the leaky
-root (an abstract parent whose properties encode one backend's needs);
-and law-free generics — a vocabulary with no stated laws is an interface
-in syntax only, and implementations will satisfy the signatures while
-diverging on every behavior that matters.
-
-**Exemplars:** objectstore (interface-first, embryonic and explicit about
-it), ellmer's `Provider` family (the mature version, with the framework
-owning orchestration), s7contract (laws made executable).
-
----
-
-## Combining playbooks: two worked identifications
-
-**A map-style package.** The style document is Playbook 1 (spec, gold
-files, aggregate root, one serializer pair). Embedded filter and paint
-expressions are Playbook 3, entered at rung 1 and climbed only if legend
-generation or expression analysis becomes a product requirement (that
-analysis pass — `fields_used()` above — is precisely the justification
-test). Build options, if any, are a small Playbook 4. Nothing here is
-Playbook 5: a style is a value through and through, and the moment a
-"style manager" R6 class appears, a wrong turn has been taken.
-
-**An API client with typed payloads.** The session — auth, retries, rate
-limits — is Playbook 5 (a thin reference shell over httr2). The
-request/response payloads are Playbook 2 if the provider publishes types
-(translation table, transport/domain sort) or Playbook 1 if it publishes
-an OpenAPI document. If the client is meant to support multiple provider
-backends, the provider abstraction is Playbook 6, and the conformance
-suite is what keeps the third-party backend honest.
-
-The identification step is worth doing explicitly at project start,
-because the playbooks disagree about where checking lives (the spec's
-validator versus your constructors versus a deferred resolution pass),
-where state is allowed (nowhere versus the named shell), and what the
-first artifact should be (a gold-file corpus, a translation table, a
-hand-written target document, a conformance suite). Knowing which game
-each part of the system is playing is most of what "architecture" means
-at this scale.
-
-One caveat about what playbooks are: they are *opening theory*. They get
-a project through its first decisions in the right order; they cannot
-show how those decisions interact ten moves later, when the presence
-policy constrains the round-trip law and the spec's churn rate argues
-against the sum-type encoding the doctrine recommends. That layer — the
-middlegame — is [10-middlegame.qmd](10-middlegame.qmd), which traces the
-pressure chains of the mature packages and plays one design derivation
-out in full, concessions included.
+The [doctrine decision guides](08-doctrine.qmd#decision-guides) are the
+canonical compact reference for choosing representations, lifecycles,
+failure channels, conversion boundaries, and embedded-language depth. Return
+here once that decision identifies the kind of design work to perform; the
+playbooks above supply the corresponding sequence and verification steps.

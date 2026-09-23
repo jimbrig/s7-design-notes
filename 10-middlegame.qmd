@@ -1,424 +1,442 @@
-# The Middlegame: From Doctrine to a Real Package
+# The Middlegame: Choosing Representation Under Pressure
 
-## The gap this document exists to close
+Opening principles become useful only when plausible designs are compared
+against actual consumers. This chapter follows one semantic-document problem
+through three defensible representations:
 
-Be honest about what the folder contained before this document. The
-conceptual chapters justify a worldview. The doctrine compresses it into
-defaults. The field guide shows *positions* — snapshots of finished
-packages with the pattern each one exhibits. The playbooks give *opening
-theory* — the first eight moves for six recognizable situations. In chess
-terms, the collection had openings, annotated positions, and endgame
-tables, and was missing the genre that actually teaches judgment:
-**annotated full games**, where you watch the decisions get made in
-sequence, interacting, under pressure, with the alternatives visible and
-the concessions priced.
+1. a property-rich model;
+2. typed known nodes with an extension bag;
+3. a validated open bag.
 
-The gap is structural, not editorial. Doctrine is stated per decision —
-one principle, one rung, one encoding choice at a time — but a real
-package is a *system of coupled decisions*: the presence policy constrains
-the round-trip law, which constrains the open/closed choice, which feeds
-back into what the validators may assume. Toy examples cannot exhibit
-coupling, because coupling only appears when there are enough decisions to
-couple. This is why the mature packages — ellmer, ragnar, quickr, rtemis —
-feel categorically more complicated than anything in the playbooks: they
-are not applying more patterns; they are absorbing the *interactions*.
+None is the inevitable S7 answer. Streaming does not force a particular owner
+architecture, a large field count does not disqualify native classes, and
+metamodel size alone does not justify a schema engine. The choice turns on
+guarantees and operations.
 
-So this document does two things. First it re-reads the mature four, not
-for their patterns (the field guide's job) but for their **pressure
-chains** — the sequence by which one hard requirement forced a cascade of
-design consequences, including the concessions. Then it plays one
-annotated game at realistic fidelity: a style-document core, derived
-decision by decision, with the doctrine cited where it was followed and
-overruled where reality outvoted it. The code for the load-bearing spine
-was verified against S7 0.2.2 on R 4.6.1.
+## The position
 
-## Part I: How the mature four absorbed complexity
+Suppose a package works with style documents containing named sources, typed
+layers, paint settings, references from layers to sources, and embedded
+expressions. It must support:
 
-### ellmer: one requirement forces the hybrid
+- constructing known fragments;
+- adding and reordering layers while preserving references;
+- reading documents from a changing external specification;
+- writing them back without casually dropping extensions;
+- producing at least one engine projection;
+- possibly adding inspection or analysis later.
 
-The instructive way to read ellmer is to ask what *forced* each piece of
-its architecture, and the answer starts with a product requirement, not a
-philosophy: **streaming**. A streamed response is a value that does not
-exist yet — tokens accumulate over seconds, consumers want them as they
-arrive, and the eventual `Turn` is only a fact once the stream closes.
-Partial state must live *somewhere*, and no amount of value-semantics
-conviction changes that. That single requirement makes the mutable `Chat`
-object load-bearing: R6 is not a stylistic lapse but the honest home for
-an accumulation-in-progress, and the doctrine's actual contribution is
-*containment* — completed turns crystallize into immutable S7 values, the
-conversation is reconstructible from the values alone, and the mutable rim
-stays one class wide.
+Before choosing classes, apply the shared opening workflow.
 
-The second chain: **provider variation**. Every supported provider has
-quirks — capabilities, wire formats, authentication, streaming protocols —
-and the `Provider` dispatch surface absorbs them. The price, visible if
-you watch the package evolve, is that a plugin surface *grows*: each new
-provider capability becomes a new generic or a new argument somewhere, and
-the interface can never again be reorganized cheaply because third parties
-stand on it. The lesson for the middlegame: doctrine 10 tells you to
-design the verb vocabulary carefully; ellmer shows *why the stakes are
-asymmetric* — under-designing an internal function costs a refactor,
-under-designing an extension surface costs an ecosystem migration.
+### Meanings and consumers
 
-### ragnar: the price tag on base-type inheritance
+The stable meanings are source identity, layer identity, layer kind, source
+references, paint declarations, and expression payloads. Consumers include
+constructors, invariant-preserving transformations, serializer/parser
+boundaries, the external validator, and perhaps a later analysis.
 
-The compendium praises `MarkdownDocumentChunks` inheriting from tibble as
-"honest base-type inheritance" — the value really is a table. The
-middlegame reading adds the invoice: **inheriting a base type means the
-parent's entire API becomes your unvalidated mutator set.** Every dplyr
-verb, every `[` method, every tool in the tibble ecosystem can transform
-the object along paths where the subclass's laws are never consulted —
-drop the columns the class depends on, break the alignment with
-`@document`, or silently strip the subclass entirely. ragnar's concession
-is that its invariants on that surface are documented rather than
-enforced, and re-established at the operations that matter. That is a
-rational trade — the whole point of inheriting tibble is to *get* that
-ecosystem — but it is a trade, and the doctrine's "construction is the
-proof" holds only on the package's own front doors, not on the thousand
-side doors the parent class ships with. When you inherit a base type, you
-are choosing which of those doors to guard, and accepting the rest.
+### Representative values and variants
 
-### quickr: power through refusal
+Sketch one source, one known fill layer, one known line layer, one unknown
+future layer, one literal paint value, and one opaque expression. Draw
+containment separately from the layer-to-source reference.
 
-quickr compiles R to Fortran, and the design decision that makes it
-possible is what it *declines*: it accepts a subset of R, requires
-`declare(type())` annotations, and errors on constructs it cannot compile
-faithfully rather than approximating their semantics. This is doctrine 17
-— refuse to guess — applied not to an argument default but to the entire
-domain of the tool: **shrink the promise until you can keep it.** The
-middlegame lesson generalizes to every "model an existing thing" project:
-the fastest route to a robust core is usually not handling more of the
-input space, it is drawing a smaller boundary you can defend completely,
-with loud errors at the fence. Coverage grows later, fence post by fence
-post, each one tested. The packages that tried to accept everything on
-day one are the ones whose validators are full of guesses.
+### Property inventory
 
-### rtemis: the fixed cost of constraints-as-data
+For every modeled field, record shape, presence, nullability, emptiness,
+defaults, and wire omission. An engine default must not automatically become
+an R constructor default: omission may carry version-sensitive meaning.
 
-rtemis's property-factory stratum — the `PropertySpec` machinery deriving
-validators, defaults, JSON Schema, and TUI forms from single declarations
-— is the compendium's favorite exhibit for constraints-as-data. The
-middlegame reading prices it: that stratum is itself a serious system,
-hundreds of lines of meta-machinery that every contributor must understand
-before they can add a property, and every error message now has an extra
-layer of indirection between the symptom and the declaration. It
-amortizes because rtemis has *hundreds* of hyperparameters across dozens
-of models and genuinely needs all four projections. Below some scale
-threshold — and most packages are below it — hand-written
-`new_property()` calls are not a failure to apply the pattern; they are
-the pattern correctly not applied (doctrine 15: the third occurrence, not
-the first). The factory stratum is the right move exactly when you can
-name the projections you need and count the declarations that will pay
-for it.
+### Rule placement
 
-### The shared shape
+- scalar shape and bounded literal rules belong to properties;
+- relationships among a layer's known fields belong to that layer;
+- unique ids and resolvable source references belong to the root;
+- expression validity and full conformance may remain with the engine;
+- version compatibility belongs at parsing or compilation boundaries.
 
-Four packages, one shape: each met a pressure that made the naive,
-doctrine-by-the-letter design uneconomic — streaming broke pure values,
-ecosystem reuse broke enforced invariants, R's full semantics broke
-compilability, hyperparameter count broke hand-written validation. And
-each responded the same way: **not by abandoning a principle but by
-moving where it applies** — containing state instead of forbidding it,
-guarding chosen doors instead of all doors, shrinking the promise instead
-of diluting it, buying machinery only where the census showed volume.
-That move — relocating a principle's jurisdiction instead of revoking it
-— is the core middlegame skill, and it is exactly what per-decision
-doctrine cannot teach and an annotated game can.
+### Operations and laws
 
-## Part II: An annotated game
+The package needs `add_layer()`, reorder, parse, and serialize. It must name
+its round-trip relation and unknown-content policy. If it later interprets
+expressions or supports several engines, those consumers may change the
+representation choice.
 
-The domain: a core for map-style documents — the root, its sources, its
-layers, their paint. Chosen because it is real, the spec pressure is
-genuine (hundreds of paint properties, embedded expressions, ongoing spec
-evolution), and it exercises three playbooks at once (spec modeling,
-embedded language, and the temptation of a stateful manager). What
-follows is a derivation, not project work: ten decisions in dependency
-order, each with its pressure, its options, and its resolution — doctrine
-cited when followed, named when overruled.
+All three models can now be evaluated fairly.
 
-### Move 1: Scope — model what your operations touch
+## Candidate A: property-rich native model
 
-The census (playbook 1, move 2) says the spec is far too large to model
-at once: root, sources, layers, sprite, glyphs, terrain, fog, transitions,
-and a paint vocabulary in the hundreds. The pressure is real and the
-answer is an ordering, not an ambition: model the nodes your *operations*
-touch — construction, mutation, serialization of root/sources/layers —
-and let everything else pass through as inert wire data until an
-operation needs it. Deferral is not debt if the pass-through is lossless;
-it is the vertical-slice discipline applied to scope.
+At the first design review, Candidate A is the natural proposal. Users will
+construct layers in R, the package promises invariant-preserving edits, and
+future interface or documentation generation could consume declared property
+metadata. A native model appears to put every known fact where S7 can reflect
+and validate it.
 
-### Move 2: Rung 0 — the engine's validator, and gold files
+Known layer kinds are classes, and meaningful paint entries are S7 properties
+with local validators. Repeated scalar, enum, color, or expression contracts
+can be shared as property definitions or generated from an owned
+specification.
 
-The engine ships an authoritative validator; re-implementing it in R
-would be expression-system envy at document scale. Rung 0 is: gold files
-produced by reference tooling, round-trip tests against them, and the
-engine validator run in CI where a JS runtime is available. Every
-subsequent decision about what *we* validate assumes this floor exists.
+### What it buys
 
-### Move 3: The layer family — three principles collide
+- constructor signatures and reflection expose known fields directly;
+- local edits can re-run precise property and class validators;
+- documentation and interfaces can project declared metadata;
+- differences among layer kinds remain available for dispatch;
+- typos in known property names fail at the native boundary.
 
-The pivotal decision of the whole game. Layers come in a dozen types
-(fill, line, symbol, raster, ...) that differ in behavior and in their
-paint vocabularies — doctrine 8 says subclass family, and dispatch
-genuinely wants it (validation, legend generation, rendering hints all
-vary by type). But each type's paint vocabulary is dozens of properties,
-churned by spec releases — hand-modeling four hundred paint properties as
-S7 properties is schema cosplay by volume, and doctrine 16 says generate
-tables, not class graphs. Meanwhile the paint values themselves can be
-literals *or* expressions, which doctrine 8 would encode as a union.
+### What it costs
 
-The resolution is a **two-level hybrid, with the split placed exactly at
-the dispatch boundary**: layer *types* become subclasses, because
-behavior dispatches on them; paint becomes a *validated bag* — one list
-property, checked against a generated spec table. The bag is a
-denormalization doctrine 8 would frown at, chosen consciously: variant
-honesty is paid for where dispatch collects the benefit (the type level)
-and declined where it would cost four hundred properties tracking a
-moving spec (the paint level). The spec table is constraints-as-data —
-rtemis's pattern at the scale where it actually amortizes:
+- specification changes require regenerating or editing declarations;
+- presence and omission semantics must survive defaults and serialization;
+- generated code needs an explicit authority and review strategy;
+- unknown future fields still need a policy;
+- metadata may duplicate an external schema unless one source is authoritative
+  and agreement is tested.
+
+### When it wins
+
+Choose this model when users construct and edit known fields heavily, native
+introspection matters, several projections consume property metadata, or
+layer-specific operations need distinctions. The number of fields is not
+itself an argument against it. Generation from an owned semantic specification
+can make a large native surface maintainable.
+
+## Candidate B: typed known nodes plus extension bag
+
+The next review introduces real documents from newer engine versions. Known
+layer kinds still drive `add_layer()`, reordering, and eventual analysis, but
+unrecognized paint keys and future layer fields must survive a read-modify-
+write cycle. Candidate B is plausible because it keeps nominal meaning at the
+operation boundary while declining to pretend that this release understands
+every foreign field.
+
+Major concepts and known variants are classes, while unknown or intentionally
+extensible content is stored separately in a disciplined bag. Known paint
+entries might be properties or a validated known-key map; foreign entries
+remain inert.
+
+### What it buys
+
+- nominal identity and dispatch remain available where operations use them;
+- foreign keys can be preserved without claiming to understand them;
+- the native surface can focus on stable, high-value meanings;
+- version churn is localized to parsers, key tables, and merge rules.
+
+### What it costs
+
+- authority is split between typed and extension state;
+- collisions need a deterministic rule: typed value wins, extension wins, or
+  rejection;
+- transformations and serializers must preserve extensions deliberately;
+- unknown content cannot participate in core logic without promotion;
+- read-modify-write cycles need tests proving extensions survive.
+
+### When it wins
+
+Choose the hybrid when known concepts drive operations but round-trip fidelity
+across evolving foreign documents also matters. It is often a strong
+compromise, but the merge policy is part of the public contract.
+
+## Candidate C: validated open bag
+
+Candidate C becomes plausible when the team asks whether native construction
+is truly the product. If most work is ingest, conformance checking, small
+patches, and pass-through serialization, translating a rapidly changing
+external document into dozens of classes may add ceremony without removing
+interpretation from any important consumer.
+
+The document or selected nodes remain lists. A schema, generated key table, or
+boundary validator checks known constraints, while operations use accessors
+and explicit validation stages.
+
+### What it buys
+
+- close fidelity to an open or changing external representation;
+- straightforward preservation of unknown keys;
+- schema updates can change data tables rather than class signatures;
+- low translation overhead when the package mostly transports documents.
+
+### What it costs
+
+- nominal meaning and dispatch axes are weaker;
+- arbitrary list edits can bypass validity unless operations revalidate;
+- consumers may repeat lookups, presence checks, and interpretation;
+- reflection reveals list shape rather than domain intent;
+- aggregate errors can arrive later and with less local context.
+
+### When it wins
+
+Choose the open bag when transport, validation, and pass-through are the main
+product and native semantic operations are few. It can be the correct stable
+architecture under external-schema authority.
+
+## Comparing candidates by consumer
+
+### Construction
+
+A property-rich model gives the strongest discoverable constructor surface.
+The hybrid gives strong constructors for known concepts and an extension
+escape hatch. The open bag minimizes translation but depends more heavily on
+boundary validation and documentation.
+
+### Supported transformation
+
+For `add_layer()`, all three can enforce root-level id and reference laws if
+the operation goes through a validated root. The difference is bypass risk:
+native replacement paths can revalidate declared contracts, while ordinary
+list mutation requires convention or an explicit validation pass.
+
+### External evolution
+
+The property-rich model can evolve safely when generation and versioning are
+disciplined. The hybrid absorbs unknown additions but must preserve and merge
+them. The open bag accepts change most easily but exposes fewer guarantees.
+
+### Projection and interface generation
+
+Property-rich declarations help when documentation, schema, and UI consumers
+need the same metadata. A hybrid can project the typed portion and label
+extensions separately. An open bag should project from its external schema
+rather than infer contracts from observed values.
+
+### Analysis and dispatch
+
+If legend generation, field usage, or renderer behavior varies by layer kind,
+typed variants earn their cost. If serialization is the only consumer, open
+data plus validation may suffice.
+
+## An annotated choice
+
+Assume the first release promises known-layer construction,
+invariant-preserving reorder/add operations, round-trip preservation of
+foreign keys, and one engine serializer. It does not interpret expressions.
+
+A typed-known-plus-extension model is reasonable under those promises:
+
+1. source and known layer identities are classes because operations validate
+   or dispatch by kind;
+2. ids and source references use shared property contracts;
+3. known paint literals are checked from declared metadata;
+4. expressions remain opaque and delegated to the external validator;
+5. unknown fields on known layer variants are retained in an extension bag,
+   while wholly unknown variants become an explicit `unknown_layer` carrying
+   their uninterpreted source record;
+6. the root checks unique ids and references;
+7. named mutators use `S7::set_props()` so root validation follows edits;
+8. serialization rejects collisions between typed fields and extension keys.
+
+The list is the end of a decision chain, not a scorecard result. Start with
+the promised operations: they need stable layer identity and root-level
+reference laws, which rules out an entirely unstructured core. Next apply
+external evolution: foreign keys must survive even when the package cannot
+interpret them, which rules out a closed property-only model. Put the split
+where behavior changes—typed layer variants above it, inert extension data
+below it. Then place checks by visibility: variant-local paint rules on each
+known layer, id and source laws on the style root, expression conformance at
+the external engine. Finally choose round-trip equality: known fields compare
+semantically, while unknown fields require representational preservation.
+Each step constrains the next; none follows from class count alone.
+
+This is contingent, not a destination every design approaches. If interface
+generation becomes central, more properties may move into the native model.
+If lossless transport becomes the product, more nodes may move toward
+validated bags. If expression analysis becomes a product, opaque expressions
+may become typed nodes.
+
+### One implementation slice
+
+The following load-bearing slice was verified with S7 0.2.2 on R 4.6.1:
+insertion order, aggregate rejection of duplicate ids, and aggregate rejection
+of missing source references were exercised. It deliberately models only
+variant identity, aggregate laws, and the supported edit; parsing, paint
+validation, and serialization remain separate boundaries.
 
 ```r
-# generated from the engine's style-spec json, one row per paint property;
-# excerpt shown - the real table is machine-derived, never hand-edited
-paint_spec <- list(
-  fill = list(
-    `fill-color`   = list(type = "color"),
-    `fill-opacity` = list(type = "number", minimum = 0, maximum = 1)
-  ),
-  line = list(
-    `line-color` = list(type = "color"),
-    `line-width` = list(type = "number", minimum = 0)
+layer <- S7::new_class(
+  "layer",
+  abstract = TRUE,
+  properties = list(
+    id = S7::class_character,
+    source = S7::class_character,
+    extensions = S7::new_property(S7::class_list, default = list())
   )
 )
 
-check_paint <- function(paint, type) {
-  spec <- paint_spec[[type]]
-  bad <- character()
-  for (nm in names(paint)) {
-    rule <- spec[[nm]]
-    if (is.null(rule)) {
-      bad <- c(bad, paste0("unknown paint property '", nm, "'"))
-      next
-    }
-    val <- paint[[nm]]
-    if (is_expression(val)) next   # move 4: rung 1, the engine judges these
-    if (identical(rule$type, "number") && is.numeric(val)) {
-      if (!is.null(rule$minimum) && val < rule$minimum) {
-        bad <- c(bad, paste0("'", nm, "' below minimum ", rule$minimum))
-      }
-      if (!is.null(rule$maximum) && val > rule$maximum) {
-        bad <- c(bad, paste0("'", nm, "' above maximum ", rule$maximum))
-      }
+fill_layer <- S7::new_class(
+  "fill_layer",
+  parent = layer,
+  properties = list(
+    paint = S7::new_property(S7::class_list, default = list())
+  )
+)
+
+line_layer <- S7::new_class(
+  "line_layer",
+  parent = layer,
+  properties = list(
+    paint = S7::new_property(S7::class_list, default = list())
+  )
+)
+
+unknown_layer <- S7::new_class(
+  "unknown_layer",
+  parent = layer,
+  properties = list(raw = S7::class_list)
+)
+
+layer_list <- S7::new_property(
+  class = S7::class_list,
+  default = list(),
+  validator = function(value) {
+    valid <- vapply(
+      value,
+      S7::S7_inherits,
+      logical(1),
+      class = layer
+    )
+    if (!all(valid)) {
+      "every element must inherit from layer"
     }
   }
-  if (length(bad)) bad
-}
-```
-
-Note what the interaction did: doctrine 16 (generate tables) is what made
-overruling doctrine 8 (honest variants) *safe* — the bag is lawless only
-as a class shape; the table restores the laws at validation time, and the
-same table can later project documentation or a paint-builder UI (the
-reverse arrow of [06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd)).
-Neither principle alone produces this design; their collision does.
-
-### Move 4: Expressions — rung 1, stated as a policy not an omission
-
-Paint values may be expressions (`["interpolate", ["zoom"], ...]`). The
-escalation ladder says opaque passthrough until analysis is the product,
-so `check_paint()` contains one line — `if (is_expression(val)) next` —
-and that line *is* the policy: expressions are the engine's jurisdiction.
-The trap this dodges is the validator slowly learning the expression
-grammar, one special case at a time, until it is a bad reimplementation
-of the engine (expression-system envy). The upgrade path is already
-written down: if legend generation ever becomes a requirement, that is
-the `fields_used()` justification test from
-[09-playbooks.qmd](09-playbooks.qmd), and the climb goes to combinators,
-not directly to an AST.
-
-### Move 5: The layer classes — thin, because the table is thick
-
-```r
-layer <- S7::new_class("layer", abstract = TRUE, properties = list(
-  id     = S7::class_character,
-  source = S7::class_character,
-  paint  = S7::new_property(S7::class_list, default = list())
-))
-
-fill_layer <- S7::new_class("fill_layer", parent = layer,
-  validator = function(self) check_paint(self@paint, "fill")
 )
-line_layer <- S7::new_class("line_layer", parent = layer,
-  validator = function(self) check_paint(self@paint, "line")
-)
-```
 
-Each subclass validator is one delegation line. This is the checking
-ladder holding under load: type lives on the property classes, paint law
-lives in the table, and the subclass's only job is to bind its type tag
-to the table lookup. A dozen layer types cost a dozen three-line classes
-— which is also the honest test that the move-3 hybrid was right: had we
-hand-modeled paint, each of these classes would be a hundred lines of
-property declarations chasing the spec.
+style <- S7::new_class(
+  "style",
+  properties = list(
+    sources = S7::new_property(S7::class_list, default = list()),
+    layers = layer_list,
+    extensions = S7::new_property(S7::class_list, default = list())
+  ),
+  validator = function(self) {
+    ids <- vapply(self@layers, function(x) x@id, character(1))
+    refs <- vapply(self@layers, function(x) x@source, character(1))
+    messages <- character()
 
-### Move 6: Presence and the round-trip law — decided together, or wrong
-
-Paint properties have engine-defined defaults (`fill-opacity` defaults to
-1 in the engine). The presence decision: **do not store engine defaults.**
-An omitted key means "engine default," and the model preserves the
-distinction between *omitted* and *explicitly set to the default value* —
-because a user who wrote `fill-opacity: 1` and a user who wrote nothing
-have expressed different things, and a future spec release could change
-the default out from under the silent one. This immediately constrains
-the round-trip law (the equality taxonomy of
-[06-documents-schemas-dsls.qmd](06-documents-schemas-dsls.qmd)): the
-promise is *canonical equality* on modeled fields and *representational
-preservation* on the paint bag — not wire equivalence, precisely because
-wire equivalence would license resolving defaults, which is the one
-normalization this design forbids. Two decisions, one lock: neither the
-presence policy nor the equality relation could have been chosen alone.
-
-### Move 7: The root, and the laws only it can see
-
-```r
-style <- S7::new_class("style", properties = list(
-  sources = S7::new_property(S7::class_list, default = list()),
-  layers  = S7::new_property(S7::class_list, default = list())
-), validator = function(self) {
-  ids  <- vapply(self@layers, function(l) l@id, character(1))
-  refs <- vapply(self@layers, function(l) l@source, character(1))
-  msgs <- character()
-  if (anyDuplicated(ids)) msgs <- c(msgs, "layer ids must be unique")
-  missing_refs <- setdiff(refs, names(self@sources))
-  if (length(missing_refs)) {
-    msgs <- c(msgs, paste("layer references unknown source:", missing_refs))
-  }
-  if (length(msgs)) msgs
-})
-```
-
-Id uniqueness and source resolution are laws no layer can check — they
-mention the collection. The aggregate-root rung earns its place here, and
-note the granularity call (an open question the ledger tracks): this
-design has *one* root despite the document's depth, because both
-cross-object laws happen to be visible from the top. A spec with
-cross-references three levels down would force the nested-root question
-this game gets to skip.
-
-### Move 8: Mutators — the front door, with preconditions
-
-```r
-add_layer <- function(style, layer, before = NULL) {
-  layers <- style@layers
-  if (!is.null(before)) {
-    ids <- vapply(layers, function(l) l@id, character(1))
-    pos <- match(before, ids)
-    if (is.na(pos)) {
-      cli::cli_abort("no layer with id {.val {before}} to insert before.")
+    if (anyDuplicated(ids)) {
+      messages <- c(messages, "layer ids must be unique")
     }
-    layers <- append(layers, list(layer), after = pos - 1)
+
+    missing_refs <- setdiff(refs, names(self@sources))
+    if (length(missing_refs)) {
+      messages <- c(
+        messages,
+        paste("layers reference unknown sources:", paste(missing_refs, collapse = ", "))
+      )
+    }
+
+    if (length(messages)) messages
+  }
+)
+
+add_layer <- function(x, value, before = NULL) {
+  if (!S7::S7_inherits(value, layer)) {
+    cli::cli_abort("{.arg value} must inherit from {.cls layer}.")
+  }
+
+  layers <- x@layers
+  if (is.null(before)) {
+    layers <- c(layers, list(value))
   } else {
-    layers <- c(layers, list(layer))
+    ids <- vapply(layers, function(item) item@id, character(1))
+    position <- match(before, ids)
+    if (is.na(position)) {
+      cli::cli_abort("No layer with id {.val {before}} exists.")
+    }
+    layers <- append(layers, list(value), after = position - 1L)
   }
-  S7::set_props(style, layers = layers)
+
+  S7::set_props(x, layers = layers)
 }
 ```
 
-`before` not existing is an *operation* error (rung: method
-precondition), distinct from the structural laws below it — the message
-can therefore speak the operation's language ("insert before"), which no
-class validator could. And a verified interaction worth knowing:
-`set_props()` re-runs the root validator, so a duplicate id introduced
-*through the mutator* is rejected by the root's law without the mutator
-checking it — the rungs genuinely do not duplicate each other, and the
-insertion order, precondition failure, and duplicate rejection were all
-confirmed live.
+`add_layer()` owns the operation precondition, then performs one grouped
+replacement through `S7::set_props()`. Root validation consequently rejects a
+duplicate id or unresolved source after the proposed edit; the mutator does
+not duplicate those laws. Additional related root fields should be included
+in the same `set_props()` call rather than replaced one at a time.
 
-### Move 9: Ids — the tier-1 answer to the atoms-versus-earning tension
+The parser for an unknown layer extracts the common `id` and `source` fields
+needed by aggregate laws and stores the complete original record in `raw`.
+Supported edits treat that record as inert, and the serializer emits it
+unchanged unless a documented operation explicitly promotes it to a known
+variant. The `layer_list` contract ensures the aggregate validator never
+dereferences an arbitrary list element as though it were a layer.
 
-Should `layer_id` be a semantic type? It is a meaning, not just a string
-— doctrine 1 wants it named early; doctrine 15 wants abstraction earned.
-The concrete resolution uses the tiers: a *reused property definition*
-(tier 1 — one `new_property()` value shared by every id-shaped slot)
-names the meaning and centralizes its law at near-zero cost, while a
-full class (tier 2/3) waits until something dispatches on ids or ids
-grow structure. The tension between two principles, unresolvable in the
-abstract, costs one line to resolve in the concrete — which is itself a
-middlegame lesson: many doctrinal collisions are cheap at the point of
-decision and only look profound in prose.
+There is an important limit to that guarantee. If a semantic class inherits
+from a parent with its own mutation API—most notably a data-frame or tibble
+base—then `[`, replacement methods, and ecosystem verbs become inherited side
+doors that may bypass subclass validation or drop the subclass. Base-type
+inheritance can still be honest, but “construction certifies validity” then
+applies only to guarded front doors; the package must document which parent
+operations preserve the class and where invariants are re-established.
 
-### Move 10: The manager that must not exist
+## Conversion pressure: three different jobs
 
-Every document model eventually tempts its author with a `StyleManager`
-R6 class — "convenient" mutable state holding the current style, an undo
-stack, a dirty flag. The fact/process sort (playbook 5) says no: a style
-is a fact through and through; reading, patching, and writing it are
-shell *functions*; and an undo stack, if wanted, is a list of immutable
-snapshots — which value semantics makes nearly free (structural sharing:
-the copies share every untouched payload, per the verified probes in
-[02-values-and-state.qmd](02-values-and-state.qmd)). The mutable manager
-would buy nothing and sell local reasoning. Declined, by name, on the
-record.
+### Faithful conversion
 
-### The game's concessions, tallied
+Use `S7::convert()` when two representations preserve the same meaning without
+policy, diagnostics, or contextual choices. The acceptance law should be a
+genuine inverse or clearly named equivalence.
 
-An annotated game ends by admitting what it conceded, because the
-concessions are where the doctrine's edges live:
+### Adapter or compiler
 
-- **The paint bag is a flattened product** (overrules the letter of
-  doctrine 8), made safe by the generated table (doctrine 16) — the
-  overrule and its mitigation are one decision, not two.
-- **Unknown paint keys are currently rejected** (closed node), which is
-  the strict choice; a package prioritizing round-trip fidelity for
-  foreign styles would flip this to a pass-through with the table
-  checking only known keys. The choice is defensible either way; making
-  it *by accident* is not. This one is flagged for revisit.
-- **The spec table is trusted, not verified** — its correctness is
-  inherited from the generation pipeline against the engine's spec JSON,
-  which quietly relocates rung 0 upstream. A stale table is now the
-  design's single most dangerous failure mode, which is exactly the
-  single-source-of-truth trade: one datum, one point of failure.
-- **What the toy still hides:** the real table generation pipeline, the
-  sprite and glyph subsystems, wire-version migration, and every print
-  method, error message, and documentation page — the unglamorous
-  majority of a real package that no design document shortens much.
+Use `parse_style()`, `adapt_style()`, or `compile_style()` when work is
+tolerant, lossy, contextual, one-to-many, version-aware, or
+diagnostic-producing. A parser may preserve unknown variants that a compiler
+later rejects. Naming policy is more honest than calling this conversion.
 
-## Part III: The loop that actually transfers the wisdom
+### Earned intermediate representation
 
-The last honest thing this document can say is that no document — not
-this one — converts wisdom into skill. The mature four were not designed
-by consulting a compendium; they were designed by people making
-decisions, hitting walls, and revising. What a compendium can do is
-shorten that loop: make the decision points visible sooner, the options
-nameable, and the concessions explicit instead of accidental. The
-transfer mechanism is a practice, and it is cheap:
+Do not create a universal style IR by unioning every foreign field. Earn an IR
+when at least two real inputs or outputs reveal stable shared semantics and
+operations consume those semantics.
+[sqlr](07-ecosystem-field-guide.qmd#sqlr-one-model-for-rendering-reflection-and-comparison)
+earns its middle representation through rendering, reflection, semantic
+comparison, and diffing. One serializer does not provide the same evidence.
 
-**Keep a design journal in the project.** One entry per real decision,
-five lines: the decision, the pressure, the options considered, the
-choice, and the principle followed *or overruled, with the reason*. The
-annotated game above is exactly this journal, written after the fact;
-writing it during the fact is faster and truer. The journal does two
-jobs at once: it makes "selectively considering the proper aspects" an
-explicit act instead of an anxiety (you consulted the doctrine, you cited
-or overruled it, done — no lingering doubt about whether you *should*
-have used some sophisticated pattern you decided against), and it
-produces the evidence stream the compendium needs to stay alive — a
-recurring overrule in your journals is a counterexample entry for
-[open-questions.qmd](open-questions.qmd), and a pattern that keeps earning
-across your projects is a promotion candidate.
+## Acceptance laws
 
-**Review the journal at complexity checkpoints, not on a schedule.** The
-natural checkpoints: the first mutator (is the invariant placement
-holding?), the first serializer (did presence and equality get decided
-together?), the tenth class (is a factory stratum starting to amortize?),
-the first external implementor (is the interface really a contract?).
-These are the moments the middlegame pressure chains start, and a
-half-hour against the doctrine's decision guides at each one is worth
-more than any amount of up-front design piety.
+- parsing and serializing preserves unknown extensions under the chosen
+  equality relation;
+- supported edits preserve untouched extensions;
+- duplicate layer ids and missing source references fail at the root;
+- typed/extension key collisions fail explicitly;
+- every known layer variant supports required operations;
+- opaque expressions pass through unchanged but are not claimed valid;
+- external conformance is checked after serialization;
+- consumers do not repeat intrinsic id, presence, or reference checks.
 
-That is the whole method: openings from the playbooks, this document's
-annotated game as the model for the middlegame, the journal as your own
-annotation habit, and the ledger as the place your games feed back into
-the theory. Eating our own food is not a property the compendium can
-have by itself — it is a loop the compendium and the projects run
-together.
+## What remains unsettled
+
+This comparison does not decide how large property metadata should become,
+when an id deserves promotion from shared property to class, whether
+expression analysis will justify typed nodes, how version migration should
+work, or which equality relation users need. Those remain in the
+[open-questions ledger](open-questions.qmd).
+
+## Keeping the decision live
+
+Record consequential choices in a five-field decision journal:
+
+1. **Decision** — the representation or boundary being chosen.
+2. **Pressure** — the concrete consumer, law, or cost forcing attention.
+3. **Options** — the plausible candidates considered.
+4. **Choice** — the selected option and its accepted concessions.
+5. **Doctrine** — the principle followed or overruled, with the reason.
+
+For this scenario, the entry would say that layer variants remain typed while
+unknown fields use extension bags; the pressure is native edit operations plus
+foreign round-trip fidelity; the alternatives are the three candidates above;
+the concession is split authority; and the doctrine trade is honest
+alternatives balanced against external-schema authority.
+
+Review the journal at complexity checkpoints, not by calendar: the first
+mutator tests invariant placement; the first parser/serializer pair tests
+presence and equality together; the second output target tests whether an
+intermediate representation is emerging; the tenth repeated declaration tests
+whether generation now amortizes; and the first external implementation tests
+whether generics plus laws form a real contract. A checkpoint may move the
+design toward any candidate. The balanced conclusion remains: complexity and
+field count are pressures to price, not automatic votes for or against native
+classes.

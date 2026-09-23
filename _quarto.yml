@@ -1,45 +1,74 @@
 project:
   type: book
 
+lang: en
+bibliography: references.bib
+glossary:
+  path: glossary.yml
+  popup: click
+
 book:
   title: "S7 Design Notes"
-  subtitle: "Doctrine, Field Guide, and Playbooks for Functional OOP in R"
+  subtitle: "Meaningful Values, Explicit Contracts, and Composable Operations in R"
+  description: "A design guide to building meaningful domain models, explicit runtime contracts, and composable functional APIs with S7 in R."
   author: "Jimmy Briggs"
   date: last-modified
+  favicon: assets/favicon.svg
+  open-graph: true
+  twitter-card: true
+  search: true
   repo-url: https://github.com/jimbrig/s7-design-notes
   repo-actions: [edit, issue]
   site-url: https://docs.jimbrig.com/s7-design-notes/
   chapters:
-    - index.qmd
-    - 00-overview.qmd
+    - href: index.qmd
+      text: Preface
+    - href: 00-overview.qmd
+      text: Overview
     - part: "Foundations"
       chapters:
-        - 01-object-systems.qmd
-        - 02-values-and-state.qmd
-        - 03-types-and-meaning.qmd
+        - href: 01-object-systems.qmd
+          text: Object Systems
+        - href: 02-values-and-state.qmd
+          text: Values and State
+        - href: 03-types-and-meaning.qmd
+          text: Types and Meaning
     - part: "Laws and Composition"
       chapters:
-        - 04-parse-dont-validate.qmd
-        - 05-composition-and-dispatch.qmd
-        - 06-documents-schemas-dsls.qmd
+        - href: 04-parse-dont-validate.qmd
+          text: Parse, Don't Validate
+        - href: 05-composition-and-dispatch.qmd
+          text: Composition and Dispatch
+        - href: 06-documents-schemas-dsls.qmd
+          text: Documents, Schemas, and Languages
     - part: "Evidence"
       chapters:
-        - 07-ecosystem-field-guide.qmd
+        - href: 07-ecosystem-field-guide.qmd
+          text: Ecosystem Field Guide
     - part: "Practice"
       chapters:
-        - 08-doctrine.qmd
-        - 09-playbooks.qmd
-        - 10-middlegame.qmd
+        - href: 08-doctrine.qmd
+          text: Doctrine
+        - href: 09-playbooks.qmd
+          text: Playbooks
+        - href: 10-middlegame.qmd
+          text: The Middlegame
   appendices:
-    - open-questions.qmd
-    - sources.qmd
+    - href: open-questions.qmd
+      text: Open Questions
+    - href: glossary.qmd
+      text: Glossary
+    - href: sources.qmd
+      text: Sources
 
 format:
   html:
     theme:
-      light: cosmo
-      dark: darkly
+      light: [cosmo, styles/custom.scss]
+      dark: [darkly, styles/custom.scss]
     toc: true
     toc-depth: 3
     code-copy: true
-    link-external-newwindow: true
+    code-overflow: wrap
+    canonical-url: true
+    link-citations: true

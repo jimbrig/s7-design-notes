@@ -1,174 +1,217 @@
+---
+nocite: |
+  @*
+---
+
 # Sources
 
-All external sources were checked in September 2026 rather than recalled from
-memory. Local artifacts are listed with their roles.
+This appendix contains only public, reader-verifiable references. Claims should
+distinguish official mechanism documentation, public package documentation,
+public source observations, public test assertions, and editorial proposals.
 
-## S7 itself
+## S7 mechanism documentation
 
-- S7 package site and vignettes — https://rconsortium.github.io/S7/
-  - Classes and objects (validators, properties, defaults, computed and
-    dynamic properties, custom constructors) —
-    https://rconsortium.github.io/S7/articles/classes-objects.html
-  - Generics and methods (generic-method compatibility, dots discipline,
-    customizing generic bodies, `super()`, multiple dispatch, `class_any`,
-    `class_missing`) —
-    https://rconsortium.github.io/S7/articles/generics-methods.html
-  - `new_property()` reference (getter/setter/validator/default contracts;
-    getter output not auto-validated; validator messages exclude the property
-    name) — https://rconsortium.github.io/S7/reference/new_property.html
-- GitHub repository and README (OOP Working Group provenance: R-Core,
-  Bioconductor, tidyverse/Posit, wider community; "functional OOP" framing) —
-  https://github.com/RConsortium/S7
-- S4 compatibility detail (S4 classes as property types via
-  `methods::getClass()`) — https://github.com/RConsortium/S7/issues/587
+- [S7 package site and vignettes](https://rconsortium.github.io/S7/)
+- [Classes and objects](https://rconsortium.github.io/S7/articles/classes-objects.html)
+- [Generics and methods](https://rconsortium.github.io/S7/articles/generics-methods.html)
+- [`S7::new_property()` reference](https://rconsortium.github.io/S7/reference/new_property.html)
+- [S7 repository and public tests](https://github.com/RConsortium/S7)
+- [Public S4 property-type discussion](https://github.com/RConsortium/S7/issues/587)
 
-## Ecosystem packages surveyed
+Official documentation is the authority for supported mechanisms.
+Version-sensitive runtime claims should also identify released R and S7
+versions used by a reproducible probe.
 
-- **ellmer** (R6 `Chat` + S7 `Turn`/`Content`/`Model`/`Provider`; mutability
-  rationale in the programming vignette) — https://ellmer.tidyverse.org/ ;
-  https://ellmer.tidyverse.org/reference/Chat.html ;
-  https://ellmer.tidyverse.org/reference/Turn.html ;
-  https://ellmer.tidyverse.org/reference/Model.html
-- **ragnar** (`MarkdownDocument` inherits character with normalizing
-  constructor; `MarkdownDocumentChunks` inherits tibble with `@document`
-  property) — https://ragnar.tidyverse.org/reference/MarkdownDocument.html ;
-  https://ragnar.tidyverse.org/reference/markdown_chunk.html
-- **stacbuildr** (STAC 1.1.0 as S7 classes; JSON Schema validation;
-  `item_from_terra()` / sf / lidR boundary constructors) —
-  https://stevenpawley.r-universe.dev/stacbuildr
-- **S7schema** (YAML config; AJV via V8; S7 + list inheritance) —
-  https://cran.r-project.org/package=S7schema
-- **s7contract** (structural interfaces, traits, runtime contract checks,
-  generative laws with shrinking and tinytest) —
-  https://cran.r-project.org/package=s7contract
-- **quickr** (R-to-Fortran compiler; `declare(type())` annotation DSL; S7 in
-  Imports; typed S7 IR such as `FortranSubroutine` visible in source) —
-  https://github.com/t-kalinowski/quickr ;
-  https://rdrr.io/cran/quickr/src/R/quick.R
-- **sqlr** (nbenn/sqlr; schema as first-class value between DDL string and
-  connection; dialect packages sqlr.postgres / sqlr.sqlite; deliberate absence
-  of an "ANSI" fallback dialect; `sqlr_reflect()` round trip as test oracle;
-  structural `sqlr_equal()` / `sqlr_diff()`; dependency-ordered rendering with
-  cycle-breaking `ALTER TABLE`; `render_sql` multiple dispatch on object and
-  dialect) — https://github.com/nbenn/sqlr ;
-  https://rdrr.io/github/nbenn/sqlr/src/R/generics.R
-- **s7x** (Enum class, scalar and range properties, property unions and
-  intersections) — http://s7x.josiah.rs/ ; Enum design rationale:
-  https://josiah.rs/posts/enums-in-r/
-- **R-ArcGIS stack** (arcgisutils, arcgisviz consuming s7x at scale:
-  `s7x::new_enum`, `s7x::property_union`, `class_float`) — public source on
-  GitHub, verified via code search.
-- **resultr** (Rust-style `Result`/`Option` as an S7 subclass family; abstract
-  parent for dispatch; write-once property setters; `wrap_in_result()` generic
-  converting conditions to values at one boundary; `and_then()`
-  short-circuiting on `Failure`) —
-  https://github.com/TransGirlCodes/resultr ; source:
-  https://github.com/TransGirlCodes/resultr/blob/main/R/Result.R
-- **datarr / reflect** (runtime reflection for base R and S7; descriptor
-  objects for properties, methods, callables; `reflect_properties()` walking
-  `class@properties` and constructor formals; `method_explain()` dispatch
-  traces; `reflect_validate()` with chained classed conditions;
-  `reflect_check_project()` conventions-as-checks) —
-  https://github.com/SanD94/datarr ; source:
-  https://github.com/SanD94/datarr/blob/main/R/s7.R ;
-  https://github.com/SanD94/datarr/blob/main/R/check-project.R
-- **rtemis** (full S7 rewrite of an ML framework; `PropertySpec`
-  constraints-as-data driving validator, default, JSON Schema, and TUI form
-  from one declaration; factory-time/load-time declaration validation;
-  `setup_*()` eager configuration validation before expensive runs;
-  `data_bound` deferred context-dependent checks; container taxonomy;
-  `tunable`/`broadcast`/`tune_on_null`/`applies_when` axes; `agent_writable`
-  authorship policy kept out of published schemas) —
-  https://github.com/rtemis-org/rtemis ; source:
-  https://github.com/rtemis-org/rtemis/blob/main/R/010_Props.R
-- **tooey** (Model-View-Update / Elm architecture terminal UI framework:
-  pure `init`/`update`/`view`, messages and commands as data, runtime-owned
-  imperative shell) — https://github.com/devOpifex/tooey
-- **rapid** (OpenAPI descriptions parsed into a strict, opinionated S7 class
-  as substrate for downstream code generation) —
-  https://github.com/api2r/rapid
-- **typedjson** (faithful and terse JSON round trip for R values; annotates
-  only what JSON cannot express: integer/double, typed NA, non-finite,
-  attributes, S3/S4/S7 objects) — https://github.com/nbenn/typedjson
-- **objectstore** (embryonic object-store interface in S7; interface-first
-  design bet) — https://github.com/Bisaloo/objectstore
-- **optimizers7 / parameters7** (statmodels7 family: optimizers as reusable
-  S7 objects with composable stopping-rule objects; constrained matrix
-  parameters as objects with inverses and derivatives to fourth order;
-  deliberate narrowness of layer knowledge) —
-  https://github.com/statmodels7/optimizers7 ;
-  https://github.com/statmodels7/parameters7
-- **structr** (contrast case, not S7: Rust-backed strict JSON schema
-  compilation and bidirectional parse/serialize; strict-by-default presence
-  via `s_optional()`) — https://github.com/ixpantia/structr
-- **provider** (adjacent case: tidyverse-style httr2 healthcare API client
-  without an S7 layer; the "before" state of these patterns) —
-  https://github.com/andrewallenbruce/provider
+## Principal public exhibits
 
-## Programming theory
+### rtemis
 
-- Alexis King, "Parse, don't validate" (2019) —
-  https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
-- Robert Harper, "Boolean blindness" —
-  https://existentialtype.wordpress.com/2011/03/15/boolean-blindness/
-- Gary Bernhardt, "Boundaries" (functional core, imperative shell) —
-  https://www.destroyallsoftware.com/talks/boundaries
-- Yaron Minsky, "Effective ML" (make illegal states unrepresentable) —
-  https://blog.janestreet.com/effective-ml-revisited/
-- Philip Wadler, "The expression problem" (1998 mailing-list note) —
-  https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt
-- Bertrand Meyer, *Object-Oriented Software Construction* (design by
-  contract: preconditions, postconditions, invariants).
-- Eric Evans, *Domain-Driven Design* (aggregates, aggregate roots as
-  consistency boundaries).
-- Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides, *Design
-  Patterns* ("favor object composition over class inheritance").
-- Rich Hickey, "The Value of Values" (2012) — talk;
-  https://www.infoq.com/presentations/Value-Values/
-- Scott Wlaschin, *Domain Modeling Made Functional* (type-driven domain
-  design workflow).
-- David Parnas, "On the Criteria To Be Used in Decomposing Systems into
-  Modules" (1972) — information hiding as design-decision hiding.
-- LANGSEC (language-theoretic security) literature on shotgun parsing —
-  http://langsec.org/
-- David Wheeler's indirection aphorism and its corollary — folklore,
-  attributed via Butler Lampson.
-- Tony Hoare, "Null References: The Billion Dollar Mistake" (2009 QCon
-  talk).
+- [Repository and source](https://github.com/rtemis-org/rtemis)
+- [`PropertySpec` and property declarations](https://github.com/rtemis-org/rtemis/blob/main/R/010_Props.R)
+- [Immutable `PropertySpec` source at revision `f60ac02`](https://github.com/rtemis-org/rtemis/blob/f60ac02b32f58373a2ba7f965b9c1c450dd2200a/R/010_Props.R)
 
-## Craft references (the playbooks document)
+**Public source observation.** The linked implementation supports the
+chapter's claims about constraints as data, separate tuning intent, defaults,
+conditional applicability, contextual data bounds, and multiple consumers.
+Whether every generated projection remains aligned is an obligation proposed
+by the chapter, not a fact inferred from one implementation.
 
-- Hadley Wickham, *Advanced R* (2nd ed.), "Translating R code" — the genre
-  model for worked DSL campaigns (HTML and LaTeX case studies) —
-  https://adv-r.hadley.nz/translation.html ; first-edition DSL chapter —
-  http://adv-r.had.co.nz/dsl.html
-- Hadley Wickham, *Tidy design principles* — function and argument design as
-  patterns and principles in tension (enumerate options, required args
-  without defaults, prefer an enum over booleans, extract strategies into
-  objects) — https://design.tidyverse.org/
+### deputy
 
-## Local artifacts (evidence, not subject matter)
+- [Repository and README](https://github.com/JamesHWade/deputy)
+- [Package site](https://jameshwade.github.io/deputy/)
+- [Getting started](https://jameshwade.github.io/deputy/articles/getting-started.html)
+- [Permissions](https://jameshwade.github.io/deputy/articles/permissions.html)
+- [Runtime integration](https://jameshwade.github.io/deputy/articles/runtime-integration.html)
+- [Immutable repository snapshot at revision `2a4bda5`](https://github.com/JamesHWade/deputy/tree/2a4bda56ae6a6aa35a2f04da208850998ee3ddcb)
 
-These are non-public working notes and experiments on the author's machine,
-listed for provenance and honesty about where the observations came from —
-they are not part of this published collection.
+**Public package documentation and source observation.** These sources support
+the distinction among declarative tools and policies, host-enforced
+permissions, live agent execution, streaming, and completed run results.
+The chapter's ownership vocabulary is an editorial interpretation of those
+public mechanisms.
 
-- `d:\jimbrig\mapstyles\dev\docs\s7-thoughts-and-notes.md` — semantic versus
-  structural contracts (Taxi-inspired), property-first design thinking,
-  missing/empty value taxonomy.
-- `d:\jimbrig\mapstyles\dev\R\` — a probe-driven property-factory foundation
-  (checks-as-quoted-data, presence model, `prop_const` identity properties,
-  aggregate-root validator); one data point for the convergent-evolution
-  observation.
-- `d:\sandbox\maplibre.s7\R\` — a complete document-object-model experiment
-  (abstract roots, source/layer variant families, `as_spec` projection,
-  mutators with operation preconditions).
-- `d:\jimbrig\mapstyles\dev\docs\context\ChatGPT-Design ArcGIS
-  Architecture-20260916-1627.md` — extended first-principles discussion of
-  literal/enum/identity modeling and external-type translation.
-- Prior agent transcripts (paths under
-  `C:\Users\jimmy\.cursor\projects\d\agent-transcripts\`):
-  `e5c395e8-71cd-49a5-a649-fbbf7c6f76af` (evidence → classification spec →
-  generated projections pipeline architecture) and
-  `33aeb89f-8549-46d7-9a98-6e096fccbcf0` (foundation-first porting decision;
-  the version-field identity debate).
+### sqlr
+
+- [Repository and README](https://github.com/nbenn/sqlr)
+- [Immutable README at revision `8325581`](https://github.com/nbenn/sqlr/blob/8325581ad859b408408738dcc289bcad05360d58/README.md)
+- [Public generic definitions at revision `8325581`](https://github.com/nbenn/sqlr/blob/8325581ad859b408408738dcc289bcad05360d58/R/generics.R)
+
+**Public documentation and source observation.** The README and generic
+definitions support the claims about a semantic schema representation shared
+by rendering, reflection, equality, and diffing; dialect objects; refusal of a
+generic fallback; dependency-aware rendering; and bounded reflection. Calling
+this an “earned IR” is the chapter's editorial evaluation.
+
+## Focused contrasts
+
+### S7schema
+
+- [CRAN package page and manual](https://cran.r-project.org/package=S7schema)
+
+**Official package documentation.** The package page and manual support the
+claims that YAML content is validated against JSON Schema through AJV/V8 and
+that S7 supplies surrounding configuration and extension machinery. The
+authority comparison with stacbuildr is editorial synthesis.
+
+### resultr
+
+- [Repository](https://github.com/TransGirlCodes/resultr)
+- [Result implementation](https://github.com/TransGirlCodes/resultr/blob/main/R/Result.R)
+- [Immutable `Result` implementation at revision `0f53d4e`](https://github.com/TransGirlCodes/resultr/blob/0f53d4ee03138cc93a3feef4900746f672d12fe8/R/Result.R)
+
+**Public source observation.** The implementation supports the claims about
+`Success` and `Failure`, short-circuiting `and_then()`, and the
+`wrap_in_result()` adapter between conditions and values. The recommendation
+to choose one deliberate boundary is editorial.
+
+### stacbuildr
+
+- [Public package site](https://stevenpawley.r-universe.dev/stacbuildr)
+- [Repository](https://github.com/stevenpawley/stacbuildr)
+- [Immutable repository snapshot at revision `5706144`](https://github.com/stevenpawley/stacbuildr/tree/5706144faf29071e7158f4b645512d01638d76a2)
+
+**Public package documentation and source observation.** These sources support
+the claims about STAC document classes, validation against published schemas,
+native geospatial boundary constructors, and tabular or spatial projections.
+The claim that the native layer and external schema have different authority
+is editorial synthesis.
+
+## Additional exhibits used in prose
+
+### quickr
+
+- [Repository](https://github.com/t-kalinowski/quickr)
+- [Published source mirror](https://rdrr.io/cran/quickr/src/R/quick.R)
+- [Immutable `quick.R` source at revision `edd4037`](https://github.com/t-kalinowski/quickr/blob/edd403766e612ef4867ad817ead3dc366dc15d77/R/quick.R)
+- [Immutable repository snapshot at revision `edd4037`](https://github.com/t-kalinowski/quickr/tree/edd403766e612ef4867ad817ead3dc366dc15d77)
+
+**Public source observation.** The source supports the bounded claim that
+quickr compiles R toward Fortran and passes structured, typed artifacts such
+as `FortranSubroutine` through compilation. The broader lesson that a typed IR
+must be earned by analysis and translation is editorial.
+
+### typedjson
+
+- [Repository](https://github.com/nbenn/typedjson)
+- [Immutable README at revision `7160c06`](https://github.com/nbenn/typedjson/blob/7160c060e260bec3d284c39e51a9a5331779aa14/README.md)
+
+**Public package documentation.** The README supports the claims that ordinary
+values remain readable JSON, annotations are introduced for distinctions JSON
+cannot preserve, and the intended law is an R-value round trip. “Minimum
+metadata” is the chapter's summary of that documented design.
+
+### s7contract
+
+- [Repository](https://github.com/sounkou-bioinfo/s7contract)
+- [CRAN package page](https://cran.r-project.org/package=s7contract)
+- [Immutable README at revision `41dce50`](https://github.com/sounkou-bioinfo/s7contract/blob/41dce50d482ad4bfac382e859662abcae0ba56c4/README.md)
+
+**Official package documentation and public source observation.** These
+sources support the claims about structural interfaces, explicit traits,
+runtime argument and return contracts, and generative laws with shrinking.
+The limits of sampled laws are an editorial caution, not a package guarantee.
+
+### optimizers7 and parameters7
+
+- [optimizers7 repository](https://github.com/statmodels7/optimizers7)
+- [parameters7 repository](https://github.com/statmodels7/parameters7)
+- [Immutable optimizers7 README at revision `c50e414`](https://github.com/statmodels7/optimizers7/blob/c50e41416c411b530124f2329679cdc72ec85ff0/README.md)
+- [Immutable parameters7 README at revision `21076ad`](https://github.com/statmodels7/parameters7/blob/21076ad92cd2442b8be767d1b0546f7f783937c5/README.md)
+
+**Public package documentation.** The linked READMEs support the claims that
+stopping rules are modeled separately and compositionally, and that
+constrained parameters expose reusable maps, inverses, and derivatives. The
+decision threshold for promoting policy to an object is editorial.
+
+## Other public package references
+
+- ellmer: [documentation](https://ellmer.tidyverse.org/),
+  [`Chat`](https://ellmer.tidyverse.org/reference/Chat.html),
+  [`Turn`](https://ellmer.tidyverse.org/reference/Turn.html), and
+  [`Model`](https://ellmer.tidyverse.org/reference/Model.html)
+- ragnar: [`MarkdownDocument`](https://ragnar.tidyverse.org/reference/MarkdownDocument.html)
+  and [`markdown_chunk()`](https://ragnar.tidyverse.org/reference/markdown_chunk.html)
+- s7x: [package site](http://s7x.josiah.rs/) and
+  [enum note](https://josiah.rs/posts/enums-in-r/)
+- [rapid](https://github.com/api2r/rapid)
+- [tooey](https://github.com/devOpifex/tooey)
+- [structr](https://github.com/ixpantia/structr)
+- reflect/datarr: [repository](https://github.com/SanD94/datarr) and
+  [S7 source](https://github.com/SanD94/datarr/blob/main/R/s7.R)
+
+Ellmer appears in the deputy discussion only to identify the public chat
+abstraction with which deputy composes; the linked official documentation is
+the source for that identification. The remaining packages are retained as
+descriptive public references used elsewhere in the book. Inclusion is not a
+claim about popularity, maturity, or comparative quality.
+
+## Public theory and engineering references
+
+- [Alexis King, “Parse, don't validate”](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)
+- [Robert Harper, “Boolean blindness”](https://existentialtype.wordpress.com/2011/03/15/boolean-blindness/)
+- [Gary Bernhardt, “Boundaries”](https://www.destroyallsoftware.com/talks/boundaries)
+- [Yaron Minsky, “Effective ML”](https://blog.janestreet.com/effective-ml-revisited/)
+- [Philip Wadler, “The expression problem”](https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt)
+- [Rich Hickey, “The Value of Values”](https://www.infoq.com/presentations/Value-Values/)
+- [LANGSEC resources](http://langsec.org/)
+- [Hadley Wickham, *Advanced R*, “Translating R code”](https://adv-r.hadley.nz/translation.html)
+- [Hadley Wickham, *Tidy design principles*](https://design.tidyverse.org/)
+- [S7 0.2.0 release notes](https://tidyverse.org/blog/2024/11/s7-0-2-0/),
+  including native-serialization limitations
+- [R serialization reference](https://stat.ethz.ch/R-manual/R-devel/library/base/html/readRDS.html)
+- [NVD, CVE-2024-27322](https://nvd.nist.gov/vuln/detail/CVE-2024-27322)
+  on untrusted R deserialization
+- [CERT Coordination Center, VU#238194](https://www.kb.cert.org/vuls/id/238194)
+- [BiocGenerics `updateObject()` reference](https://rdrr.io/bioc/BiocGenerics/man/updateObject.html)
+- future guidance for
+  [package developers](https://cran.r-project.org/web/packages/future/vignettes/future-7-for-package-developers.html)
+  and [non-exportable objects](https://cran.r-project.org/web/packages/future/vignettes/future-4-non-exportable-objects.html)
+
+Conceptual background also includes Bertrand Meyer's *Object-Oriented Software
+Construction*; Eric Evans's *Domain-Driven Design*; Gamma, Helm, Johnson, and
+Vlissides's *Design Patterns*; Scott Wlaschin's *Domain Modeling Made
+Functional*; and David Parnas's “On the Criteria To Be Used in Decomposing
+Systems into Modules.”
+
+## Evidence labels
+
+- **Official mechanism:** documented by S7 or another authoritative public
+  specification.
+- **Public source observation:** visible in a linked public repository;
+  behavior may change. Version-sensitive observations should use an immutable
+  revision link.
+- **Public test assertion:** encoded in a linked package test suite.
+- **Released-version probe:** reproducible execution naming R, S7, and package
+  versions.
+- **Editorial proposal:** guidance offered for evaluation, not a claim that a
+  package implements it.
+
+A source comment, README statement, or single implementation can motivate a
+question. It should not become a universal claim without corroborating
+evidence.
+
+## Bibliography
+
+::: {#refs}
+:::
